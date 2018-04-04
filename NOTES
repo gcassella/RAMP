@@ -1,0 +1,24 @@
+The OpenCL pipeline for this program consists of three important N-buffers,
+
+ - The neutron buffer. Each neutron is represented by a float16 in this buffer with the data structure (x,y,z,vx,vy,vz,sx,sy,sz,p,t,mc,_,_,_,T):
+    x,y,z: position
+    vx,vy,vz: velocity
+    sx,sy,sz: spin
+    p: weight
+    t: time of flight
+    mc: internal counter for random number generation
+    T: termination flag
+
+ - The intersection buffer. At each step of the simulation the neutron is ray traced against every element in the instrument. The element which is intersected at the lowest positive time will have its intersection points stored in this buffer.
+
+ - The index buffer. The first intersected elements index is stored in this buffer at each step. This buffer is used to determine which scattering kernel should act upon a neutron
+
+In addition to this there is an N-buffer for each detector in the instrument, into which is stored the index of the histogram bin into which each neutron should go for that detector. Why not just create a histogram buffer the size of the bin array? Because we cannot safely increment this histogram from every work unit simultaneously, so instead we simply store the index of the bin each neutron contributes to and sum the weights on the CPU as this operation costs very little processing time.
+
+Important conventions:
+
+ - If the final component of a neutron history is non zero (neutron[global_addr].sf > 0.) the neutron history is considered 'terminated', and components should no longer interact with the neutron history
+
+ - If the time of the second intersection is zero (intersections[global_addr].s7 == 0) a neutron will be considered absorbed and it's history terminated
+
+ - Intersections should be reset to (float8)( 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 0.0f, 0.0f, 0.0f ) at the end of each scattering kernel
