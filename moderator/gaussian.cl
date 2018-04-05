@@ -57,7 +57,13 @@ __kernel void generate_neutrons(__global float16* neutrons,
   neutron.s5 = dir.s2;
 
   // Initialize weight
-  neutron.s9 = 1;
+  neutron.s9 = 1.;
+
+  // Initialize time
+  neutron.sa = 0.;
+
+  // Revive terminated neutrons
+  neutron.sf = 0.;
 
   neutrons[global_addr] = neutron;
   intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,

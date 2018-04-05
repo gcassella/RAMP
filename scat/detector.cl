@@ -1,7 +1,22 @@
+inline void AtomicAdd(volatile __global float *source, float const operand) {
+    union {
+        unsigned int intVal;
+        float floatVal;
+    } newVal;
+    union {
+        unsigned int intVal;
+        float floatVal;
+    } prevVal;
+    do {
+        prevVal.floatVal = *source;
+        newVal.floatVal = prevVal.floatVal + operand;
+    } while (atomic_cmpxchg((volatile __global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
+}
+
 __kernel void detector(__global float16* neutrons,
   __global float8* intersections, __global uint* iidx,
   uint const comp_idx,
-  __global uint* histogram, float3 const det_pos,
+  __global float* histogram, float3 const det_pos,
   float3 const binning, uint const var) {
 
   uint global_addr = get_global_id(0);
@@ -45,7 +60,7 @@ __kernel void detector(__global float16* neutrons,
       idx = round((varval - minvar) / stepvar);
       neutron.s012a = intersection.s4567;
 
-      histogram[global_addr] = idx;
+      AtomicAdd(&histogram[idx], neutron.s9);
     }
 
     neutron.sf = 1.;

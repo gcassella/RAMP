@@ -272,10 +272,11 @@ class Instrument:
         self.ctx = ctx
         self.queue = queue
 
+        self.num_bins   = 1000
+
     def _initialize_buffers(self, N):
         self.neutrons           = np.zeros((N, ), dtype=clarr.vec.float16)
-        self.histo              = np.zeros((N, ), dtype=np.uint32) - 1
-        self.histo_data         = np.zeros((N_bins+1, ), dtype=np.float32)
+        self.histo        = np.zeros((self.num_bins, ), dtype=np.float32)
         self.intersections      = np.zeros((N, ), dtype=clarr.vec.float8)
         self.iidx               = np.zeros((N, ), dtype=np.uint32)
 
@@ -292,21 +293,25 @@ class Instrument:
         self.iidx_cl            = cl.Buffer(ctx,
                                         mf.WRITE_ONLY,
                                         self.iidx.nbytes)
-        self.histo_cl           = cl.Buffer(ctx, 
-                                        mf.WRITE_ONLY | mf.COPY_HOST_PTR,
-                                        hostbuf=self.histo)
+        self.histo_cl     = cl.Buffer(ctx,
+                                        mf.WRITE_ONLY,
+                                        self.histo.nbytes)
 
         with open('scat/terminator.cl', 'r') as f:
             self.term_prg = cl.Program(ctx, f.read()).build(options=r'-I "{}\include"'.format(os.getcwd()))
 
     def linear_sim(self, N):
+        rtime = time()
         self._initialize_buffers(N)
+        print('Buffer initialization completed in {} seconds'.format(time() - rtime))
 
         self.source.gen_prg(self.queue,
                             N,
                             self.neutrons_cl,
                             self.intersections_cl)
-        
+
+        rtime = time()
+
         for (idx, comp) in self.components.items():
             comp.geom_kernel.intersect_prg(self.queue, 
                                            N, 
@@ -322,11 +327,10 @@ class Instrument:
 
         self.queue.finish()
 
-        cl.enqueue_copy(queue, self.histo, self.histo_cl)
+        print('Ray tracing completed in {} seconds'.format(time() - rtime))
 
-        for h in self.histo:
-            if not h == 4294967295:
-                self.histo_data[h] += 1
+        cl.enqueue_copy(self.queue, self.histo, self.histo_cl)
+        cl.enqueue_copy(self.queue, self.neutrons, self.neutrons_cl)
 
     def non_linear_sim(self, N, max_events):
         self._initialize_buffers(N)
@@ -354,18 +358,11 @@ class Instrument:
                                            self.neutrons_cl, 
                                            self.intersections_cl, 
                                            self.iidx_cl,
-                                           self.histo_cl)
+                                           self.histo_idx_cl)
 
             events += 1
 
         self.queue.finish()
-
-        cl.enqueue_copy(queue, self.histo, self.histo_cl)
-
-        for h in self.histo:
-            if not h == 4294967295:
-                self.histo_data[h] += 1
-
 
 if __name__ == '__main__':
     N = 1000000
@@ -380,18 +377,18 @@ if __name__ == '__main__':
     sample2 = Component(GSphere(0.1, (0., 0, 5), 2, ctx), SPowder('data/Y3Fe5O12_YIG.laz', 2, ctx))
     detector = Component(GBanana(1.1, (0., 0., 5.), 0.1, 0, np.pi, 3, ctx),
                          Detector((0., 0., 5.), (0, np.pi/N_bins/2, np.pi/2), 0, 3, ctx))
-    comps = {800: sample2, 123: detector}
+    comps = {1: sample2, 2: detector}
 
     rtime = time()
 
     inst = Instrument(source, comps, ctx, queue)
-    inst.non_linear_sim(N, 2)
+    inst.linear_sim(N)
 
     print(time() - rtime)
 
     plt.xlabel('Scattering angle / deg')
     plt.ylabel('Counts')
-    plt.plot(np.arange(len(inst.histo_data))*180/2000,inst.histo_data)
+    plt.plot(np.arange(len(inst.histo))*180/2000,inst.histo)
     
     plt.show()
 
