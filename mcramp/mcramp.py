@@ -1,0 +1,102 @@
+import numpy as np
+import pyopencl as cl
+import pyopencl.array as clarr
+
+import os
+
+from time import time
+
+class Component:
+    def __init__(self, geom_kernel, scat_kernel):
+        self.geom_kernel = geom_kernel
+        self.scat_kernel = scat_kernel
+
+class Instrument:
+    def __init__(self, source, components, ctx, queue):
+        self.source = source
+        self.components = components
+        self.ctx = ctx
+        self.queue = queue
+
+    def _initialize_buffers(self, N):
+        self.neutrons           = np.zeros((N, ), dtype=clarr.vec.float16)
+        self.intersections      = np.zeros((N, ), dtype=clarr.vec.float8)
+        self.iidx               = np.zeros((N, ), dtype=np.uint32)
+
+        self.queue              = cl.CommandQueue(self.ctx)
+        mf                      = cl.mem_flags
+
+        self.neutrons_cl        = cl.Buffer(self.ctx, 
+                                        mf.READ_WRITE | mf.COPY_HOST_PTR, 
+                                        hostbuf=self.neutrons)
+        self.intersections_cl   = cl.Buffer(self.ctx,
+                                        mf.READ_WRITE, 
+                                        self.neutrons.nbytes)
+        self.iidx_cl            = cl.Buffer(self.ctx,
+                                        mf.WRITE_ONLY,
+                                        self.iidx.nbytes)
+
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scat/terminator.cl'), mode='r') as f:
+            self.prg = cl.Program(self.ctx, f.read()).build(options=r'-I "{}\include"'.format(os.path.dirname(os.path.abspath(__file__))))
+
+
+    def linear_sim(self, N):
+        rtime = time()
+        self._initialize_buffers(N)
+        print('Buffer initialization completed in {} seconds'.format(time() - rtime))
+
+        self.source.gen_prg(self.queue,
+                            N,
+                            self.neutrons_cl,
+                            self.intersections_cl)
+
+        rtime = time()
+
+        for (idx, comp) in self.components.items():
+            comp.geom_kernel.intersect_prg(self.queue, 
+                                           N, 
+                                           self.neutrons_cl, 
+                                           self.intersections_cl, 
+                                           self.iidx_cl)
+                                           
+            comp.scat_kernel.scatter_prg(self.queue, 
+                                           N, 
+                                           self.neutrons_cl, 
+                                           self.intersections_cl, 
+                                           self.iidx_cl)
+
+        self.queue.finish()
+
+        print('Ray tracing completed in {} seconds'.format(time() - rtime))
+
+    def non_linear_sim(self, N, max_events):
+        self._initialize_buffers(N)
+
+        rtime = time()
+
+        self.source.gen_prg(self.queue,
+                            N,
+                            self.neutrons_cl,
+                            self.intersections_cl)
+        events = 0
+
+        while events < max_events:
+            for (idx, comp) in self.components.items():
+                comp.geom_kernel.intersect_prg(self.queue, 
+                                           N, 
+                                           self.neutrons_cl, 
+                                           self.intersections_cl, 
+                                           self.iidx_cl)
+
+            for (idx, comp) in self.components.items():
+                comp.scat_kernel.scatter_prg(self.queue, 
+                                           N, 
+                                           self.neutrons_cl, 
+                                           self.intersections_cl, 
+                                           self.iidx_cl)
+
+            events += 1
+
+        self.queue.finish()
+
+        print("Raytracing took {} seconds".format(time() - rtime))

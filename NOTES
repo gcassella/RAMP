@@ -1,24 +1,36 @@
 The OpenCL pipeline for this program consists of three important N-buffers,
 
- - The neutron buffer. Each neutron is represented by a float16 in this buffer with the data structure (x,y,z,vx,vy,vz,sx,sy,sz,p,t,mc,_,_,_,T):
+ - The neutron buffer. Each neutron is represented by a float16 in this buffer with the data structure (x,y,z,vx,vy,vz,sx,sy,sz,p,t,mc,prevcomp,_,_,T):
     x,y,z: position
     vx,vy,vz: velocity
     sx,sy,sz: spin
     p: weight
     t: time of flight
     mc: internal counter for random number generation
+    prevcomp: previous component hit
+    _: free flags for user defined variables / debugging info
     T: termination flag
 
  - The intersection buffer. At each step of the simulation the neutron is ray traced against every element in the instrument. The element which is intersected at the lowest positive time will have its intersection points stored in this buffer.
 
  - The index buffer. The first intersected elements index is stored in this buffer at each step. This buffer is used to determine which scattering kernel should act upon a neutron
 
-In addition to this there is an N-buffer for each detector in the instrument, into which is stored the index of the histogram bin into which each neutron should go for that detector. Why not just create a histogram buffer the size of the bin array? Because we cannot safely increment this histogram from every work unit simultaneously, so instead we simply store the index of the bin each neutron contributes to and sum the weights on the CPU as this operation costs very little processing time.
+In addition to this there is an buffer for each detector in the instrument that is nbins long, into which the neutron weights are summed histogrammed according to the parameters supplied to the Detector component.
 
 Important conventions:
 
  - If the final component of a neutron history is non zero (neutron[global_addr].sf > 0.) the neutron history is considered 'terminated', and components should no longer interact with the neutron history
 
- - If the time of the second intersection is zero (intersections[global_addr].s7 == 0) a neutron will be considered absorbed and it's history terminated
+ - If the length of the second intersection is zero (length(intersections[global_addr].s456) == 0) a neutron will be considered absorbed and it's history terminated
 
- - Intersections should be reset to (float8)( 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 0.0f, 0.0f, 0.0f ) at the end of each scattering kernel
+ - Intersections should be reset to (float8)( 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 0.0f, 0.0f, 1000.0f ) at the end of each scattering kernel
+
+ - A scattering kernel should set the prevcomp (neutron.sc) flag to the index of the last component hit. This is to prevent the need for weird re-intersection hacks in non linear scattering to prevent a neutron becoming trapped forever inside a scatterer. A neutron should never scatter from a component whose index is equal to the prevcomp flag.
+
+On the topic of multiple scattering:
+
+ - For an instrument run in non_linear_sim() mode, all of the geometry kernels will be run before any scattering kernels are run. Because of this, a scattering kernel should handle multiple scattering itself. You may ask 'how can I propogate a neutron inside the geometry of the scattering kernel when I am handling multiple scattering?'. The solution to this is the consideration that it is typically meaningless WHERE the scattering from a multiple internal scattering event occurs and the neutron state after the scattering event that matters. This does not hold for some situation e.g. underilluminated samples so think carefully about multiple scattering when simulating it (duh).
+
+When writing geometry kernels, how do I decide if I should update the intersection buffer?
+
+ - A useful abstraction in this case is to think 'what are the conditions under which this geometry is hit before any other?'. For example, in the Plane geometry kernel we only have a single intersection point (time), so we check that this time is before either of the two currently stored intersection times and then store the same intersection point to both intersections. Thus, if another componenet turns out to be intersected before the plane it doesn't need to 'know' which of the two intersections are the plane - they both are! This might be obvious to the reader but it took me a while to think of an abstraction that helps me think through writing the intersection conditions in geometry kernels.

@@ -1,1 +1,6 @@
 *shit*
+*pycache*
+*.pyc
+*inst.py*
+cloc-1.76.exe
+*.gitignore*

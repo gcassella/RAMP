@@ -1,0 +1,20 @@
+A brief guide to the object heirarchy of the implementation of the code:
+
+    - Every instrument is an object with the class type (unsurprisingly) Instrument. 
+    - An Instrument is made up of a Source and a number of Components.
+        - A Source generates an initial buffer of neutrons (e.g. as they are emitted from the moderator). This abstraction can also be used to store a buffer of neutrons at a certain point in an instrument, for example to pre-chop and guide a buffer full of neutrons, save it, and re-use it as a source down the line.
+        - A Component is composed of two kernels,
+            - The geometry kernel is responsible for handling the ray tracing of a neutron. At each step of the simulation, a neutron is either raytraced against the geometry kernel and the earliest intersection determined (non-linear simulation) or raytraced against a single component's kernel to determine if there is an intersection. The position and time of this intersection is fed to the scattering kernel of the eariest intersected component to determine the scattering. If a neutron intersects no components, its history is terminated and it will not be simulated further
+            - The scattering kernel is responsible for handling the change of state of a neutron as it passes through the component, e.g. computing reflections from a guide, scattering from a powder sample.
+    - The Instrument owns the neutron, intersection, and index buffers and is responsible for looping through the kernels of it's Components and update the buffers accordingly at each step.
+    - If an Instrument contains a Detector component, the Detector will have a histogram binned according to a set of user supplied parameters. Otherwise, the neutron buffer can be extracted from the Instrument at the end of the simulation and analysed directly, without the need for a Detector.
+
+Each kernel is - as it says on the tin - an OpenCL kernel. Geometry and scattering kernels follow a few conventions. The kernel must accept the following arguments:
+
+    - An N-Buffer of float16's representing the neutrons
+    - An N-Buffer of float8's representing neutron intersections at the current simulation step
+    - An N-Buffer of uint32's representing the index of the intersected component
+    - A uint32 representing the index of the component to which this kernel belongs
+
+In addition a kernel may require other arguments (for example a list of reflections for a powder diffraction sample). Each kernel is wrapped in a Python class which is responsible for passing the correct arguments to the kernel through an abstract method that is called by the Instrument for each Component. There are some other conventions for how kernels should behave outlined in NOTES, however these are not directly relevant to implementation.
+
