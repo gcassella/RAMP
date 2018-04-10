@@ -8,7 +8,7 @@ import os
 import re
 
 class GBanana(GPrim):
-    def __init__(self, radius, position, height, mintheta, maxtheta, idx, ctx):
+    def __init__(self, radius=0, position=(0, 0, 0), height=0, mintheta=0, maxtheta=0, idx=0, ctx=None):
         self.radius     = np.float32(radius)
         self.height     = np.float32(height)
         self.mintheta   = np.float32(mintheta)

@@ -5,7 +5,7 @@ import pyopencl.array as clarr
 import os
 
 class Detector():
-    def __init__(self, position, binning, var, idx, ctx):
+    def __init__(self, position=(0, 0, 0), binning=(0, 0, 0), var=0, idx=0, ctx=None):
         self.binning     = binning
         self.var         = np.uint32(var)
         self.position    = position

@@ -2,7 +2,7 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
-import os
+import os, json, importlib
 
 from time import time
 
@@ -17,6 +17,38 @@ class Instrument:
         self.components = components
         self.ctx = ctx
         self.queue = queue
+
+    @staticmethod
+    def fromJSON(fn, ctx, queue):
+        inst = json.load(open(fn, 'r'))
+        comps = {}
+        i = 1
+
+        for comp in inst.values():
+            if "source" in comp:
+                mk = getattr(importlib.import_module("mcramp"), comp['moderator_kernel']['name'])
+                args = {k : v for (k,v,) in comp['moderator_kernel'].items() if not k == 'name'}
+                args['ctx'] = ctx
+
+                source = mk(**args)
+            else:
+                gk = getattr(importlib.import_module("mcramp"), comp['geom_kernel']['name'])
+                gargs = {k : v for (k,v) in comp['geom_kernel'].items() if not k == 'name'}
+                gargs['idx'] = i
+                gargs['ctx'] = ctx
+
+                sk = getattr(importlib.import_module("mcramp"), comp['scat_kernel']['name'])
+                sargs = {k : v for (k,v) in comp['scat_kernel'].items() if not k ==  'name'}
+                sargs['idx'] = i
+                sargs['ctx'] = ctx
+
+                comps[str(i)] = Component(gk(**gargs), sk(**sargs))
+
+            i += 1
+
+        inst = Instrument(source, comps, ctx, queue)
+
+        return inst
 
     def _initialize_buffers(self, N):
         self.neutrons           = np.zeros((N, ), dtype=clarr.vec.float16)

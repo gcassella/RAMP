@@ -7,7 +7,7 @@ import pyopencl.array as clarr
 import os
 
 class GPlane(GPrim):
-    def __init__(self, width, height, position, idx, ctx):
+    def __init__(self, width=0, height=0, position=[0, 0, 0], idx=0, ctx=None):
         self.position   = position
         self.width      = np.float32(width)
         self.height     = np.float32(height)

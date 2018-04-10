@@ -8,7 +8,7 @@ import os
 import re
 
 class SIsotropic():
-    def __init__(self, fn, idx, ctx):
+    def __init__(self, fn='', idx=0, ctx=None):
         q,w,rho,sigma_abs,sigma_scat,pw_cdf,pq_cdf,sqw = self._LoadSQW(fn)
 
         pq_cdf = pq_cdf.flatten()

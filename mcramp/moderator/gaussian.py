@@ -6,7 +6,8 @@ import os
 import re
 
 class MGaussian():
-    def __init__(self, ctx, pos, norm, rad, t_dim, t_pos, lamb, dlamb):
+    def __init__(self, ctx=None, pos=(0, 0, 0), norm=(0, 0, 0), 
+                 rad=0, t_dim=(0, 0), t_pos=(0, 0, 0), lamb=0, dlamb=0):
         self.pos    = np.array((pos[0], pos[1], pos[2], 0.0), dtype=clarr.vec.float3)
         self.norm   = np.array((norm[0], norm[1], norm[2], 0.0), dtype=clarr.vec.float3)
         self.rad    = np.float32(rad)

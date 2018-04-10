@@ -7,7 +7,6 @@ __kernel void intersect_sphere(__global float16* neutrons,
   float16 neutron = neutrons[global_addr];
   float8 intersection;
   float3 pos, vel, s_pos;
-  uint this_iidx = iidx[global_addr];
   float s_rad, a, b, c, d1, d2, quotient;
  
   if (neutron.sf > 0.) {

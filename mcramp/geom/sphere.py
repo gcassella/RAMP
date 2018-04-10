@@ -7,7 +7,7 @@ import pyopencl.array as clarr
 import os
 
 class GSphere(GPrim):
-    def __init__(self, radius, position, idx, ctx):
+    def __init__(self, radius=0, position=(0, 0, 0), idx=0, ctx=None):
         self.radius     = np.float32(radius)
         self.position   = position
         self.idx        = idx

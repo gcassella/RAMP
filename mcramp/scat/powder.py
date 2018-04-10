@@ -6,7 +6,7 @@ import os
 import re
 
 class SPowder():
-    def __init__(self, fn, idx, ctx):
+    def __init__(self, fn=None, idx=0, ctx=None):
         reflections = self._LoadLAZ(fn)
 
         self.nreflections = len(reflections)
