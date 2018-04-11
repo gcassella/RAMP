@@ -15,7 +15,11 @@ if __name__ == '__main__':
     ## Load and simulate instrument
     inst = Instrument.fromJSON('inst.json', ctx, queue)
     #inst.non_linear_sim(N, 4)
-    inst.visualize()
+    ax = inst.visualize()
+    ax.set_xlim((-0.5, 0.5))
+    ax.set_ylim((-0.5, 0.5))
+    ax.set_zlim((4, 5))
+    plt.show()
 
     ## Plot resulting histogram
     #plt.xlabel('Scattering angle / deg')

@@ -150,8 +150,6 @@ class Instrument:
             for line in lines:
                 ax.plot(*line)
 
-        ax.set_xlim((-0.5, 0.5))
-        ax.set_ylim((-0.5, 0.5))
-        ax.set_zlim((4, 5))
+
         ax.set_axis_off()
-        plt.show()
+        return ax
