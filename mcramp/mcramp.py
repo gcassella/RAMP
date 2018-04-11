@@ -136,9 +136,14 @@ class Instrument:
 
         print("Raytracing took {} seconds".format(time() - rtime))
 
-    def visualize(self, **kwargs):
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
+    def visualize(self, fig=None, ax=None, **kwargs):
+        if fig is None and ax is None:
+            fig = plt.figure()
+            ax = fig.gca(projection='3d')
+        elif fig is None and ax is not None:
+            return ax
+        elif fig is not None and ax is None:
+            ax = fig.gca(projection='3d')
 
         ax.set_aspect('equal', 'box')
 

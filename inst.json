@@ -43,8 +43,8 @@
             "position": [0, 0, 5]
         },
         "scat_kernel": {
-            "name": "SIsotropic",
-            "fn": "data/diffuse.sqw"
+            "name": "SPowder",
+            "fn": "data/Y3Fe5O12_YIG.laz"
         }
     },
 
@@ -54,13 +54,13 @@
             "radius": 1.1,
             "position": [0, 0, 5],
             "height": 0.1,
-            "mintheta": 0,
-            "maxtheta": 1.57
+            "mintheta": -0.7,
+            "maxtheta": 2.44
         },
         "scat_kernel": {
             "name": "Detector",
             "position": [0, 0, 5],
-            "binning": [0, 0.00157, 1.57],
+            "binning": [-0.7, 0.00244, 2.44],
             "var": 0
         }
     }

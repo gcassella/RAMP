@@ -23,6 +23,8 @@ __kernel void detector(__global float16* neutrons,
   
   float16 neutron;
   float8 intersection;
+  float3 planediff_padded, planediff_cross;
+  float2 planediff;
   float varval;
   float minvar, maxvar, stepvar;
   uint idx;
@@ -49,7 +51,11 @@ __kernel void detector(__global float16* neutrons,
 
   switch(var) {
     case 0:
-      varval = acos(dot(normalize(intersection.s46 - det_pos.s02), (float2)( 0.0f, 1.0f )));
+      planediff = intersection.s46 - det_pos.s02;
+      planediff_padded = (float3)( planediff.s0, 0.0f, planediff.s1 );
+      planediff_cross = cross(normalize(planediff_padded), (float3)( 0.0f, 1.0f, 0.0f ));
+      varval = acos(dot(normalize(planediff), (float2)( 0.0f, 1.0f )))
+                * sign(planediff_cross.s2);
       break;
     case 1:
       varval = intersection.s7;

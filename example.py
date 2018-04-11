@@ -15,15 +15,21 @@ if __name__ == '__main__':
     ## Load and simulate instrument
     inst = Instrument.fromJSON('inst.json', ctx, queue)
     inst.non_linear_sim(N, 4)
-    ax = inst.visualize(linewidth=1)
+
+    fig = plt.figure()
+
+    ax = fig.add_subplot(2, 1, 1, projection='3d')
+
+    inst.visualize(fig=fig, ax=ax, linewidth=1)
     ax.set_xlim((-0.5, 0.5))
     ax.set_ylim((-0.5, 0.5))
     ax.set_zlim((4, 5))
-    plt.show()
 
     ## Plot resulting histogram
-    plt.xlabel('Scattering angle / deg')
-    plt.ylabel('Counts')
+    ax = fig.add_subplot(2, 1, 2)
+    ax.set_xlabel('Scattering angle / deg')
+    ax.set_ylabel('Counts')
     histo = inst.components['4']
-    plt.plot(np.arange(len(histo.scat_kernel.histo))*180/2000,histo.scat_kernel.histo, 'b-')
+    ax.plot(np.linspace(-40, 140, num=histo.scat_kernel.histo.shape[0]),
+        histo.scat_kernel.histo, 'b-')
     plt.show()

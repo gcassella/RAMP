@@ -44,7 +44,9 @@ __kernel void isotropic_scatter(__global float16* neutrons,
 
   if (rand(&neutron, global_addr) < exp(-mu*length(path.s012))) {
     // Transmitted, return without modifying
-    // neutron state
+    // neutron state, but multiply by weight factor
+    neutron.s9 *= 1.0 - sigma_s / sigma_tot;
+    
     neutron.sc = comp_idx;
     iidx[global_addr] = 0;
     neutrons[global_addr] = neutron;
@@ -80,7 +82,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
 
     if (fabs(pw_cdf[i] - v) < mindiff) {
       mindiff = fabs(pw_cdf[i] - v);
-      omega = w[i];
+      omega = w[i] + (rand(&neutron, global_addr) - 0.5f)*(w[i+1] - w[i]);
       w_index = i;
     } 
   }
