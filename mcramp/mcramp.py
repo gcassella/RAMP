@@ -136,7 +136,7 @@ class Instrument:
 
         print("Raytracing took {} seconds".format(time() - rtime))
 
-    def visualize(self):
+    def visualize(self, **kwargs):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
 
@@ -148,7 +148,7 @@ class Instrument:
             lines += comp.geom_kernel.lines()
 
             for line in lines:
-                ax.plot(*line)
+                ax.plot(*line, **kwargs)
 
 
         ax.set_axis_off()

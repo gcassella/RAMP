@@ -14,16 +14,16 @@ if __name__ == '__main__':
 
     ## Load and simulate instrument
     inst = Instrument.fromJSON('inst.json', ctx, queue)
-    #inst.non_linear_sim(N, 4)
-    ax = inst.visualize()
+    inst.non_linear_sim(N, 4)
+    ax = inst.visualize(linewidth=1)
     ax.set_xlim((-0.5, 0.5))
     ax.set_ylim((-0.5, 0.5))
     ax.set_zlim((4, 5))
     plt.show()
 
     ## Plot resulting histogram
-    #plt.xlabel('Scattering angle / deg')
-    #plt.ylabel('Counts')
-    
-    #plt.plot(np.arange(len(histo.scat_kernel.histo))*180/2000,histo.scat_kernel.histo, 'b-')
-    #plt.show()
+    plt.xlabel('Scattering angle / deg')
+    plt.ylabel('Counts')
+    histo = inst.components['4']
+    plt.plot(np.arange(len(histo.scat_kernel.histo))*180/2000,histo.scat_kernel.histo, 'b-')
+    plt.show()

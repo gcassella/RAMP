@@ -17,5 +17,5 @@ float rand(float16* neutron, uint tid) {
 
   (*neutron).sb+=1;
 
-  return u01fixedpt_closed_closed_32_24(u.i.x);
+  return (float)u01fixedpt_closed_closed_32_24(u.i.x);
 }

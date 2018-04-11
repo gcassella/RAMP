@@ -94,7 +94,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
 
     if (fabs(pq_cdf[w_index*qsamples + i] - u) < mindiff) {
       mindiff = fabs(pq_cdf[w_index*qsamples + i] - u);
-      Q = q[i];
+      Q = q[i] + (rand(&neutron, global_addr) - 0.5f)*(q[i+1] - q[i]);
     } 
   }
 
@@ -168,7 +168,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
   neutron.s012 = intersection.s012 + path_length*path;
   neutron.sa   += intersection.s3 + TOF;
   
-  neutron.s345 = normvel*kf/(1.583*pow(10.,-3.));
+  neutron.s345 = normvel*kf/(float)(1.583*pow(10.,-3.));
 
   neutron.sc = comp_idx;
   iidx[global_addr] = 0;

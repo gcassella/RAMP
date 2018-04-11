@@ -43,8 +43,8 @@
             "position": [0, 0, 5]
         },
         "scat_kernel": {
-            "name": "SPowder",
-            "fn": "data/Y3Fe5O12_YIG.laz"
+            "name": "SIsotropic",
+            "fn": "data/diffuse.sqw"
         }
     },
 
