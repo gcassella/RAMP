@@ -1,3 +1,5 @@
+from .sprim import SPrim
+
 import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
@@ -5,7 +7,7 @@ import pyopencl.array as clarr
 import os
 import re
 
-class SGuide():
+class SGuide(SPrim):
     def __init__(self, g_pos=(0., 0., 0.), w1=0, h1=0, w2=0, h2=0, l=0, 
                  R0=0, Qc=0, alpha=0, m=1, W=0, idx=0, ctx=0, max_bounces=5):
         self.g_pos  = np.array((g_pos[0], g_pos[1], g_pos[2], 0. ), dtype=clarr.vec.float3)
@@ -45,3 +47,62 @@ class SGuide():
                                 self.m,
                                 self.W,
                                 self.max_bounces).wait()
+
+    def lines(self):
+        lines = []
+
+        fmt = 'k-'
+
+        y = np.linspace(-self.h1 / 2, self.h1 / 2) + self.g_pos['y']
+        x = self.w1 / 2 * np.ones(y.shape) + self.g_pos['x']
+        z = self.g_pos['z']
+        lines.append((x, y, z, fmt))
+
+        x = -self.w1 / 2 * np.ones(y.shape) + self.g_pos['x']
+        lines.append((x, y, z, fmt))
+
+        x = np.linspace(-self.w1 / 2, self.w1 / 2) + self.g_pos['x']
+        y = self.h1 / 2 * np.ones(x.shape) + self.g_pos['y']
+        z = self.g_pos['z']
+        lines.append((x, y, z, fmt))
+
+        y = -self.h1 / 2 * np.ones(x.shape) + self.g_pos['y']
+        lines.append((x, y, z, fmt))
+
+        y = np.linspace(-self.h2 / 2, self.h2 / 2) + self.g_pos['y']
+        x = self.w2 / 2 * np.ones(y.shape) + self.g_pos['x']
+        z = self.g_pos['z'] + self.l
+        lines.append((x, y, z, fmt))
+
+        x = -self.w2 / 2 * np.ones(y.shape) + self.g_pos['x']
+        lines.append((x, y, z, fmt))
+
+        x = np.linspace(-self.w2 / 2, self.w2 / 2) + self.g_pos['x']
+        y = self.h2 / 2 * np.ones(x.shape) + self.g_pos['y']
+        z = self.g_pos['z'] + self.l
+        lines.append((x, y, z, fmt))
+
+        y = -self.h2 / 2 * np.ones(x.shape) + self.g_pos['y']
+        lines.append((x, y, z, fmt))
+
+        z = np.linspace(0, self.l) + self.g_pos['z']
+        x = np.linspace(self.w1 / 2, self.w2 / 2) + self.g_pos['x']
+        y = np.linspace(self.h1 / 2, self.h2 / 2) + self.g_pos['y']
+        lines.append((x, y, z, fmt))
+
+        z = np.linspace(0, self.l) + self.g_pos['z']
+        x = np.linspace(-self.w1 / 2, -self.w2 / 2) + self.g_pos['x']
+        y = np.linspace(self.h1 / 2, self.h2 / 2) + self.g_pos['y']
+        lines.append((x, y, z, fmt))
+
+        z = np.linspace(0, self.l) + self.g_pos['z']
+        x = np.linspace(self.w1 / 2, self.w2 / 2) + self.g_pos['x']
+        y = np.linspace(-self.h1 / 2, -self.h2 / 2) + self.g_pos['y']
+        lines.append((x, y, z, fmt))
+
+        z = np.linspace(0, self.l) + self.g_pos['z']
+        x = np.linspace(-self.w1 / 2, -self.w2 / 2) + self.g_pos['x']
+        y = np.linspace(-self.h1 / 2, -self.h2 / 2) + self.g_pos['y']
+        lines.append((x, y, z, fmt))
+
+        return lines

@@ -2,6 +2,9 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 import os, json, importlib
 
 from time import time
@@ -132,3 +135,23 @@ class Instrument:
         self.queue.finish()
 
         print("Raytracing took {} seconds".format(time() - rtime))
+
+    def visualize(self):
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+
+        ax.set_aspect('equal', 'box')
+
+        for comp in self.components.values():
+            lines = []
+            lines += comp.scat_kernel.lines()
+            lines += comp.geom_kernel.lines()
+
+            for line in lines:
+                ax.plot(*line)
+
+        ax.set_xlim((-0.5, 0.5))
+        ax.set_ylim((-0.5, 0.5))
+        ax.set_zlim((4, 5))
+        ax.set_axis_off()
+        plt.show()

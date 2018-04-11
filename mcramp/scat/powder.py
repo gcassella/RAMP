@@ -1,3 +1,5 @@
+from .sprim import SPrim
+
 import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
@@ -5,7 +7,7 @@ import pyopencl.array as clarr
 import os
 import re
 
-class SPowder():
+class SPowder(SPrim):
     def __init__(self, fn=None, idx=0, ctx=None):
         reflections = self._LoadLAZ(fn)
 

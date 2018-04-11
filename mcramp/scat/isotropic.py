@@ -1,3 +1,5 @@
+from .sprim import SPrim
+
 import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
@@ -7,7 +9,7 @@ from scipy.integrate import simps
 import os
 import re
 
-class SIsotropic():
+class SIsotropic(SPrim):
     def __init__(self, fn='', idx=0, ctx=None):
         q,w,rho,sigma_abs,sigma_scat,pw_cdf,pq_cdf,sqw = self._LoadSQW(fn)
 

@@ -1,10 +1,12 @@
+from .sprim import SPrim
+
 import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
 import os
 
-class Detector():
+class Detector(SPrim):
     def __init__(self, position=(0, 0, 0), binning=(0, 0, 0), var=0, idx=0, ctx=None):
         self.binning     = binning
         self.var         = np.uint32(var)

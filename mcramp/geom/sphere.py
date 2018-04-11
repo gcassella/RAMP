@@ -25,3 +25,26 @@ class GSphere(GPrim):
                                   np.uint32(self.idx),
                                   self.position,
                                   self.radius).wait()
+
+    def lines(self):
+        lines = []
+
+        fmt = 'r-'
+
+        theta = np.linspace(0, 2*np.pi)
+        x = self.radius*np.cos(theta) + self.position['x']
+        y = self.radius*np.sin(theta) + self.position['y']
+        z = self.position['z'] * np.ones(theta.shape)
+        lines.append((x,y,z, fmt))
+
+        x = self.radius*np.cos(theta) + self.position['x']
+        y = self.position['y'] * np.ones(theta.shape)
+        z = self.radius*np.sin(theta) + self.position['z']
+        lines.append((x, y, z, fmt))
+
+        x = self.position['x'] * np.ones(theta.shape)
+        y = self.radius*np.cos(theta) + self.position['y']
+        z = self.radius*np.sin(theta) + self.position['z']
+        lines.append((x, y, z, fmt))
+
+        return lines

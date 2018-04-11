@@ -31,3 +31,30 @@ class GBanana(GPrim):
                                   self.height,
                                   self.mintheta,
                                   self.maxtheta).wait()
+
+    def lines(self):
+        lines = []
+
+        fmt = 'b-'
+
+        theta = np.linspace(self.mintheta, self.maxtheta)
+
+        # Top curve
+        x = self.radius*np.sin(theta) + self.position['x']
+        y = self.height / 2 * np.ones(x.shape) + self.position['y']
+        z = self.radius*np.cos(theta) + self.position['z']
+        lines.append((x, y, z, fmt))
+        # Bottom curve
+        y = -self.height / 2 * np.ones(x.shape) + self.position['y']
+        lines.append((x, y, z, fmt))
+        # Side line A
+        y = np.linspace(-self.height / 2, self.height/2) + self.position['y']
+        x = (self.radius*np.sin(self.mintheta) + self.position['x']) * np.ones(y.shape)
+        z = (self.radius*np.cos(self.mintheta) + self.position['z']) * np.ones(z.shape)
+        lines.append((x, y, z, fmt))
+        # Side line B
+        x = (self.radius*np.sin(self.maxtheta) + self.position['x']) * np.ones(y.shape)
+        z = (self.radius*np.cos(self.maxtheta) + self.position['z']) * np.ones(z.shape)
+        lines.append((x, y, z, fmt))
+
+        return lines
