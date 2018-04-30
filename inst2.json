@@ -58,10 +58,10 @@
             "maxtheta": 2.44
         },
         "scat_kernel": {
-            "name": "MantidDetector",
+            "name": "Detector",
             "position": [0, 0, 5],
-            "y_binning": [-0.05, 0.1, 0.05],
-            "theta_binning": [-0.7, 0.00244, 2.44]
+            "binning": [-0.7, 0.00244, 2.44],
+            "var": 0
         }
     }
 }

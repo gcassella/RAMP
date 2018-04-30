@@ -3,7 +3,9 @@
 __kernel void powder_scatter(__global float16* neutrons,
   __global float8* intersections, __global uint* iidx,
   uint const comp_idx,
-  __global float3* reflections, uint const num_reflections) {
+  __global float3* reflections, uint const num_reflections,
+  float const rho,
+  float const sigma_abs, float const sigma_scat) {
 
   // Choose a reflection
   uint global_addr = get_global_id(0);
@@ -20,87 +22,118 @@ __kernel void powder_scatter(__global float16* neutrons,
   }
 
   uint NReflection, attempts;
-  float3 reflection, perp, normvel;
+  float3 reflection, perp, normvel, path;
   float x, y, z, Rxx, Rxy, Rxz, Ryx, Ryy, Ryz, Rzx, Rzy, Rzz, arg;
-  float vel, q_v, alpha;
+  float vel, q_v, alpha, sigma_s, sigma_a, sigma_tot, mu, ki;
 
   normvel = normalize(neutron.s345);
   vel = length(neutron.s345);
 
   attempts = 0;
 
-    neutron.s012 = (intersection.s012 + intersection.s456) / 2;
-    neutron.sa += intersection.s3;
+  path = intersection.s456 - intersection.s012;
+  ki = 1.583*pow(10.,-3.)*length(neutron.s345);
 
-    do {
-      NReflection = floor(rand(&neutron, global_addr)*num_reflections);
+  normvel = normalize(neutron.s345);
+
+  sigma_s = sigma_scat / (2*ki*ki);
+  sigma_a = sigma_abs * 2200 / length(neutron.s345);
+  sigma_tot = sigma_a + sigma_s;
+
+  mu = rho*sigma_tot*100.;
+
+  // Monte carlo choice to see if our neutron scatters
+
+  if (rand(&neutron, global_addr) < exp(-mu*length(path.s012))) {
+    // Transmitted, return without modifying
+    // neutron state, but multiply by weight factor
+    neutron.s9 *= 1.0 - sigma_s / sigma_tot;
+    
+    neutron.sc = comp_idx;
+    iidx[global_addr] = 0;
+    neutrons[global_addr] = neutron;
+    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+                                         0.0f, 0.0f, 0.0f, 100000.0f );
+    neutrons[global_addr] = neutron;
+    return;
+  } else {
+    // Scattered, multiply by weight factor
+    // to model absorption
+    neutron.s9 *= sigma_s / sigma_tot;
+  }
+
+  neutron.s012 = (intersection.s012 + intersection.s456) / 2;
+  neutron.sa += intersection.s3;
+
+  do {
+    NReflection = floor(rand(&neutron, global_addr)*num_reflections);
+    
+
+    reflection = reflections[NReflection];
+
+    // Check if reflection is okay?
+    q_v = 3.97*pow(10., 3.) / reflection.s1;
+
+    arg = q_v / (2*vel);
+
+    if (arg < 1.0) {
+      // Okay, scatter
+      // Generate an arbitrary perpendicular vector to the velocity
+      // x*vx + y*vy + z*vz = (vx+vy)+z*vz = 0
+      // => z = -(vx+vy)/vz
+
+      x = 1.;
+      y = 1.;
+      z = -(neutron.s3+neutron.s4)/(neutron.s5);
+      perp = normalize((float3)( x, y, z ));
+      // construct rotation matrix to randomly rotate the scattering
+      // vector about the velocity
+
+      alpha = 2*M_PI*rand(&neutron, global_addr);
       
 
-      reflection = reflections[NReflection];
+      Rxx = cos(alpha)+normvel.s0*normvel.s0*(1-cos(alpha));
+      Rxy = normvel.s0*normvel.s1*(1-cos(alpha))-normvel.s2*sin(alpha);
+      Rxz = normvel.s0*normvel.s2*(1-cos(alpha))+normvel.s1*sin(alpha);
+      Ryx = normvel.s1*normvel.s0*(1-cos(alpha))+normvel.s2*sin(alpha);
+      Ryy = cos(alpha)+normvel.s1*normvel.s1*(1-cos(alpha));
+      Ryz = normvel.s1*normvel.s2*(1-cos(alpha))-normvel.s0*sin(alpha);
+      Rzx = normvel.s2*normvel.s0*(1-cos(alpha))-normvel.s1*sin(alpha);
+      Rzy = normvel.s2*normvel.s1*(1-cos(alpha))+normvel.s0*sin(alpha);
+      Rzz = cos(alpha)+normvel.s2*normvel.s2*(1-cos(alpha));
 
-      // Check if reflection is okay?
-      q_v = 3.97*pow(10., 3.) / reflection.s1;
+      perp = (float3)( Rxx*perp.s0+Rxy*perp.s1+Rxz*perp.s2, 
+                       Ryx*perp.s0+Ryy*perp.s1+Ryz*perp.s2, 
+                       Rzx*perp.s0+Rzy*perp.s1+Rzz*perp.s2 );
 
-      arg = q_v / (2*vel);
+      // now construct rotation matrix to rotate the velocity 2theta
+      // about the scattering vector
+      alpha = 2*asin(arg);
 
-      if (arg < 1.0) {
-        // Okay, scatter
-        // Generate an arbitrary perpendicular vector to the velocity
-        // x*vx + y*vy + z*vz = (vx+vy)+z*vz = 0
-        // => z = -(vx+vy)/vz
+      Rxx = cos(alpha)+perp.s0*perp.s0*(1-cos(alpha));
+      Rxy = perp.s0*perp.s1*(1-cos(alpha))-perp.s2*sin(alpha);
+      Rxz = perp.s0*perp.s2*(1-cos(alpha))+perp.s1*sin(alpha);
+      Ryx = perp.s1*perp.s0*(1-cos(alpha))+perp.s2*sin(alpha);
+      Ryy = cos(alpha)+perp.s1*perp.s1*(1-cos(alpha));
+      Ryz = perp.s1*perp.s2*(1-cos(alpha))-perp.s0*sin(alpha);
+      Rzx = perp.s2*perp.s0*(1-cos(alpha))-perp.s1*sin(alpha);
+      Rzy = perp.s2*perp.s1*(1-cos(alpha))+perp.s0*sin(alpha);
+      Rzz = cos(alpha)+perp.s2*perp.s2*(1-cos(alpha));
 
-        x = 1.;
-        y = 1.;
-        z = -(neutron.s3+neutron.s4)/(neutron.s5);
-        perp = normalize((float3)( x, y, z ));
-        // construct rotation matrix to randomly rotate the scattering
-        // vector about the velocity
+      normvel = (float3)( Rxx*normvel.s0+Rxy*normvel.s1+Rxz*normvel.s2, 
+                          Ryx*normvel.s0+Ryy*normvel.s1+Ryz*normvel.s2, 
+                          Rzx*normvel.s0+Rzy*normvel.s1+Rzz*normvel.s2 );
 
-        alpha = 2*M_PI*rand(&neutron, global_addr);
-        
+      neutron.s345 = vel*normvel;
+      neutron.s9 *= reflection.s2;
 
-        Rxx = cos(alpha)+normvel.s0*normvel.s0*(1-cos(alpha));
-        Rxy = normvel.s0*normvel.s1*(1-cos(alpha))-normvel.s2*sin(alpha);
-        Rxz = normvel.s0*normvel.s2*(1-cos(alpha))+normvel.s1*sin(alpha);
-        Ryx = normvel.s1*normvel.s0*(1-cos(alpha))+normvel.s2*sin(alpha);
-        Ryy = cos(alpha)+normvel.s1*normvel.s1*(1-cos(alpha));
-        Ryz = normvel.s1*normvel.s2*(1-cos(alpha))-normvel.s0*sin(alpha);
-        Rzx = normvel.s2*normvel.s0*(1-cos(alpha))-normvel.s1*sin(alpha);
-        Rzy = normvel.s2*normvel.s1*(1-cos(alpha))+normvel.s0*sin(alpha);
-        Rzz = cos(alpha)+normvel.s2*normvel.s2*(1-cos(alpha));
+      break;
 
-        perp = (float3)( Rxx*perp.s0+Rxy*perp.s1+Rxz*perp.s2, 
-                         Ryx*perp.s0+Ryy*perp.s1+Ryz*perp.s2, 
-                         Rzx*perp.s0+Rzy*perp.s1+Rzz*perp.s2 );
-
-        // now construct rotation matrix to rotate the velocity 2theta
-        // about the scattering vector
-        alpha = 2*asin(arg);
-
-        Rxx = cos(alpha)+perp.s0*perp.s0*(1-cos(alpha));
-        Rxy = perp.s0*perp.s1*(1-cos(alpha))-perp.s2*sin(alpha);
-        Rxz = perp.s0*perp.s2*(1-cos(alpha))+perp.s1*sin(alpha);
-        Ryx = perp.s1*perp.s0*(1-cos(alpha))+perp.s2*sin(alpha);
-        Ryy = cos(alpha)+perp.s1*perp.s1*(1-cos(alpha));
-        Ryz = perp.s1*perp.s2*(1-cos(alpha))-perp.s0*sin(alpha);
-        Rzx = perp.s2*perp.s0*(1-cos(alpha))-perp.s1*sin(alpha);
-        Rzy = perp.s2*perp.s1*(1-cos(alpha))+perp.s0*sin(alpha);
-        Rzz = cos(alpha)+perp.s2*perp.s2*(1-cos(alpha));
-
-        normvel = (float3)( Rxx*normvel.s0+Rxy*normvel.s1+Rxz*normvel.s2, 
-                            Ryx*normvel.s0+Ryy*normvel.s1+Ryz*normvel.s2, 
-                            Rzx*normvel.s0+Rzy*normvel.s1+Rzz*normvel.s2 );
-
-        neutron.s345 = vel*normvel;
-        neutron.s9 *= reflection.s2;
-
-        break;
-
-      } else {
-        // Not allowed, try again
-        attempts += 1;
-      }
-    } while (attempts < 100);
+    } else {
+      // Not allowed, try again
+      attempts += 1;
+    }
+  } while (attempts < 100);
 
   iidx[global_addr] = 0;
   neutron.sc = comp_idx;

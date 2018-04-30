@@ -15,12 +15,11 @@ class Detector(SPrim):
 
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
         self.histo       = np.zeros((self.num_bins, ), dtype=np.float32)
-        self.histo_temp  = np.zeros((self.num_bins, ), dtype=np.float32)
 
         mf               = cl.mem_flags
         self.histo_cl    = cl.Buffer(ctx,
                                     mf.WRITE_ONLY,
-                                    self.histo_temp.nbytes)
+                                    self.histo.nbytes)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'detector.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}\include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -35,7 +34,9 @@ class Detector(SPrim):
                           self.histo_cl,
                           self.position,
                           self.binning,
-                          self.var).wait()
+                          self.var,
+                          np.uint32(0),
+                          np.uint32(0)).wait()
 
         cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
     
