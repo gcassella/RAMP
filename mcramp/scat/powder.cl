@@ -1,4 +1,5 @@
 #include "rand.h"
+#include "geom.h"
 
 __kernel void powder_scatter(__global float16* neutrons,
   __global float8* intersections, __global uint* iidx,
@@ -91,38 +92,11 @@ __kernel void powder_scatter(__global float16* neutrons,
 
       alpha = 2*M_PI*rand(&neutron, global_addr);
       
+      rotate_about_axis(alpha, normvel, (&perp));
 
-      Rxx = cos(alpha)+normvel.s0*normvel.s0*(1-cos(alpha));
-      Rxy = normvel.s0*normvel.s1*(1-cos(alpha))-normvel.s2*sin(alpha);
-      Rxz = normvel.s0*normvel.s2*(1-cos(alpha))+normvel.s1*sin(alpha);
-      Ryx = normvel.s1*normvel.s0*(1-cos(alpha))+normvel.s2*sin(alpha);
-      Ryy = cos(alpha)+normvel.s1*normvel.s1*(1-cos(alpha));
-      Ryz = normvel.s1*normvel.s2*(1-cos(alpha))-normvel.s0*sin(alpha);
-      Rzx = normvel.s2*normvel.s0*(1-cos(alpha))-normvel.s1*sin(alpha);
-      Rzy = normvel.s2*normvel.s1*(1-cos(alpha))+normvel.s0*sin(alpha);
-      Rzz = cos(alpha)+normvel.s2*normvel.s2*(1-cos(alpha));
-
-      perp = (float3)( Rxx*perp.s0+Rxy*perp.s1+Rxz*perp.s2, 
-                       Ryx*perp.s0+Ryy*perp.s1+Ryz*perp.s2, 
-                       Rzx*perp.s0+Rzy*perp.s1+Rzz*perp.s2 );
-
-      // now construct rotation matrix to rotate the velocity 2theta
-      // about the scattering vector
       alpha = 2*asin(arg);
 
-      Rxx = cos(alpha)+perp.s0*perp.s0*(1-cos(alpha));
-      Rxy = perp.s0*perp.s1*(1-cos(alpha))-perp.s2*sin(alpha);
-      Rxz = perp.s0*perp.s2*(1-cos(alpha))+perp.s1*sin(alpha);
-      Ryx = perp.s1*perp.s0*(1-cos(alpha))+perp.s2*sin(alpha);
-      Ryy = cos(alpha)+perp.s1*perp.s1*(1-cos(alpha));
-      Ryz = perp.s1*perp.s2*(1-cos(alpha))-perp.s0*sin(alpha);
-      Rzx = perp.s2*perp.s0*(1-cos(alpha))-perp.s1*sin(alpha);
-      Rzy = perp.s2*perp.s1*(1-cos(alpha))+perp.s0*sin(alpha);
-      Rzz = cos(alpha)+perp.s2*perp.s2*(1-cos(alpha));
-
-      normvel = (float3)( Rxx*normvel.s0+Rxy*normvel.s1+Rxz*normvel.s2, 
-                          Ryx*normvel.s0+Ryy*normvel.s1+Ryz*normvel.s2, 
-                          Rzx*normvel.s0+Rzy*normvel.s1+Rzz*normvel.s2 );
+      rotate_about_axis(alpha, perp, (&normvel));
 
       neutron.s345 = vel*normvel;
       neutron.s9 *= reflection.s2;

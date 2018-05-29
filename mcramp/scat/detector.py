@@ -34,9 +34,7 @@ class Detector(SPrim):
                           self.histo_cl,
                           self.position,
                           self.binning,
-                          self.var,
-                          np.uint32(0),
-                          np.uint32(0)).wait()
+                          self.var).wait()
 
         cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
     

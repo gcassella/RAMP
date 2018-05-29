@@ -8,7 +8,7 @@
             "rad": 0.01,
             "t_dim": [0.001, 0.001],
             "t_pos": [0, 0, 5],
-            "lamb": 2,
+            "lamb": 3,
             "dlamb": 0.01
         }
     },
@@ -54,14 +54,14 @@
             "radius": 1.1,
             "position": [0, 0, 5],
             "height": 0.1,
-            "mintheta": -0.7,
+            "mintheta": 0.1,
             "maxtheta": 2.44
         },
         "scat_kernel": {
-            "name": "MantidDetector",
+            "name": "Detector",
             "position": [0, 0, 5],
-            "y_binning": [-0.05, 0.1, 0.05],
-            "theta_binning": [-0.7, 0.00244, 2.44]
+            "binning": [0.1, 0.00244, 2.44],
+            "var": 0
         }
     }
 }

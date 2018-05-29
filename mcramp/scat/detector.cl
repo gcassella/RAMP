@@ -17,8 +17,7 @@ __kernel void detector(__global float16* neutrons,
   __global float8* intersections, __global uint* iidx,
   uint const comp_idx,
   __global float* histogram, float3 const det_pos,
-  float3 const binning, uint const var,
-  uint const restore_neutron, uint const event_mode) {
+  float3 const binning, uint const var) {
 
   uint global_addr = get_global_id(0);
   
@@ -31,6 +30,9 @@ __kernel void detector(__global float16* neutrons,
   uint idx;
 
   uint this_iidx = iidx[global_addr];
+  
+  neutron = neutrons[global_addr];
+  intersection = intersections[global_addr];
 
   if(!(this_iidx == comp_idx)) {
     return;
@@ -40,17 +42,9 @@ __kernel void detector(__global float16* neutrons,
     return;
   }
 
-  if (event_mode == 1) {
-    histogram[global_addr] = 0.;
-  }
-
   minvar = binning.s0;
   stepvar = binning.s1;
   maxvar = binning.s2;
-
-  neutron = neutrons[global_addr];
-  intersection = intersections[global_addr];
-
 
   switch(var) {
     case 0:
@@ -71,24 +65,17 @@ __kernel void detector(__global float16* neutrons,
   }
 
   if(minvar<=varval && varval<=maxvar) {    
-    if(event_mode == 0) {
-      idx = round((varval -  minvar) / stepvar);
-      AtomicAdd(&histogram[idx], neutron.s9);
-    } else {
-      histogram[global_addr] = varval;
-    }
+    idx = round((varval -  minvar) / stepvar);
+    AtomicAdd(&histogram[idx], neutron.s9);
   }
 
-  
-  if(restore_neutron == 0) {
-    iidx[global_addr] = 0;
-    neutron.s012 = intersection.s456;
-    neutron.sa += intersection.s7;
-    neutron.sc = comp_idx;
-    neutron.sf = 1.;
-    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+  iidx[global_addr] = 0;
+  neutron.s012 = intersection.s456;
+  neutron.sa += intersection.s7;
+  neutron.sc = comp_idx;
+  neutron.sf = 1.;
+  intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
-  }
 
   neutrons[global_addr] = neutron;
 }
