@@ -9,7 +9,7 @@ import re
 
 class SPowder(SPrim):
     def __init__(self, fn=None, idx=0, ctx=None):
-        reflections, self.sigma_coh, self.sigma_abs, self.rho = self._LoadLAZ(fn)
+        reflections, self.sigma_abs, self.Vc = self._LoadLAZ(fn)
 
         self.nreflections = len(reflections)
         self.idx = idx
@@ -30,22 +30,17 @@ class SPowder(SPrim):
                                    np.uint32(self.idx),
                                    self.reflections_opencl,
                                    np.uint32(self.nreflections),
-                                   np.float32(self.rho),
                                    np.float32(self.sigma_abs),
-                                   np.float32(self.sigma_coh)).wait()
+                                   np.float32(self.Vc)).wait()
 
     def _LoadLAZ(self, fn):
         with open(fn, 'r') as fin:
             lines = fin.readlines()
             for line in lines:
-                if "sigma_coh" in line:
-                    sigma_coh = np.float32(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
-                elif "sigma_inc" in line:
-                    sigma_inc = np.float32(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
-                elif "sigma_abs" in line:
+                if "sigma_abs" in line:
                     sigma_abs = np.float32(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
-                elif "density" in line:
-                    rho = np.float32(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
+                elif "Vc" in line:
+                    Vc = np.float32(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
 
         reflections_temp = np.loadtxt(fn)
 
@@ -53,7 +48,7 @@ class SPowder(SPrim):
 
         sum_intensity = sum(reflections_temp[:,11])
 
-        reflections = np.array([(ref[4], ref[5], ref[11]/sum_intensity, 0.) for ref in reflections_temp],
+        reflections = np.array([(ref[5], ref[12], ref[16], 0.) for ref in reflections_temp],
                                dtype=clarr.vec.float3 )
 
-        return (reflections, sigma_coh, sigma_abs, rho)
+        return (reflections, sigma_abs, Vc)

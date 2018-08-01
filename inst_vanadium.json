@@ -1,0 +1,45 @@
+{
+    "mod" : {
+        "source": true,
+        "moderator_kernel": {
+            "name": "MGaussian",
+            "pos": [0, 0, 0],
+            "norm": [0, 0, 1],
+            "rad": 0.01,
+            "t_dim": [0.001, 0.001],
+            "t_pos": [0, 0, 5],
+            "E": 4.0,
+            "dE": 4.0
+        }
+    },
+
+    "sample": {
+        "geom_kernel": {
+            "name": "GSphere",
+            "radius": 0.01,
+            "position": [0, 0, 5]
+        },
+        "scat_kernel": {
+            "name": "SVanadium"
+        }
+    },
+
+    "detector": {
+        "geom_kernel": {
+            "name": "GBanana",
+            "radius": 3.5,
+            "position": [0, 0, 5],
+            "height": 3,
+            "mintheta": 0,
+            "maxtheta": 3.14
+        },
+        "scat_kernel": {
+            "name": "QWDetector",
+            "position": [0, 0, 5],
+            "ei": 4.0,
+            "ki_norm": [0, 0, 1],
+            "q_binning": [0.1, 0.01, 2.5],
+            "de_binning": [-4, 0.01, 4]
+        }
+    }
+}
