@@ -8,7 +8,7 @@ from mcramp import Instrument
 import os
 
 if __name__ == '__main__':
-    N = 1e7
+    N = int(1e7)
 
     ## OpenCL setup and internals
     ctx = cl.create_some_context()
