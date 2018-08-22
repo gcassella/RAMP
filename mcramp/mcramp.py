@@ -18,6 +18,8 @@ class Instrument:
         self.ctx = ctx
         self.queue = queue
 
+        self.max_buf = int(1E7)
+
     @staticmethod
     def fromJSON(fn, ctx, queue):
         inst = json.load(open(fn, 'r'))
@@ -230,71 +232,110 @@ class Instrument:
 
 
     def linear_sim(self, N):
-        rtime = time()
-        self._initialize_buffers(N)
-        print('Buffer initialization completed in {} seconds'.format(time() - rtime))
-
-        self.source.gen_prg(self.queue,
-                            N,
-                            self.neutrons_cl,
-                            self.intersections_cl)
+        left = N
 
         rtime = time()
 
-        for (idx, comp) in self.components.items():
-            comp.geom_kernel.intersect_prg(self.queue, 
-                                           N, 
-                                           self.neutrons_cl, 
-                                           self.intersections_cl, 
-                                           self.iidx_cl)
-                                           
-            comp.scat_kernel.scatter_prg(self.queue, 
-                                           N, 
-                                           self.neutrons_cl, 
-                                           self.intersections_cl, 
-                                           self.iidx_cl)
+        if N > self.max_buf:
+            self._initialize_buffers(self.max_buf)
+        else:
+            self._initialize_buffers(N)
 
-        self.queue.finish()
+        torun = 0
 
-        print('Ray tracing completed in {} seconds'.format(time() - rtime))
+        while True:
+            if left <= 0:
+                break
+            elif left >= self.max_buf:
+                torun = self.max_buf
+            else:
+                torun = left
 
-    def non_linear_sim(self, N, max_events):
-        self._initialize_buffers(N)
+            self.source.gen_prg(self.queue,
+                                torun,
+                                self.neutrons_cl,
+                                self.intersections_cl)
 
-        rtime = time()
-
-        self.source.gen_prg(self.queue,
-                            N,
-                            self.neutrons_cl,
-                            self.intersections_cl)
-
-        events = 0
-
-        while events < max_events:
             for (idx, comp) in self.components.items():
                 comp.geom_kernel.intersect_prg(self.queue, 
-                                           N, 
-                                           self.neutrons_cl, 
-                                           self.intersections_cl, 
-                                           self.iidx_cl)
-            
-            cl.enqueue_copy(self.queue, self.neutrons, self.neutrons_cl)
-            print(self.neutrons)
+                                               torun, 
+                                               self.neutrons_cl, 
+                                               self.intersections_cl, 
+                                               self.iidx_cl)
 
-            self.term_prg.terminate(self.queue, (N, ), None, self.neutrons_cl, self.intersections_cl)
-
-            for (idx, comp) in self.components.items():
                 comp.scat_kernel.scatter_prg(self.queue, 
-                                           N, 
-                                           self.neutrons_cl, 
-                                           self.intersections_cl, 
-                                           self.iidx_cl)
+                                               torun, 
+                                               self.neutrons_cl, 
+                                               self.intersections_cl, 
+                                               self.iidx_cl)
 
-            events += 1
+            self.queue.finish()
 
-        self.queue.finish()
+            left -= self.max_buf
+
+        print('Ray tracing completed in {} seconds'.format(time() - rtime))
+        return time() - rtime
+
+    def non_linear_sim(self, N, max_events):
+        left = N
+
+        rtime = time()
+
+        if N > self.max_buf:
+            self._initialize_buffers(self.max_buf)
+        else:
+            self._initialize_buffers(N)
+
+        torun = 0
+
+        while True:
+            if left <= 0:
+                break
+            elif left >= self.max_buf:
+                torun = self.max_buf
+            else:
+                torun = left
+
+            self.source.gen_prg(self.queue,
+                                torun,
+                                self.neutrons_cl,
+                                self.intersections_cl)
+
+            events = 0
+
+            while events < max_events:
+                for (idx, comp) in self.components.items():
+                    comp.geom_kernel.intersect_prg(self.queue, 
+                                               torun, 
+                                               self.neutrons_cl, 
+                                               self.intersections_cl, 
+                                               self.iidx_cl)
+                
+                cl.enqueue_copy(self.queue, self.intersections, self.intersections_cl)
+
+                self.term_prg.terminate(self.queue, (torun, ), None, self.neutrons_cl, self.intersections_cl)
+
+                for (idx, comp) in self.components.items():
+                    comp.scat_kernel.scatter_prg(self.queue, 
+                                               torun, 
+                                               self.neutrons_cl, 
+                                               self.intersections_cl, 
+                                               self.iidx_cl)
+                            
+                cl.enqueue_copy(self.queue, self.neutrons, self.neutrons_cl)
+
+
+                print(self.neutrons)
+
+                events += 1
+
+            self.queue.finish()
+
+            left -= self.max_buf
 
         print("Raytracing took {} seconds".format(time() - rtime))
+
+        return time() - rtime
 
     def visualize(self, fig=None, ax=None, **kwargs):
         if fig is None and ax is None:
