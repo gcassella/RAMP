@@ -2,9 +2,6 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
 import os, json, importlib
 
 from time import time
@@ -229,7 +226,7 @@ class Instrument:
                                         self.iidx.nbytes)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scat/terminator.cl'), mode='r') as f:
-            self.term_prg = cl.Program(self.ctx, f.read()).build(options=r'-I "{}\include"'.format(os.path.dirname(os.path.abspath(__file__))))
+            self.term_prg = cl.Program(self.ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
 
 
     def linear_sim(self, N):

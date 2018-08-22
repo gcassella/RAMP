@@ -18,7 +18,7 @@ class SPowder(SPrim):
         self.reflections_opencl = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=reflections)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'powder.cl'), mode='r') as f:
-            self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}\include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 
     def scatter_prg(self, queue, N, neutron_buf, intersection_buf, iidx_buf):

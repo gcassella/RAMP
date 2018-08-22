@@ -16,7 +16,7 @@ class MMaxwellian():
         self.T      = np.float32(T)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'maxwellian.cl'), mode='r') as f:
-            self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}\include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     def gen_prg(self, queue, N, neutron_buf, intersection_buf):
         self.prg.generate_neutrons(queue, (N,), None, neutron_buf, intersection_buf,
