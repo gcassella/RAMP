@@ -1,16 +1,10 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import pyopencl as cl
 from mcramp import Instrument
 
-import matplotlib
-
-from mpl_toolkits.mplot3d import Axes3D
-
+import matplotlib.pyplot as plt
 import os
-
-os.environ['PYOPENCL_CTX']=':'
-matplotlib.rcParams.update({'font.size': 12})
 
 if __name__ == '__main__':
     N = int(1e7)
@@ -23,7 +17,7 @@ if __name__ == '__main__':
     inst = Instrument.fromJSON('inst_noguide_TOF.json', ctx, queue)
     inst.non_linear_sim(N, 8)
 
-    fig = plt.figure()
+    #fig = plt.figure()
 
     #ax = fig.add_subplot(1, 1, 1, projection='3d')
  

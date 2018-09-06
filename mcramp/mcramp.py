@@ -2,10 +2,7 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
-import os, json, importlib, math
+import os, json, importlib
 
 from time import time
 
