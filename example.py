@@ -14,6 +14,7 @@ matplotlib.rcParams.update({'font.size': 12})
 
 if __name__ == '__main__':
     N = int(1e7)
+    
     ## OpenCL setup and internals
     ctx = cl.create_some_context()
     queue = cl.CommandQueue(ctx)

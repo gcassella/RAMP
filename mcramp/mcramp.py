@@ -169,22 +169,6 @@ class Instrument:
                                                self.intersections_cl, 
                                                self.iidx_cl)
                 
-                cl.enqueue_copy(self.queue, self.intersections, self.intersections_cl)
-
-                #x1 = self.intersections['s0']
-                #y1 = self.intersections['s1']
-                #z1 = self.intersections['s2']
-                #x2 = self.intersections['s4']
-                #y2 = self.intersections['s5']
-                #z2 = self.intersections['s6']
-
-                #fig = plt.figure()
-                #ax = fig.add_subplot(111, projection='3d')
-                #ax.scatter(list(zip(x1,x2)), list(zip(y1,y2)), list(zip(z1,z2)))
-
-                #self.visualize(fig=fig, ax=ax)
-                #plt.show()
-
                 self.term_prg.terminate(self.queue, (torun, ), None, self.neutrons_cl, self.intersections_cl)
 
                 for (idx, comp) in self.components.items():
