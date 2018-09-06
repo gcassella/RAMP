@@ -14,18 +14,10 @@ if __name__ == '__main__':
     queue = cl.CommandQueue(ctx)
 
     ## Load and simulate instrument
-    inst = Instrument.fromJSON('inst_noguide_TOF.json', ctx, queue)
+    inst = Instrument.fromJSON('inst_TOF.json', ctx, queue)
     inst.non_linear_sim(N, 8)
 
-    #fig = plt.figure()
-
-    #ax = fig.add_subplot(1, 1, 1, projection='3d')
- 
-    #inst.visualize(fig=fig, ax=ax, linewidth=1)
-    #ax.set_xlim((-0.5, 0.5))
-    #ax.set_ylim((-0.5, 0.5))
-    #ax.set_zlim((4, 5))
- 
+    fig = plt.figure()
     # Plot resulting histogram
     ax = fig.add_subplot(1, 1, 1)
 

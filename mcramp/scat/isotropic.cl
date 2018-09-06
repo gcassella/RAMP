@@ -46,7 +46,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
     // Transmitted, return without modifying
     // neutron state, but multiply by weight factor
     neutron.s9 *= 1.0 - sigma_s / sigma_tot;
-    neutron.s012 = (intersection.s456+0.01*normalize(path));
+    neutron.s012 = (intersection.s456+0.01f*normalize(path));
     neutron.sa += intersection.s7;
 
     neutron.sc = comp_idx;
