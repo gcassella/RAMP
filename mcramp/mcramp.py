@@ -86,7 +86,7 @@ class Instrument:
                                         self.iidx.nbytes)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scat/terminator.cl'), mode='r') as f:
-            self.term_prg = cl.Program(self.ctx, f.read()).build(options=r'-I "{}\include"'.format(os.path.dirname(os.path.abspath(__file__))))
+            self.term_prg = cl.Program(self.ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
 
 
     def linear_sim(self, N):

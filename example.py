@@ -19,10 +19,8 @@ if __name__ == '__main__':
     queue = cl.CommandQueue(ctx)
 
     ## Load and simulate instrument
-    inst = Instrument.fromJSON('inst_noguide.json', ctx, queue)
-    inst_van = Instrument.fromJSON('inst_vanadium.json', ctx, queue)
+    inst = Instrument.fromJSON('inst_noguide_TOF.json', ctx, queue)
     inst.non_linear_sim(N, 8)
-    inst_van.linear_sim(N)
 
     fig = plt.figure()
 
@@ -36,17 +34,10 @@ if __name__ == '__main__':
     # Plot resulting histogram
     ax = fig.add_subplot(1, 1, 1)
 
-    histo = inst.components['3']
-    histo_van = inst_van.components['3']
-    #ax.plot(np.arange(0.008,0.012,step=1e-5),
-    #    histo.scat_kernel.histo, 'b-')
-    #plt.show()
+    histo = inst.components['4']
+    ax.plot(np.arange(0.008,0.012,step=1e-5),
+        histo.scat_kernel.histo, 'b-')
+    plt.show()
 
-    Q, DE, I = histo.scat_kernel.reduce_histogram()
-    _, _, I_van = histo_van.scat_kernel.reduce_histogram()
 
-    I_van[np.where(I_van<=0)] = 1
-
-    plt.pcolormesh(Q, DE, (I/np.max(I)), vmin=0, vmax=2)
-    plt.colorbar()
     plt.show()
