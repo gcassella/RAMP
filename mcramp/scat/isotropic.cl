@@ -34,20 +34,21 @@ __kernel void isotropic_scatter(__global float16* neutrons,
 
   normvel = normalize(neutron.s345);
 
-  sigma_s = sigma_scat / (2*ki*ki);
-  sigma_a = sigma_abs * 2200 / length(neutron.s345);
+  sigma_s = sigma_scat / (2.*ki*ki);
+  sigma_a = sigma_abs * 2200. / length(neutron.s345);
   sigma_tot = sigma_a + sigma_s;
 
   mu = rho*sigma_tot*100.;
 
 
   // Monte carlo choice to see if our neutron scatters
-
   if (rand(&neutron, global_addr) < exp(-mu*length(path.s012))) {
     // Transmitted, return without modifying
     // neutron state, but multiply by weight factor
     neutron.s9 *= 1.0 - sigma_s / sigma_tot;
-    
+    neutron.s012 = (intersection.s456+0.01*normalize(path));
+    neutron.sa += intersection.s7;
+
     neutron.sc = comp_idx;
     iidx[global_addr] = 0;
     neutrons[global_addr] = neutron;
@@ -102,22 +103,34 @@ __kernel void isotropic_scatter(__global float16* neutrons,
 
   // Test conservation laws can be satisfied
 
-  if (ki*ki < (0.007706*omega)) {
+  if (ki*ki < (0.693*omega)) {
     // No real valued kf possible
+    
+    neutron.sf = 1;
+    iidx[global_addr] = 0;
+    neutrons[global_addr] = neutron;
+    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+                                         0.0f, 0.0f, 0.0f, 100000.0f );
     return;
   }
 
   if (rand(&neutron, global_addr) > 0.5) {
-    kf = sqrt(ki*ki - 0.007706*omega);
+    kf = sqrt(ki*ki - 0.693*omega);
   } else {
-    kf = -sqrt(ki*ki - 0.007706*omega);
+    kf = sqrt(ki*ki + 0.693*omega);
   }
 
   arg = (ki*ki + kf*kf - Q*Q)/(2*ki*kf);
 
   if (fabs(arg) > 1) {
     // Unphysical scattering direction
+    neutron.sf = 1;
+    iidx[global_addr] = 0;
+    neutrons[global_addr] = neutron;
+    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+                                         0.0f, 0.0f, 0.0f, 100000.0f );
     return;
+
   } else {
     theta = acos(arg);
   }
@@ -143,7 +156,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
 
   TOF = path_length / length(neutron.s345);
 
-  neutron.s012 = intersection.s012 + path_length*path;
+  neutron.s012 = intersection.s012 + (path_length)*path;
   neutron.sa   += intersection.s3 + TOF;
   
   neutron.s345 = normvel*kf/(float)(1.583*pow(10.,-3.));

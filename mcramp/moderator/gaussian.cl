@@ -4,12 +4,12 @@ __kernel void generate_neutrons(__global float16* neutrons,
     __global float8* intersections,
     float3 const source_pos, float3 const source_normal,
     float const source_radius, float2 const target_dimensions,
-    float3 const target_pos, float const lambda,
-    float const dlambda) {
+    float3 const target_pos, float const E,
+    float const dE) {
 
   uint global_addr;
 
-  float chi, x, y, r2, tx, ty, u1, u2, wl, vel;
+  float chi, x, y, r2, tx, ty, u1, u2, calcE, vel;
   float3 dir, target_norm;
   float16 neutron;
 
@@ -47,8 +47,9 @@ __kernel void generate_neutrons(__global float16* neutrons,
   
   u2 = rand(&neutron, global_addr);
   
-  wl = sqrt(-2.0 * log(u1)) * cos(2 * M_1_PI * u2) * dlambda + lambda;
-  vel = 3.97*pow(10.,-7.) / (wl*pow(10.,-10.));
+  calcE = (E + (sqrt(-2.0 * log(u1)) * cos(2 * M_PI * u2)) * dE);
+
+  vel = 438.01*sqrt(calcE);
 
   dir = normalize(dir)*vel;
 

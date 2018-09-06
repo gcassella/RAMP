@@ -1,0 +1,58 @@
+{
+    "mod" : {
+        "source": true,
+        "moderator_kernel": {
+            "name": "MGaussian",
+            "pos": [0, 0, 0],
+            "norm": [0, 0, 1],
+            "rad": 0.01,
+            "t_dim": [0.001, 0.001],
+            "t_pos": [0, 0, 5],
+            "E": 4.0,
+            "dE": 0.001
+        }
+    },
+
+    "cryostat": {
+        "geom_kernel": {
+            "name": "GAnnulus",
+            "inner_radius": 0.05,
+            "outer_radius": 0.06,
+            "position": [0, 0, 5],
+            "height": 0.2
+        },
+        "scat_kernel": {
+            "name": "SPowder",
+            "fn": "data/Al.laz"
+        }
+    },
+
+    "sample": {
+        "geom_kernel": {
+            "name": "GSphere",
+            "radius": 0.001,
+            "position": [0, 0, 5]
+        },
+        "scat_kernel": {
+            "name": "SIsotropic",
+            "fn": "data/He4_liq_coh.sqw"
+        }
+    },
+
+    "detector": {
+        "geom_kernel": {
+            "name": "GBanana",
+            "radius": 3.5,
+            "position": [0, 0, 5],
+            "height": 0.3,
+            "mintheta": 0,
+            "maxtheta": 3.14
+        },
+        "scat_kernel": {
+            "name": "Detector",
+            "position": [0, 0, 5],
+            "binning": [0.008, 0.00001, 0.012],
+            "var": 1
+        }
+    }
+}
