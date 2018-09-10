@@ -8,31 +8,8 @@
             "rad": 0.01,
             "t_dim": [0.001, 0.001],
             "t_pos": [0, 0, 5],
-            "lamb": 3,
-            "dlamb": 0.01
-        }
-    },
-
-    "guide": {
-        "geom_kernel": {
-            "name": "GPlane",
-            "width": 0.03,
-            "height": 0.03,
-            "position": [0, 0, 1]
-        },
-        "scat_kernel": {
-            "name": "SGuide",
-            "g_pos": [0, 0, 1],
-            "w1": 0.03,
-            "h1": 0.03,
-            "w2": 0.03,
-            "h2": 0.03,
-            "l": 3.9,
-            "R0": 0,
-            "Qc": 0,
-            "alpha": 0,
-            "m": 1,
-            "W": 0
+            "E": 4.0,
+            "dE": 0.001
         }
     },
 

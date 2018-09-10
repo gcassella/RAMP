@@ -134,8 +134,6 @@ class Instrument:
     def non_linear_sim(self, N, max_events):
         left = N
 
-        rtime = time()
-
         if N > self.max_buf:
             self._initialize_buffers(self.max_buf)
         else:
@@ -150,6 +148,10 @@ class Instrument:
                 torun = self.max_buf
             else:
                 torun = left
+
+            self._initialize_buffers(torun)
+
+            rtime = time()
 
             self.source.gen_prg(self.queue,
                                 torun,
@@ -174,11 +176,6 @@ class Instrument:
                                                self.neutrons_cl, 
                                                self.intersections_cl, 
                                                self.iidx_cl)
-                            
-                cl.enqueue_copy(self.queue, self.neutrons, self.neutrons_cl)
-
-
-                print(self.neutrons)
 
                 events += 1
 
@@ -186,9 +183,11 @@ class Instrument:
 
             left -= self.max_buf
 
+            rt_time = time() - rtime
+
         print("Raytracing took {} seconds".format(time() - rtime))
 
-        return time() - rtime
+        return rt_time
 
     def visualize(self, fig=None, ax=None, **kwargs):
         if fig is None and ax is None:
