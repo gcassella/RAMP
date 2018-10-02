@@ -1,5 +1,5 @@
-# MCRAMP
-Monte Carlo Raytracing Achieved via Massive Parallelisation
+# RAMP
+Raytracing Achieved via Massive Parallelisation
 
 ![example](/data/visualized.png)
 
