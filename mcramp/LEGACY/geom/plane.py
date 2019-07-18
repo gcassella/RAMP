@@ -26,4 +26,4 @@ class GPlane(GPrim):
                                  self.idx,
                                  self.position,
                                  self.width,
-                                 self.height)
+                                 self.height).wait()

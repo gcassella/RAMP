@@ -5,3 +5,7 @@
 cloc-1.76.exe
 *.gitignore*
 *.dat
+*energy_data.E*
+*modloader.py*
+*.vscode*
+*profile*

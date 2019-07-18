@@ -3,6 +3,14 @@ __kernel void intersect_plane(__global float16* neutrons,
     uint const comp_idx, float3 const g_pos, float const width, 
     float const height) {
 
+    /* Geometry kernel for linear components such as guides which have an
+     * entrance rectangle and an exit rectangle. It is assumed that
+     * we only care about neutrons who pass through the entrance rectangle.
+     * It is possible to relax this requirement but I don't care to.
+     *
+     * The plane normal points along the z axis
+     */
+
     uint global_addr        = get_global_id(0);
     float16 neutron         = neutrons[global_addr];
     float8 intersection     = intersections[global_addr];
