@@ -41,8 +41,6 @@ __kernel void generate_neutrons(__global float16* neutrons,
   // FIXME: find a better method for sampling the full range of bins so the entire
   // specified range is actually sampled
   if(Tpnt >= num_time_bins-1 || Epnt >= num_ener_bins - 1) {
-    
-    printf("%e\n", str_area);
     neutrons[global_addr] = neutron;
     intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );

@@ -33,25 +33,23 @@ class MISIS():
         n_steps = 50
         A = 0.0
 
-        target_x = np.linspace(0, target_dim[0] / 2.0, num = 50)
-        target_y = np.linspace(0, target_dim[1] / 2.0, num = 50)
+        target_x = np.linspace(0, target_dim[0] / 2.0, num = n_steps)
+        target_y = np.linspace(0, target_dim[1] / 2.0, num = n_steps)
         
         TX, TY = np.meshgrid(target_x, target_y)
         
-        mod_x = np.linspace(-mod_dim[0] / 2.0, mod_dim[0] / 2.0, num = 50)
-        mod_y = np.linspace(-mod_dim[1] / 2.0, mod_dim[1] / 2.0, num = 50)
+        mod_x = np.linspace(-mod_dim[0] / 2.0, mod_dim[0] / 2.0, num = n_steps)
+        mod_y = np.linspace(-mod_dim[1] / 2.0, mod_dim[1] / 2.0, num = n_steps)
         MX, MY = np.meshgrid(mod_x, mod_y)
         for mx in MX:
             for my in MY:
                 A += np.sum(1 / (np.power(-1.0*TX + mx, 2.0) + np.power(-1.0*TY + my, 2.0) + target_dist**2.0))
-        A *= (mod_dim[0] * mod_dim[1]) / (50**4.0)
+        A *= (mod_dim[0] * mod_dim[1]) / (n_steps**4.0)
         A *= target_dim[0] * target_dim[1] * 10000
 
         
         self.str_area = np.float32(A)
         
-        print(self.str_area)
-
     def load_spectrum(self, spec_file):
         with open(spec_file, 'r') as mod_file:
             lines = mod_file.read()
@@ -175,8 +173,6 @@ class MISIS():
         self.ener_bins = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=e_bins_cropped)
         self.e_int = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=EInt.astype(np.float32))
         self.total = np.float32(Total)
-
-        print(self.total)
 
     def gen_prg(self, queue, N, neutron_buf, intersection_buf):
         self.prg.generate_neutrons(queue, (N,), None, neutron_buf, intersection_buf,

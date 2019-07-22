@@ -9,7 +9,7 @@ import os
 from time import sleep
 
 os.environ["PYOPENCL_CTX"] = "0:0"
-os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
+os.environ["PYOPENCL_COMPILER_OUTPUT"] = "0"
 
 if __name__ == '__main__':
     N = int(1e4)
@@ -26,12 +26,14 @@ if __name__ == '__main__':
     #cl.enqueue_copy(queue, inst.neutrons, inst.neutrons_cl)
     queue.finish()
 
-    print(inst.blocks[0].components['2'].scat_kernel.histo)
-    plt.plot(np.linspace(0.0, 40.0, num=len(inst.blocks[0].components['2'].scat_kernel.histo)),
-             inst.blocks[0].components['2'].scat_kernel.histo)
+    detector=inst.blocks[0].components['2'].scat_kernel
+    x=np.linspace(detector.axis1_binning['s0'],
+                  detector.axis1_binning['s2'],
+                  num=detector.axis1_num_bins)
+    y=np.linspace(detector.axis2_binning['s0'],
+                    detector.axis2_binning['s2'],
+                    num=detector.axis2_num_bins)
 
-    data = np.loadtxt('data/energy_data.E', skiprows=27, unpack=True)
-    total_I = np.sum(data[1])
-    plt.errorbar(data[0], data[1], yerr=data[2])
-
+    X, Y=np.meshgrid(x, y)
+    plt.imshow(detector.histo2d)
     plt.show()

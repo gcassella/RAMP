@@ -8,7 +8,7 @@
                 "pos": [0, 0, 0],
                 "spec_file": "data/Let_Base.mcstas",
                 "mod_dim": [0.5, 0.5],
-                "target_dim": [0.05, 0.05],
+                "target_dim": [0.03, 0.03],
                 "target_dist": 0.5,
                 "E_min": 0.01,
                 "E_max": 40.0
@@ -23,8 +23,11 @@
                 "position": [0, 0, 0.5]
             },
             "scat_kernel": {
-                "name": "EMon",
-                "binning": [0.0, 0.05, 40.0]
+                "name": "PSD2dMon",
+                "sample_pos": [0, 0, 0.45],
+                "axis1_binning": [-90.0, 1.0, 90.0],
+                "axis2_binning": [-90.0, 1.0, 90.0],
+                "shape": "banana"
             }
         }
     }
