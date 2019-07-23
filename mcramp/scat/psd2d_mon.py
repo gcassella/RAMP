@@ -10,7 +10,7 @@ class PSD2dMon(SPrim):
     def __init__(self, sample_pos=(0, 0, 0), shape="", axis1_binning=(0, 0, 0),
                  axis2_binning=(0, 0, 0), idx=0, ctx=None):
         
-        shapes = {"plane" : 0, "banana": 1}
+        shapes = {"plane" : 0, "banana": 1, "thetatof": 2}
 
         self.axis1_binning = axis1_binning
         self.axis2_binning = axis2_binning
@@ -47,7 +47,11 @@ class PSD2dMon(SPrim):
                           self.axis2_num_bins,
                           self.shape)
 
-        cl.enqueue_copy(queue, self.histo, self.histo_cl)
+        neutrons = np.zeros((N, ), dtype=clarr.vec.float16)
+        cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
+        
+        counted = np.where((neutrons['s14'] > 0) & (neutrons['s12'].astype(np.uint32) == self.idx))
+        self.histo, _ = np.histogram(neutrons['s14'][counted], bins=range(self.num_bins + 1), weights=neutrons['s9'][counted])
         self.histo2d = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins))
 
     @property

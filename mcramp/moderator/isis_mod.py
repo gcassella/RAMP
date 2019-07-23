@@ -124,7 +124,7 @@ class MISIS():
         e_max = self.E_max  # [meV]
 
         t_min = 0.0  # [s]
-        t_max = 0.5  # [s]
+        t_max = 1.0  # [s]
 
         e_min_idx = (np.abs(e_axis - e_min)).argmin()
         e_max_idx = (np.abs(e_axis - e_max)).argmin()

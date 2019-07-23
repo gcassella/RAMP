@@ -27,6 +27,7 @@ __kernel void generate_neutrons(__global float16* neutrons,
   float deviate, time_val, time_range, time_spread, R, ener_val, ener_spread, 
   accumulator, Pj, vel, Dx, Dy, displacement;
   float16 neutron;
+  
 
   global_addr = get_global_id(0);
   neutron = neutrons[global_addr];

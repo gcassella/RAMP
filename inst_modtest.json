@@ -8,26 +8,46 @@
                 "pos": [0, 0, 0],
                 "spec_file": "data/Let_Base.mcstas",
                 "mod_dim": [0.5, 0.5],
-                "target_dim": [0.03, 0.03],
+                "target_dim": [0.01, 0.01],
                 "target_dist": 0.5,
-                "E_min": 0.01,
-                "E_max": 40.0
+                "E_min": 13.0,
+                "E_max": 18.0
+            }
+        },
+
+        "sample" : {
+            "geom_kernel" : {
+                "name": "GSphere",
+                "radius": 0.01,
+                "position": [0, 0, 0.5]
+            },
+            "scat_kernel": {
+                "name": "SPowder1",
+                "d_spacing": 4.2,
+                "pack": 1.0,
+                "vc": 85.0,
+                "sigma_abs": 0.0,
+                "multiplicity": 1,
+                "DW": 1.0,
+                "F2": 60.0
             }
         },
 
         "det" : {
             "geom_kernel": {
-                "name": "GPlane",
-                "width": 5.0,
-                "height": 5.0,
-                "position": [0, 0, 0.5]
+                "name": "GBanana",
+                "radius": 1.0,
+                "height": 0.1,
+                "position": [0, 0, 0.5],
+                "mintheta" : -40.0,
+                "maxtheta" : 140.0
             },
             "scat_kernel": {
                 "name": "PSD2dMon",
-                "sample_pos": [0, 0, 0.45],
-                "axis1_binning": [-90.0, 1.0, 90.0],
-                "axis2_binning": [-90.0, 1.0, 90.0],
-                "shape": "banana"
+                "sample_pos": [0, 0, 0.5],
+                "axis1_binning": [-180.0, 1.0, 180.0],
+                "axis2_binning": [0.0, 1e-5, 0.002],
+                "shape": "thetatof"
             }
         }
     }
