@@ -18,7 +18,7 @@ void AtomicAdd(volatile global float *source, const float operand) {
 __kernel void detector(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
                        uint const comp_idx, volatile __global float *histogram,
-                       float3 const binning)
+                       float3 const binning, uint const restore_neutron)
 {
 
   uint global_addr = get_global_id(0);
@@ -47,14 +47,20 @@ __kernel void detector(__global float16 *neutrons,
 
   if(min_var<=ener_val && ener_val<=max_var) {    
     idx = round((ener_val -  min_var) / step_var);
-    AtomicAdd(&histogram[idx], neutron.s9);
+   // AtomicAdd(&histogram[idx], neutron.s9);
+    neutron.se = idx;
+  } else {
+    neutron.se = -1;
+  }
+  
+  iidx[global_addr] = 0;
+  if (restore_neutron == 0) {
+    neutron.s012 = intersection.s456;
+    neutron.sa += intersection.s7;
+    neutron.sf = 1.;
   }
 
-  iidx[global_addr] = 0;
-  neutron.s012 = intersection.s456;
-  neutron.sa += intersection.s7;
   neutron.sc = comp_idx;
-  neutron.sf = 1.;
   intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 

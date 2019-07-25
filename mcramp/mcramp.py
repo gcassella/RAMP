@@ -46,7 +46,7 @@ class ExecutionBlock:
                 sargs['idx'] = i
                 sargs['ctx'] = parent.ctx
 
-                comps[str(i)] = Component(gk(**gargs), sk(**sargs))
+                comps[name] = Component(gk(**gargs), sk(**sargs))
             
             i += 1
 

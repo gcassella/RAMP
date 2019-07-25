@@ -24,17 +24,15 @@ if __name__ == '__main__':
     inst.execute(N)
 
     #cl.enqueue_barrier(queue)
-    #cl.enqueue_copy(queue, inst.neutrons, inst.neutrons_cl)
+    cl.enqueue_copy(queue, inst.neutrons, inst.neutrons_cl)
     queue.finish()
 
-    detector=inst.blocks[0].components['3'].scat_kernel
-    x=np.linspace(detector.axis1_binning['s0'],
-                  detector.axis1_binning['s2'],
-                  num=detector.axis1_num_bins)
-    y=np.linspace(detector.axis2_binning['s0'],
-                    detector.axis2_binning['s2'],
-                    num=detector.axis2_num_bins)
+    plt.show()
 
-    X, Y=np.meshgrid(x, y)
-    plt.imshow(detector.histo2d)
+    ps2=inst.blocks[0].components["det"].scat_kernel
+    ps2.slice(-80, 80, 0.001, 0.002)
+
+    data = np.loadtxt('data/thetamon.th', skiprows=27, unpack=True)
+    plt.plot(data[0], data[1])
+
     plt.show()

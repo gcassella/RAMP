@@ -80,13 +80,14 @@ __kernel void powder1(__global float16* neutrons,
 
         rotate_about_axis(twotheta, beam_perp, &beam_para);
 
-        neutron.s012 += pen_depth * path;
+        neutron.s012 = intersection.s012 + pen_depth * path;
         neutron.s345 = vel*normalize(beam_para);
-        neutron.sa += pen_depth*full_path_length / vel;
+
+        neutron.sa += intersection.s7 - intersection.s3;
         //neutron.s9 *= pen_depth*sigma_scat*exp(-sigma_abs*full_path_length);
     } else { // Neutron is transmitted, do nothing
         neutron.s012 = intersection.s456;
-        neutron.sa += intersection.s7;
+        neutron.sa += intersection.s7 - intersection.s3;
         neutron.s9 *= exp(-(sigma_scat+sigma_abs)*full_path_length);
     }
 

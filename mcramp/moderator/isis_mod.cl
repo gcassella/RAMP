@@ -1,18 +1,14 @@
 #include "rand.h"
 
 int find_closest_in_cdf(__global float* arr, int arrlen, float val) {
-  float nearest = fabs(arr[0] - val);
-  int nearest_idx = 0;
-  for (int i = 1; i < arrlen; i++) {
-    if (fabs(arr[i] - val) <= nearest) {
-      nearest = fabs(arr[i] - val);
-      nearest_idx = i;
-    } else {
-      break;
+  // Find index of last element in arr which is less than val
+  for (int i = 0; i < arrlen; i++) {
+    if ((arr[i] - val) > 0.0) {
+      return i - 1;
     }
   }
 
-  return nearest_idx;
+  return 0;
 }
 
 __kernel void generate_neutrons(__global float16* neutrons,
@@ -25,10 +21,9 @@ __kernel void generate_neutrons(__global float16* neutrons,
 
   int global_addr, idx, Epnt, Tpnt, interpol_start, interpol_end;
   float deviate, time_val, time_range, time_spread, R, ener_val, ener_spread, 
-  accumulator, Pj, vel, Dx, Dy, displacement;
+  accumulator, Pj, vel, Dx, Dy;
   float16 neutron;
   
-
   global_addr = get_global_id(0);
   neutron = neutrons[global_addr];
 
@@ -36,20 +31,14 @@ __kernel void generate_neutrons(__global float16* neutrons,
 
   idx = find_closest_in_cdf(flux, num_time_bins * num_ener_bins, deviate);
 
-  Epnt = floor((float)idx / (float)num_time_bins);
+  Epnt = find_closest_in_cdf(E_int, num_ener_bins, deviate);
   Tpnt = fmod((float)idx, (float)num_time_bins);
 
-  // FIXME: find a better method for sampling the full range of bins so the entire
-  // specified range is actually sampled
-  if(Tpnt >= num_time_bins-1 || Epnt >= num_ener_bins - 1) {
-    neutrons[global_addr] = neutron;
-    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
-                                         0.0f, 0.0f, 0.0f, 100000.0f );
-    return;
+  if(Tpnt >= num_time_bins-1) {
+    Tpnt -= 1;
   }
 
   time_val = time_bins[Tpnt];
-
   time_range = time_bins[Tpnt + 1] - time_bins[Tpnt];
   time_spread = flux[Epnt * num_time_bins + Tpnt + 1] - flux[Epnt * num_time_bins + Tpnt];
   R = deviate - flux[Epnt * num_time_bins + Tpnt];
@@ -60,8 +49,8 @@ __kernel void generate_neutrons(__global float16* neutrons,
   ener_spread = E_int[Epnt+1] - E_int[Epnt];
 
   interpol_start = (Epnt > 3) ? Epnt - 3 : 0;
-  interpol_end = ((num_ener_bins - 1 - Epnt) > 3) ? Epnt + 3 : (num_ener_bins) - 1;
-
+  interpol_end = ((num_ener_bins - Epnt - 1) > 3) ? Epnt + 3 : (num_ener_bins - 1);
+  
   deviate = E_int[Epnt] + ener_spread * rand(&neutron, global_addr);
   accumulator = 0.0;
   for (int i = interpol_start; i <= interpol_end; i++) {
@@ -83,14 +72,11 @@ __kernel void generate_neutrons(__global float16* neutrons,
   neutron.s1 = pos.y + mod_dim.y*(0.5 - rand(&neutron, global_addr));
   neutron.s2 = pos.z;
 
-  vel = 438.01*sqrt(ener_val);
+  vel = 437.393377*sqrt(ener_val);
   Dx = target_dim.x*(0.5 - rand(&neutron, global_addr)) - neutron.s0;
   Dy = target_dim.y*(0.5 - rand(&neutron, global_addr)) - neutron.s1;
-  displacement = sqrt(Dx*Dx + Dy*Dy + target_dist*target_dist);
-
-  neutron.s3 = vel*Dx/displacement;
-  neutron.s4 = vel*Dy/displacement;
-  neutron.s5 = vel*target_dist/displacement;
+  
+  neutron.s345 = vel*normalize((float3)( Dx, Dy, target_dist ));
 
   // Initialize weight
   // TODO: with buffer chunking this will exaggerate the intensity by the number
