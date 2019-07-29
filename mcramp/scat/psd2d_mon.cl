@@ -45,15 +45,15 @@ __kernel void detector(__global float16 *neutrons,
   int this_iidx, axis1_idx, axis2_idx, flattened_idx;
   this_iidx = iidx[global_addr];
 
+  /* Check we are scattering from the intersected component -------------- */
   if (!(this_iidx == comp_idx))
-  {
       return;
-  }
 
-  if (neutron.sf > 0.)
-  {
+  /* Check termination flag ---------------------------------------------- */
+  if (neutron.sf > 0.) 
       return;
-  }
+
+  /* Perform scattering here --------------------------------------------- */
 
   // Find axis 1 bin
 

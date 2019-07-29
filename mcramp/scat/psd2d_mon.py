@@ -64,20 +64,8 @@ class PSD2dMon(SPrim):
 
         X, Y = np.meshgrid(x, y)
 
-        plt.pcolormesh(X, Y, self.histo2d.T, cmap='jet', vmin=0, vmax=5000, shading='gouraud')
+        plt.pcolormesh(X, Y, self.histo2d.T, cmap='jet', shading='gouraud')
         plt.colorbar()
-
-    def slice(self, x1, x2, y1, y2):
-        axis1 = np.linspace(self.axis1_binning['s0'], self.axis1_binning['s2'], num=self.axis1_num_bins)
-        axis2 = np.linspace(self.axis2_binning['s0'], self.axis2_binning['s2'], num=self.axis2_num_bins)
-
-        axis1_min = np.fabs(axis1 - x1).argmin()
-        axis1_max = np.fabs(axis1 - x2).argmin()
-        axis2_min = np.fabs(axis2 - y1).argmin()
-        axis2_max = np.fabs(axis2 - y2).argmin()
-
-        data = np.sum(self.histo2d[axis1_min:axis1_max, axis2_min:axis2_max], axis=1)
-        plt.plot(axis1[axis1_min:axis1_max], data / 7.5)
 
     @property
     def sample_pos(self):

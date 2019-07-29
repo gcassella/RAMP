@@ -19,7 +19,7 @@ class SPowder1(SPrim):
         sigma_scat_denom = vc ** 2.0 * q
 
         self.sigma_scat_v2 = np.float32(sigma_scat_numer / sigma_scat_denom)
-        self.sigma_abs_v = np.float32(pack * sigma_abs / vc * 2200 * 100)
+        self.sigma_abs_v = np.float32(pack * sigma_abs / vc * 100)
         self.q = np.float32(q)
         self.idx = np.uint32(idx)
 

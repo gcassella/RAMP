@@ -27,12 +27,7 @@ if __name__ == '__main__':
     cl.enqueue_copy(queue, inst.neutrons, inst.neutrons_cl)
     queue.finish()
 
-    plt.show()
+    print(inst.neutrons)
 
-    ps2=inst.blocks[0].components["det"].scat_kernel
-    ps2.slice(-80, 80, 0.001, 0.002)
-
-    data = np.loadtxt('data/thetamon.th', skiprows=27, unpack=True)
-    plt.plot(data[0], data[1])
 
     plt.show()
