@@ -259,6 +259,40 @@
             }
         },
 
+        "samplepos_div" : {
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.1,
+                "height": 0.1,
+                "position": [0, 0, 25.0]
+            },
+            "scat_kernel": {
+                "name": "PSD2dMon",
+                "sample_pos": [0, 0, 25.0],
+                "axis1_binning": [-3.0, 0.01, 3.0],
+                "axis2_binning": [-3.0, 0.01, 3.0],
+                "shape": "div",
+                "restore_neutron" : true
+            }
+        },
+
+        "samplepos_divpos" : {
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.1,
+                "height": 0.1,
+                "position": [0, 0, 25.0]
+            },
+            "scat_kernel": {
+                "name": "PSD2dMon",
+                "sample_pos": [0, 0, 25.0],
+                "axis1_binning": [-0.05, 0.001, 0.05],
+                "axis2_binning": [-3.0, 0.01, 3.0],
+                "shape": "divpos",
+                "restore_neutron" : true
+            }
+        },
+
         "sample" : {
             "geom_kernel" : {
                 "name": "GSphere",

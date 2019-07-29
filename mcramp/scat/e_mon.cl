@@ -53,13 +53,14 @@ __kernel void detector(__global float16 *neutrons,
     neutron.se = -1;
   }
   
-  iidx[global_addr] = 0;
+  
   if (restore_neutron == 0) {
     neutron.s012 = intersection.s456;
     neutron.sa += intersection.s7;
     neutron.sf = 1.;
   }
 
+  iidx[global_addr] = 0;
   neutron.sc = comp_idx;
   intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );

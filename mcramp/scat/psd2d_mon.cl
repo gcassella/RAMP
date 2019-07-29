@@ -35,7 +35,8 @@ __kernel void detector(__global float16 *neutrons,
                        uint const comp_idx, volatile __global float *histogram,
                        float3 const pos, float3 const axis1_binning, 
                        float3 const axis2_binning, uint const axis1_numbins,
-                       uint const axis2_numbins, uint const shape)
+                       uint const axis2_numbins, uint const shape,
+                       uint const restore_neutron)
 {
 
   uint global_addr = get_global_id(0);
@@ -57,13 +58,15 @@ __kernel void detector(__global float16 *neutrons,
 
   // Find axis 1 bin
 
-  if (shape == 0) { // Plane detector, axis1 is x
+  if (shape == 0 || shape == 4) { // Plane detector, axis1 is x
     float x_val = intersection.s4 - pos.s0;
     axis1_idx = find_idx(x_val, axis1_binning);
   } else if (shape == 1 || shape == 2) { // Banana detector, axis1 is 2theta
     float3 sample_to_det = intersection.s456 - pos;
     float theta_val = degrees(atan2(sample_to_det.s0, sample_to_det.s2));
     axis1_idx = find_idx(theta_val, axis1_binning);
+  } else if (shape == 3) {
+    axis1_idx = find_idx(degrees(atan2(neutron.s3, neutron.s5)), axis2_binning);
   }
 
   // Find axis 2 bin
@@ -77,6 +80,10 @@ __kernel void detector(__global float16 *neutrons,
     axis2_idx = find_idx(alpha_val, axis2_binning);
   } else if (shape == 2) {
     axis2_idx = find_idx(neutron.sa+intersection.s7, axis2_binning);
+  } else if (shape == 3) {
+    axis2_idx = find_idx(degrees(atan2(neutron.s4, neutron.s5)), axis2_binning);
+  } else if (shape == 4) {
+    axis2_idx = find_idx(degrees(atan2(neutron.s3, neutron.s5)), axis2_binning);
   }
 
 
@@ -86,13 +93,15 @@ __kernel void detector(__global float16 *neutrons,
   } else {
     neutron.se = -1;
   }
-  // AtomicAdd(&histogram[flattened_idx], neutron.s9);
+
+  if (restore_neutron == 0) {
+    neutron.s012 = intersection.s456;
+    neutron.sa += intersection.s7;
+    neutron.sf = 1.;
+  }
 
   iidx[global_addr] = 0;
-  neutron.s012 = intersection.s456;
-  neutron.sa += intersection.s7;
   neutron.sc = comp_idx;
-  neutron.sf = 1.;
   intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 

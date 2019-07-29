@@ -55,6 +55,11 @@ class ExecutionBlock:
         return ex_block
 
     def execute(self, N):
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      'scat/terminator.cl'), mode='r') as f:
+                self.term_prg = cl.Program(self.parent.ctx,
+                                           f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
+
         if self.linear:
 
             for (idx, comp) in self.components.items():
@@ -64,20 +69,23 @@ class ExecutionBlock:
                                                self.parent.intersections_cl,
                                                self.parent.iidx_cl)
 
+                self.term_prg.terminate(self.parent.queue, (N,), None,
+                                        self.parent.neutrons_cl,
+                                        self.parent.intersections_cl)           
+
                 comp.scat_kernel.scatter_prg(self.parent.queue,
                                              N,
                                              self.parent.neutrons_cl,
                                              self.parent.intersections_cl,
                                              self.parent.iidx_cl)
 
+                
+                
+                
+
             self.parent.queue.finish()
 
         else:
-            with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                      'scat/terminator.cl'), mode='r') as f:
-                self.term_prg = cl.Program(self.parent.ctx,
-                                           f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
-
             events = 0
 
             while events < self.max_events:

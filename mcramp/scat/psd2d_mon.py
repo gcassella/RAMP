@@ -9,15 +9,16 @@ import os
 
 class PSD2dMon(SPrim):
     def __init__(self, sample_pos=(0, 0, 0), shape="", axis1_binning=(0, 0, 0),
-                 axis2_binning=(0, 0, 0), idx=0, ctx=None):
+                 axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None):
         
-        shapes = {"plane" : 0, "banana": 1, "thetatof": 2}
+        shapes = {"plane" : 0, "banana": 1, "thetatof": 2, "div" : 3, "divpos": 4}
 
         self.axis1_binning = axis1_binning
         self.axis2_binning = axis2_binning
         self.sample_pos = sample_pos
         self.shape = np.uint32(shapes[shape])
         self.idx = np.uint32(idx)
+        self.restore_neutron = np.uint32(1 if restore_neutron else 0)
 
         self.axis1_num_bins = np.uint32(np.ceil((axis1_binning[2] - axis1_binning[0]) / axis1_binning[1]))
         self.axis2_num_bins = np.uint32(np.ceil((axis2_binning[2] - axis2_binning[0]) / axis2_binning[1]))
@@ -46,7 +47,8 @@ class PSD2dMon(SPrim):
                           self.axis2_binning,
                           self.axis1_num_bins,
                           self.axis2_num_bins,
-                          self.shape)
+                          self.shape,
+                          self.restore_neutron)
 
         neutrons = np.zeros((N, ), dtype=clarr.vec.float16)
         cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
