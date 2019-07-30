@@ -20,7 +20,7 @@ if __name__ == '__main__':
     queue = cl.CommandQueue(ctx)
 
     ## Load and simulate instrument
-    inst = Instrument('inst_modtest.json', ctx, queue)
+    inst = Instrument('LET_withchop.json', ctx, queue, v_foc=1000.0, pha_offset = 222e-6)
     inst.execute(N)
 
     #cl.enqueue_barrier(queue)

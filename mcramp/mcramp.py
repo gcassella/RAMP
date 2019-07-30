@@ -2,7 +2,7 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
-import os, json, importlib
+import os, json, importlib, re
 
 from time import time
 
@@ -110,16 +110,33 @@ class ExecutionBlock:
                 events += 1
 
 class Instrument:
-    def __init__(self, fn, ctx, queue):
+    def __init__(self, fn, ctx, queue, **kwargs):
         self.ctx = ctx
         self.queue = queue
-        self.blocks = self.fromJSON(fn, ctx, queue)
+        self.blocks = self.fromJSON(fn, ctx, queue, **kwargs)
 
         self.dev = self.ctx.devices[0]
         self.max_buf = int(1E7)
 
-    def fromJSON(self, fn, ctx, queue):
-        inst = json.load(open(fn, 'r'))
+    def substitute_params(self, json_str, **kwargs):
+        pattern = r"(?:\$)(.*?)(?:\$)"
+        tokens = re.findall(pattern, json_str)
+
+        for t in tokens:
+            subbed_t = t
+            for key, value in kwargs.items():
+                subbed_t = subbed_t.replace("{}".format(key), str(value))
+
+            json_str = json_str.replace("${}$".format(t), str(eval(subbed_t)))
+
+        return json_str
+
+    def fromJSON(self, fn, ctx, queue, **kwargs):
+        with open(fn, 'r') as f:
+            json_str = f.read()
+            json_str = self.substitute_params(json_str, **kwargs)
+
+        inst = json.loads(json_str)
 
         blocks = []
 
