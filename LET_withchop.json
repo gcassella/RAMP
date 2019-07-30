@@ -116,7 +116,7 @@
                 "n_slits" : 6,
                 "jitter" : 7e-7,
                 "slit_width" : 0.04,
-                "phase" : -0.0081
+                "phase" : -$7.83 / v_foc + pha_offset$
             }
         },
 
@@ -180,7 +180,7 @@
                 "n_slits" : 2,
                 "jitter" : 7e-7,
                 "slit_width" : 0.058,
-                "phase" : 0.012
+                "phase" : $11.75 / v_foc + pha_offset$
             }
         },
 
@@ -221,7 +221,7 @@
                 "n_slits" : 6,
                 "jitter" : 7e-7,
                 "slit_width" : 0.054,
-                "phase" : 0.0159
+                "phase" : $15.66 / v_foc + pha_offset$
             }
         },
 
@@ -326,25 +326,9 @@
             },
             "scat_kernel" : {
                 "name" : "EMon",
-                "binning": [0.0, 0.01, 41.0],
-                "restore_neutron": true
-            }
-        },
-
-        "samplepos_div" : {
-            "geom_kernel": {
-                "name": "GPlane",
-                "width": 0.1,
-                "height": 0.1,
-                "position": [0, 0, 25.0]
-            },
-            "scat_kernel": {
-                "name": "PSD2dMon",
-                "sample_pos": [0, 0, 25.0],
-                "axis1_binning": [-3.0, 0.01, 3.0],
-                "axis2_binning": [-3.0, 0.01, 3.0],
-                "shape": "div",
-                "restore_neutron" : true
+                "binning": [0.0, 0.01, 10.0],
+                "restore_neutron": true,
+                "filename": "emon"
             }
         },
 
@@ -361,7 +345,8 @@
                 "axis1_binning": [-0.05, 0.001, 0.05],
                 "axis2_binning": [-3.0, 0.01, 3.0],
                 "shape": "divpos",
-                "restore_neutron" : true
+                "restore_neutron" : true,
+                "filename": "divpos_psd"
             }
         },
 
@@ -397,7 +382,8 @@
                 "sample_pos": [0, 0, 25.0],
                 "axis1_binning": [-90.0, 1.0, 90.0],
                 "axis2_binning": [0.022, 1e-5, 0.03],
-                "shape": "thetatof"
+                "shape": "thetatof",
+                "filename" : "thetatof_psd"
             }
         }
     }

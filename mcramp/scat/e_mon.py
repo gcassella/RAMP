@@ -8,13 +8,15 @@ import matplotlib.pyplot as plt
 import os
 
 class EMon(SPrim):
-    def __init__(self, binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None):
+    def __init__(self, binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
+                 filename=None):
         self.binning     = binning
         self.idx         = idx
 
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
         self.histo = np.zeros((self.num_bins,), dtype=np.float32)
         self.restore = np.uint32(1 if restore_neutron else 0)
+        self.filename = filename
 
         mf               = cl.mem_flags
         self.histo_cl    = cl.Buffer(ctx,
@@ -47,6 +49,10 @@ class EMon(SPrim):
         plt.figure()
         axis = np.linspace(self.binning['s0'], self.binning['s2'], num=self.num_bins)
         plt.plot(axis, self.histo)
+
+        if self.filename:
+            np.save(self.filename + 'X.dat', axis)
+            np.save(self.filename + 'Y.dat', self.histo)
 
     @property
     def binning(self):

@@ -9,7 +9,8 @@ import os
 
 class PSD2dMon(SPrim):
     def __init__(self, sample_pos=(0, 0, 0), shape="", axis1_binning=(0, 0, 0),
-                 axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None):
+                 axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
+                 filename=None):
         
         shapes = {"plane" : 0, "banana": 1, "thetatof": 2, "div" : 3, "divpos": 4}
 
@@ -19,6 +20,7 @@ class PSD2dMon(SPrim):
         self.shape = np.uint32(shapes[shape])
         self.idx = np.uint32(idx)
         self.restore_neutron = np.uint32(1 if restore_neutron else 0)
+        self.filename = filename
 
         self.axis1_num_bins = np.uint32(np.ceil((axis1_binning[2] - axis1_binning[0]) / axis1_binning[1]))
         self.axis2_num_bins = np.uint32(np.ceil((axis2_binning[2] - axis2_binning[0]) / axis2_binning[1]))
@@ -68,6 +70,11 @@ class PSD2dMon(SPrim):
 
         plt.pcolormesh(X, Y, self.histo2d.T, cmap='jet', shading='gouraud')
         plt.colorbar()
+
+        if self.filename:
+            np.save(self.filename + 'X.dat', X)
+            np.save(self.filename + 'Y.dat', Y)
+            np.save(self.filename + 'Z.dat', self.histo2d.T)
 
     @property
     def sample_pos(self):
