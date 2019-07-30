@@ -1,5 +1,14 @@
+/*
+* The functionality of this component has been entirely ripped
+* (to the extent of copy paste) from the McStas guide component.
+*/
+
 #include "ref.h"
 #include "consts.h"
+
+#ifndef V2K
+#define V2K 1.58825361e-3
+#endif
 
 __kernel void guide_scatter(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
@@ -11,6 +20,7 @@ __kernel void guide_scatter(__global float16* neutrons,
 
     uint global_addr        = get_global_id(0);
     float16 neutron         = neutrons[global_addr];
+    float8 intersection = intersections[global_addr];
     uint this_iidx          = iidx[global_addr];
 
     /* Check we are scattering from the intersected component */
@@ -25,66 +35,101 @@ __kernel void guide_scatter(__global float16* neutrons,
 
     /* Perform scattering here */
 
-    float3 n1v, n2v, n1h, n2h, O1v, O2v, O1h, O2h, pos, vel;
-    float t1v, t2v, t1h, t2h, texit, q, tmin;
-    float refl = 1;
+    // Propogate neutron to guide entrance first
 
-    uint attempts = 0;
-    bool finished = false;
+    neutron.s012 = intersection.s456;
+    neutron.sa += intersection.s7;
 
-    n1v = (float3)( l, 0.0f, (w2 - w1)/2.0f );
-    n2v = (float3)( -l, 0.0f, (w2 - w1)/2.0f );
-    n1h = (float3)( 0.0f, l, (h2 - h1)/2.0f );
-    n2h = (float3)( 0.0f, -l, (h2-h1)/2.0f );
-    O1v = (float3)( -w1/2.0f, 0.0f, 0.0f );
-    O2v = (float3)( w1/2.0f, 0.0f, 0.0f );
-    O1h = (float3)( 0.0f, -h1/2.0f, 0.0f );
-    O2h = (float3)( 0.0f, h1/2.0f, 0.0f );
+    float3 pos, vel;
+    float t1, t2, av, ah, bv, bh, cv1, cv2, ch1, ch2, d, ww, hh, whalf, hhalf;
+    float vdotn_v1, vdotn_v2, vdotn_h1, vdotn_h2, q, nlen2;
 
-    float3 norms[4] = {n1v, n2v, n1h, n2h};
+    uint i = 0;
 
-   while (!finished && attempts < max_bounces) {
-        attempts+=1;
+    ww = 0.5*(w2 - w1); hh = 0.5*(h2 - h1);
+    whalf = 0.5*w1; hhalf = 0.5*h1;
 
+    while(true) {
         pos = neutron.s012 - g_pos;
         vel = neutron.s345;
 
-        t1h = dot((O1h - pos), n1h) / dot(vel, n1h);
-        t2h = dot((O2h - pos), n2h) / dot(vel, n2h);
-        t1v = dot((O1v - pos), n1v) / dot(vel, n1v);
-        t2v = dot((O2v - pos), n2v) / dot(vel, n2v);
-        texit = (l - pos.s2) / neutron.s5;
+        av = l*vel.s0; bv = ww*vel.s2;
+        ah = l*vel.s1; bh = hh*vel.s2;
+        vdotn_v1 = bv + av;
+        vdotn_v2 = bv - av;
+        vdotn_h1 = bh + ah;
+        vdotn_h2 = bh - ah;
 
-        /* 0: 1h, 1: 2h, 2: 1v, 3: 2v, 4: exit */
+        cv1 = -whalf*l - pos.s2*ww;
+        cv2 = pos.s0*l;
+        ch1 = -hhalf*l - pos.s2*hh;
+        ch2 = pos.s1*l;
 
-        float times[5] = {t1h, t2h, t1v, t2v, texit};
-
-        tmin=1000.0f;
-        uint mindex=0;
-
-        for(uint i=0; i < 5; i++) {
-            if ((times[i] < tmin) && (times[i] > 0.0f)) {
-                tmin = times[i];
-                mindex = i;
-            }
+        t1 = (l - pos.s2)/vel.s2;
+        i = 0;
+        if(vdotn_v1 < 0 && (t2 = (cv1 - cv2)/vdotn_v1) < t1)
+        {
+          t1 = t2;
+          i = 1;
+        }
+        if(vdotn_v2 < 0 && (t2 = (cv1 + cv2)/vdotn_v2) < t1)
+        {
+          t1 = t2;
+          i = 2;
+        }
+        if(vdotn_h1 < 0 && (t2 = (ch1 - ch2)/vdotn_h1) < t1)
+        {
+          t1 = t2;
+          i = 3;
+        }
+        if(vdotn_h2 < 0 && (t2 = (ch1 + ch2)/vdotn_h2) < t1)
+        {
+          t1 = t2;
+          i = 4;
         }
 
-        neutron.s012 = (pos + g_pos) + tmin*vel;
-        neutron.sa += tmin;
-
-        if (mindex == 4) { 
-            finished = true;
-        } else {
-            q = V2Q*length(vel);
-
-            refl = reflectivity_func(q, R0, Qc, alpha, m, W);
-
-            neutron.s345 = vel - (dot(2*norms[mindex], vel) 
-                            / (length(norms[mindex])*length(norms[mindex])))
-                            * norms[mindex];
-            neutron.s9  *= refl;
+        if (i == 0) {
+            break;
         }
+
+        neutron.s012 += t1*vel;
+        neutron.sa += t1;
+
+        switch(i)
+        {
+          case 1:                   /* Left vertical mirror */
+            nlen2 = l*l + ww*ww;
+            q = V2Q*(-2)*vdotn_v1/sqrt(nlen2);
+            d = 2*vdotn_v1/nlen2;
+            neutron.s3 = neutron.s3 - d*l;
+            neutron.s5 = neutron.s5 - d*ww;
+            break;
+          case 2:                   /* Right vertical mirror */
+            nlen2 = l*l + ww*ww;
+            q = V2Q*(-2)*vdotn_v2/sqrt(nlen2);
+            d = 2*vdotn_v2/nlen2;
+            neutron.s3 = neutron.s3 + d*l;
+            neutron.s5 = neutron.s5 - d*ww;
+            break;
+          case 3:                   /* Lower horizontal mirror */
+            nlen2 = l*l + hh*hh;
+            q = V2Q*(-2)*vdotn_h1/sqrt(nlen2);
+            d = 2*vdotn_h1/nlen2;
+            neutron.s4 = neutron.s4 - d*l;
+            neutron.s5 = neutron.s5 - d*hh;
+            break;
+          case 4:                   /* Upper horizontal mirror */
+            nlen2 = l*l + hh*hh;
+            q = V2Q*(-2)*vdotn_h2/sqrt(nlen2);
+            d = 2*vdotn_h2/nlen2;
+            neutron.s4 = neutron.s4 + d*l;
+            neutron.s5 = neutron.s5 - d*hh;
+            break;
+        }
+
+        neutron.s9  *= reflectivity_func(q, R0, Qc, alpha, m, W);
     }
+
 
     /* ----------------------- */
 

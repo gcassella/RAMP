@@ -34,13 +34,13 @@ __kernel void intersect_banana(__global float16* neutrons,
   intersection = intersections[global_addr];
 
   theta2 = acos(dot(normalize(plane_pos+t2*plane_vel), (float2)( 0.0f, 1.0f )));
+
   if ((quotient > 0) &&
       ((banana_pos.s1 - banana_height/2) < (neutron.s1 + t2*neutron.s4)) &&
       ((neutron.s1 + t2*neutron.s4) < (banana_pos.s1 + banana_height/2)) &&
       (mintheta < theta2 < maxtheta)) {
-  
+    
     if (t2 < intersection.s3 && t1 < 0 && t2 > 0) {
-        
         intersection.s012 = neutron.s012 + t1*neutron.s345;
         intersection.s3   = t1;
       

@@ -10,6 +10,10 @@ class SPrim():
     def lines(self):
         return []
 
+    @abstractmethod
+    def data(self):
+        return 0
+
 class Float3(object):
     def __init__(self, attr):
         self.attr = '_' + attr
