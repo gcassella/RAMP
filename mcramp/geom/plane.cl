@@ -1,6 +1,6 @@
 __kernel void intersect_plane(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
-    uint const comp_idx, float3 const g_pos, float const width, 
+    uint const comp_idx, float const width, 
     float const height) {
 
     uint global_addr        = get_global_id(0);
@@ -20,7 +20,7 @@ __kernel void intersect_plane(__global float16* neutrons,
     float3 vel = neutron.s345;
     float3 pos = neutron.s012;
 
-    float t = (g_pos.s2 - pos.s2) / vel.s2;
+    float t = (-pos.s2) / vel.s2;
     float x = pos.s0 + t*vel.s0;
     float y = pos.s1 + t*vel.s1;
 

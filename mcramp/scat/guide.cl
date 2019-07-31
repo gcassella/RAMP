@@ -12,7 +12,7 @@
 
 __kernel void guide_scatter(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
-    uint const comp_idx, float3 const g_pos, 
+    uint const comp_idx,
     float const w1, float const h1,
     float const w2, float const h2, float const l,
     float const R0, float const Qc, float const alpha,
@@ -50,7 +50,7 @@ __kernel void guide_scatter(__global float16* neutrons,
     whalf = 0.5*w1; hhalf = 0.5*h1;
 
     while(true) {
-        pos = neutron.s012 - g_pos;
+        pos = neutron.s012;
         vel = neutron.s345;
 
         av = l*vel.s0; bv = ww*vel.s2;

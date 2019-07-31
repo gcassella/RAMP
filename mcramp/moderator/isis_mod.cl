@@ -12,7 +12,7 @@ int find_closest_in_cdf(__global float* arr, int arrlen, float val) {
 }
 
 __kernel void generate_neutrons(__global float16* neutrons,
-    __global float8* intersections, float3 const pos, float2 const mod_dim,
+    __global float8* intersections, float2 const mod_dim,
     float2 const target_dim, float const target_dist, float const E_min,
     float const E_max, int const num_time_bins, int const num_ener_bins,
     __global float* flux, __global float* time_bins, __global float* ener_bins,
@@ -68,9 +68,9 @@ __kernel void generate_neutrons(__global float16* neutrons,
   }
   ener_val = accumulator;
 
-  neutron.s0 = pos.x + mod_dim.x*(0.5 - rand(&neutron, global_addr));
-  neutron.s1 = pos.y + mod_dim.y*(0.5 - rand(&neutron, global_addr));
-  neutron.s2 = pos.z;
+  neutron.s0 = mod_dim.x*(0.5 - rand(&neutron, global_addr));
+  neutron.s1 = mod_dim.y*(0.5 - rand(&neutron, global_addr));
+  neutron.s2 = 0.0;
 
   vel = 437.393377*sqrt(ener_val);
   Dx = target_dim.x*(0.5 - rand(&neutron, global_addr)) - neutron.s0;

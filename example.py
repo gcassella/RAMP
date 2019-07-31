@@ -27,7 +27,4 @@ if __name__ == '__main__':
     cl.enqueue_copy(queue, inst.neutrons, inst.neutrons_cl)
     queue.finish()
 
-    print(inst.neutrons)
-
-
     plt.show()

@@ -8,19 +8,19 @@ import matplotlib.pyplot as plt
 import os
 
 class PSD2dMon(SPrim):
-    def __init__(self, sample_pos=(0, 0, 0), shape="", axis1_binning=(0, 0, 0),
+    def __init__(self, shape="", axis1_binning=(0, 0, 0),
                  axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
-                 filename=None):
+                 filename=None, logscale = False):
         
         shapes = {"plane" : 0, "banana": 1, "thetatof": 2, "div" : 3, "divpos": 4}
 
         self.axis1_binning = axis1_binning
         self.axis2_binning = axis2_binning
-        self.sample_pos = sample_pos
         self.shape = np.uint32(shapes[shape])
         self.idx = np.uint32(idx)
         self.restore_neutron = np.uint32(1 if restore_neutron else 0)
         self.filename = filename
+        self.logscale = logscale
 
         self.axis1_num_bins = np.uint32(np.ceil((axis1_binning[2] - axis1_binning[0]) / axis1_binning[1]))
         self.axis2_num_bins = np.uint32(np.ceil((axis2_binning[2] - axis2_binning[0]) / axis2_binning[1]))
@@ -44,7 +44,6 @@ class PSD2dMon(SPrim):
                           iidx_buf,
                           self.idx,
                           self.histo_cl,
-                          self.sample_pos,
                           self.axis1_binning,
                           self.axis2_binning,
                           self.axis1_num_bins,
@@ -67,8 +66,9 @@ class PSD2dMon(SPrim):
         y = np.linspace(self.axis2_binning['s0'], self.axis2_binning['s2'], num=self.axis2_num_bins)
 
         X, Y = np.meshgrid(x, y)
+        Z = (np.log(self.histo2d.T + 1e-7) if self.logscale else self.histo2d.T)
 
-        plt.pcolormesh(X, Y, self.histo2d.T, cmap='jet', shading='gouraud')
+        plt.pcolormesh(X, Y, Z, cmap='jet', shading='gouraud')
         plt.colorbar()
 
         if self.filename:

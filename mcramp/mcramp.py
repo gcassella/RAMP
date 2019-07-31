@@ -7,9 +7,12 @@ import os, json, importlib, re
 from time import time
 
 class Component:
-    def __init__(self, geom_kernel, scat_kernel):
+    def __init__(self, geom_kernel, scat_kernel, pos, rot=[0, 0, 0]):
         self.geom_kernel = geom_kernel
         self.scat_kernel = scat_kernel
+
+        self.pos = np.array((pos[0], pos[1], pos[2], 0.), dtype=clarr.vec.float3)
+        self.rot = np.array((rot[0], rot[1], rot[2], 0.), dtype=clarr.vec.float3)
 
 class ExecutionBlock:
     def __init__(self, source, components, parent, linear, max_events):
@@ -29,6 +32,7 @@ class ExecutionBlock:
         for (name, comp) in block.items():
             if name == "linear" or name == "multi":
                 continue
+            
             if "source" in comp:
                 mk = getattr(importlib.import_module("mcramp"), comp['moderator_kernel']['name'])
                 args = {k : v for (k,v,) in comp['moderator_kernel'].items() if not k == 'name'}
@@ -36,6 +40,9 @@ class ExecutionBlock:
 
                 source = mk(**args)
             else:
+                pos = comp['position'] if 'position' in comp else [0, 0, 0]
+                rot = comp['rotation'] if 'rotation' in comp else [0, 0, 0]
+
                 gk = getattr(importlib.import_module("mcramp"), comp['geom_kernel']['name'])
                 gargs = {k: v for (k, v) in comp['geom_kernel'].items() if not k == 'name'}
                 gargs['idx'] = i
@@ -46,7 +53,7 @@ class ExecutionBlock:
                 sargs['idx'] = i
                 sargs['ctx'] = parent.ctx
 
-                comps[name] = Component(gk(**gargs), sk(**sargs))
+                comps[name] = Component(gk(**gargs), sk(**sargs), pos, rot)
             
             i += 1
 
@@ -60,9 +67,19 @@ class ExecutionBlock:
                 self.term_prg = cl.Program(self.parent.ctx,
                                            f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
 
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      'scat/frametransform.cl'), mode='r') as f:
+                self.trans_prg = cl.Program(self.parent.ctx,
+                                           f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
+
         if self.linear:
 
             for (idx, comp) in self.components.items():
+                self.trans_prg.transform(self.parent.queue, (N,), None,
+                                         self.parent.neutrons_cl,
+                                         comp.pos,
+                                         comp.rot)
+
                 comp.geom_kernel.intersect_prg(self.parent.queue,
                                                N,
                                                self.parent.neutrons_cl,
@@ -79,9 +96,10 @@ class ExecutionBlock:
                                              self.parent.intersections_cl,
                                              self.parent.iidx_cl)
 
-                
-                
-                
+                self.trans_prg.untransform(self.parent.queue, (N,), None,
+                                           self.parent.neutrons_cl,
+                                           comp.pos,
+                                           comp.rot)
 
             self.parent.queue.finish()
 
@@ -90,22 +108,38 @@ class ExecutionBlock:
 
             while events < self.max_events:
                 for (idx, comp) in self.components.items():
+                    self.trans_prg.transform(self.parent.queue, (N,), None,
+                                         self.parent.neutrons_cl,
+                                         comp.pos,
+                                         comp.rot)
                     comp.geom_kernel.intersect_prg(self.parent.queue,
                                                    N,
                                                    self.parent.neutrons_cl,
                                                    self.parent.intersections_cl,
                                                    self.parent.iidx_cl)
+                    self.trans_prg.untransform(self.parent.queue, (N,), None,
+                                           self.parent.neutrons_cl,
+                                           comp.pos,
+                                           comp.rot)
 
                 self.term_prg.terminate(self.parent.queue, (N,), None,
                                         self.parent.neutrons_cl,
                                         self.parent.intersections_cl)
 
                 for (idx, comp) in self.components.items():
+                    self.trans_prg.transform(self.parent.queue, (N,), None,
+                                         self.parent.neutrons_cl,
+                                         comp.pos,
+                                         comp.rot)
                     comp.scat_kernel.scatter_prg(self.parent.queue,
                                                  N,
                                                  self.parent.neutrons_cl,
                                                  self.parent.intersections_cl,
                                                  self.parent.iidx_cl)
+                    self.trans_prg.untransform(self.parent.queue, (N,), None,
+                                           self.parent.neutrons_cl,
+                                           comp.pos,
+                                           comp.rot)
 
                 events += 1
 

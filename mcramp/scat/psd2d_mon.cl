@@ -33,10 +33,9 @@ int find_idx(float val, float3 binning) {
 __kernel void detector(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
                        uint const comp_idx, volatile __global float *histogram,
-                       float3 const pos, float3 const axis1_binning, 
-                       float3 const axis2_binning, uint const axis1_numbins,
-                       uint const axis2_numbins, uint const shape,
-                       uint const restore_neutron)
+                       float3 const axis1_binning, float3 const axis2_binning, 
+                       uint const axis1_numbins, uint const axis2_numbins,
+                       uint const shape, uint const restore_neutron)
 {
 
   uint global_addr = get_global_id(0);
@@ -59,10 +58,10 @@ __kernel void detector(__global float16 *neutrons,
   // Find axis 1 bin
 
   if (shape == 0 || shape == 4) { // Plane detector, axis1 is x
-    float x_val = intersection.s4 - pos.s0;
+    float x_val = intersection.s4;
     axis1_idx = find_idx(x_val, axis1_binning);
   } else if (shape == 1 || shape == 2) { // Banana detector, axis1 is 2theta
-    float3 sample_to_det = intersection.s456 - pos;
+    float3 sample_to_det = intersection.s456;
     float theta_val = degrees(atan2(sample_to_det.s0, sample_to_det.s2));
     axis1_idx = find_idx(theta_val, axis1_binning);
   } else if (shape == 3) {
@@ -72,10 +71,10 @@ __kernel void detector(__global float16 *neutrons,
   // Find axis 2 bin
 
   if (shape == 0) { // Plane detector, axis2 is y
-    float y_val = intersection.s5 - pos.s1;
+    float y_val = intersection.s5;
     axis2_idx = find_idx(y_val, axis2_binning);
   } else if (shape == 1) { // Banana detector, axis2 is alpha
-    float3 sample_to_det = intersection.s456 - pos;
+    float3 sample_to_det = intersection.s456;
     float alpha_val = degrees(atan2(sample_to_det.s1, sample_to_det.s2));
     axis2_idx = find_idx(alpha_val, axis2_binning);
   } else if (shape == 2) {

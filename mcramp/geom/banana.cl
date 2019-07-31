@@ -1,7 +1,6 @@
 __kernel void intersect_banana(__global float16* neutrons, 
   __global float8* intersections, __global uint* iidx,
-  uint const comp_idx, float3 const banana_pos,
-  float const banana_radius, float const banana_height,
+  uint const comp_idx, float const banana_radius, float const banana_height,
   float const mintheta, float const maxtheta) {
 
   uint global_addr = get_global_id(0);
@@ -19,7 +18,7 @@ __kernel void intersect_banana(__global float16* neutrons,
     return;
   }
 
-  plane_pos = neutron.s02 - banana_pos.s02;
+  plane_pos = neutron.s02;
   plane_vel = neutron.s35;
 
   a = dot(plane_vel, plane_vel);
@@ -35,8 +34,8 @@ __kernel void intersect_banana(__global float16* neutrons,
 
   theta2 = acos(dot(normalize(plane_pos+t2*plane_vel), (float2)( 0.0f, 1.0f )));
   if ((quotient > 0) &&
-      ((banana_pos.s1 - banana_height/2) < (neutron.s1 + t2*neutron.s4)) &&
-      ((neutron.s1 + t2*neutron.s4) < (banana_pos.s1 + banana_height/2)) &&
+      ((-banana_height/2) < (neutron.s1 + t2*neutron.s4)) &&
+      ((neutron.s1 + t2*neutron.s4) < (banana_height/2)) &&
       (mintheta < theta2 < maxtheta)) {
   
     if (t2 < intersection.s3 && t1 < 0 && t2 > 0) {

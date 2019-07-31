@@ -8,12 +8,11 @@ import os
 import re
 
 class GBanana(GPrim):
-    def __init__(self, radius=0, position=(0, 0, 0), height=0, mintheta=0, maxtheta=0, idx=0, ctx=None):
+    def __init__(self, radius=0, height=0, mintheta=0, maxtheta=0, idx=0, ctx=None):
         self.radius     = np.float32(radius)
         self.height     = np.float32(height)
         self.mintheta   = np.float32(mintheta)
         self.maxtheta   = np.float32(maxtheta)
-        self.position   = position
         self.idx        = idx
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'banana.cl'), mode='r') as f:
@@ -26,7 +25,6 @@ class GBanana(GPrim):
                                   intersection_buf,
                                   iidx_buf,
                                   np.uint32(self.idx),
-                                  self.position,
                                   self.radius,
                                   self.height,
                                   self.mintheta,
