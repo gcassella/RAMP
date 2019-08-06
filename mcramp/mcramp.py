@@ -7,9 +7,12 @@ import os, json, importlib, re
 from time import time
 
 class Component:
-    def __init__(self, geom_kernel, scat_kernel, pos, rot=[0, 0, 0]):
+    def __init__(self, geom_kernel, scat_kernel, restore_neutron, pos, rot=[0, 0, 0]):
         self.geom_kernel = geom_kernel
         self.scat_kernel = scat_kernel
+
+        # Should neutron be terminated if it doesn't hit this component?
+        self.restore_neutron = np.uint32(1) if restore_neutron else np.uint32(0)
 
         self.pos = np.array((pos[0], pos[1], pos[2], 0.), dtype=clarr.vec.float3)
         self.rot = np.array((rot[0], rot[1], rot[2], 0.), dtype=clarr.vec.float3)
@@ -41,7 +44,18 @@ class ExecutionBlock:
                 source = mk(**args)
             else:
                 pos = comp['position'] if 'position' in comp else [0, 0, 0]
-                rot = comp['rotation'] if 'rotation' in comp else [0, 0, 0]
+                rot = comp['rotation'] if 'rotation' in comp else[0, 0, 0]
+                restore_neutron = comp['restore_neutron'] if 'restore_neutron' in comp else False
+                
+                if 'relative' in comp:
+                    rcomp_name = comp['relative']
+                    rcomp_pos = comps[rcomp_name].pos
+                    rcomp_rot = comps[rcomp_name].rot
+
+                    pos = frame_rotate(pos, [rcomp_rot['s0'], rcomp_rot['s1'], rcomp_rot['s2']])
+
+                    pos = np.add(pos, [rcomp_pos['s0'], rcomp_pos['s1'], rcomp_pos['s2']])
+                    rot = np.add(rot, [rcomp_rot['s0'], rcomp_rot['s1'], rcomp_rot['s2']])
 
                 gk = getattr(importlib.import_module("mcramp"), comp['geom_kernel']['name'])
                 gargs = {k: v for (k, v) in comp['geom_kernel'].items() if not k == 'name'}
@@ -53,7 +67,7 @@ class ExecutionBlock:
                 sargs['idx'] = i
                 sargs['ctx'] = parent.ctx
 
-                comps[name] = Component(gk(**gargs), sk(**sargs), pos, rot)
+                comps[name] = Component(gk(**gargs), sk(**sargs), restore_neutron, pos, rot)
             
             i += 1
 
@@ -88,7 +102,8 @@ class ExecutionBlock:
 
                 self.term_prg.terminate(self.parent.queue, (N,), None,
                                         self.parent.neutrons_cl,
-                                        self.parent.intersections_cl)           
+                                        self.parent.intersections_cl,
+                                        getattr(comp, 'restore_neutron', np.uint32(0)))           
 
                 comp.scat_kernel.scatter_prg(self.parent.queue,
                                              N,
@@ -100,6 +115,11 @@ class ExecutionBlock:
                                            self.parent.neutrons_cl,
                                            comp.pos,
                                            comp.rot)
+
+                #cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
+                #self.parent.queue.finish()
+
+                #print(self.parent.neutrons)
 
             self.parent.queue.finish()
 
@@ -153,6 +173,7 @@ class Instrument:
         self.max_buf = int(1E7)
 
     def substitute_params(self, json_str, **kwargs):
+        # FIXME: if a token contains another as a substring things get effed up
         pattern = r"(?:\$)(.*?)(?:\$)"
         tokens = re.findall(pattern, json_str)
 
@@ -233,3 +254,23 @@ class Instrument:
 
         return 0
 
+def frame_rotate(vec, rot):
+    x_a = rot[0]
+    y_a = rot[1]
+    z_a = rot[2]
+
+    r00 = np.cos(y_a)*np.cos(z_a)
+    r01 = -np.cos(x_a)*np.sin(z_a) + np.sin(x_a)*np.sin(y_a)*np.cos(z_a)
+    r02 = np.sin(x_a)*np.sin(z_a) + np.cos(x_a)*np.sin(y_a)*np.cos(z_a)
+    r10 = np.cos(y_a)*np.sin(z_a)
+    r11 = np.cos(x_a)*np.cos(z_a) + np.sin(x_a)*np.sin(y_a)*np.sin(z_a)
+    r12 = -np.sin(x_a)*np.cos(z_a) + np.cos(x_a)*np.sin(y_a)*np.sin(z_a)
+    r20 = -np.sin(y_a)
+    r21 = np.sin(x_a)*np.cos(y_a)
+    r22 = np.cos(x_a) * np.cos(y_a)
+
+    row1 = [r00, r01, r02]
+    row2 = [r10, r11, r12]
+    row3 = [r20, r21, r22]
+    
+    return [np.dot(row1, vec), np.dot(row2, vec), np.dot(row3, vec)]

@@ -329,7 +329,7 @@
                 "height": 0.1
             },
             "scat_kernel": {
-                "name": "PSD2dMon",
+                "name": "PSD2d",
                 "axis1_binning": [-0.05, 0.001, 0.05],
                 "axis2_binning": [-3.0, 0.01, 3.0],
                 "shape": "divpos",
@@ -358,7 +358,7 @@
 
         "det" : {
             "position" : [0.0, 0.0, 25.0],
-            "rotation" : [0.0, 0.0, 0.0],
+            "rotation" : [0.0, 0.3, 0.0],
             "geom_kernel": {
                 "name": "GBanana",
                 "radius": 0.5,
@@ -367,7 +367,7 @@
                 "maxtheta" : 80.0
             },
             "scat_kernel": {
-                "name": "PSD2dMon",
+                "name": "PSD2d",
                 "axis1_binning": [-40.0, 1.0, 140.0],
                 "axis2_binning": [0.022, 5e-5, 0.05],
                 "shape": "thetatof",

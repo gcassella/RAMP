@@ -1,0 +1,181 @@
+{
+    "all" : {
+        "linear" : true,
+        "mod" : {
+            "source": true,
+            "position" : [0.0, 0.0, 0.0],
+            "moderator_kernel": {
+                "name": "MCont",
+                "mod_dim": [0.02, 0.02],
+                "target_dim": [0.02, 0.02],
+                "target_dist": 1.0,
+                "E_min": 0.0,
+                "E_max": 40.0,
+                "T1" : 216.8,
+                "I1" : 1.24e13,
+                "T2" : 33.9,
+                "I2" : 1.02e13,
+                "T3" : 16.7,
+                "I3" : 3.0423e12
+            }
+        },
+
+        "Mono_arm" : {
+            "position" : [0.0, 0.0, 1.0],
+            "rotation" : [0.0, $A1$, 0.0],
+            "geom_kernel": {
+                "name": "GArm"
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        },
+
+        "Mono_out" : {
+            "position" : [0.0, 0.0, 1.0],
+            "rotation" : [0.0, $A2$, 0.0],
+            "geom_kernel": {
+                "name": "GArm"
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        },
+
+        "mono" : {
+            "position" : [0.0, 0.0, 0.0],
+            "rotation" : [0.0, 0.0, 0.0],
+            "relative" : "Mono_arm",
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.10,
+                "height": 0.10,
+                "orientation": "yz"
+            },
+            "scat_kernel": {
+                "name": "SMonochromator",
+                "slab_width" : 0.10,
+                "slab_height" : 0.10,
+                "gap" : 0.0,
+                "mosaic_horizontal" : $moz$,
+                "mosaic_vertical" : $moz$,
+                "r0" : 0.9,
+                "d_spacing" : $d_spacing$
+            }
+        },
+
+        "emon_outgoing" :{
+            "position" : [0.0, 0.0, 0.5],
+            "rotation" : [0.0, 0.0, 0.0],
+            "restore_neutron" : true,
+            "relative" : "Mono_out",
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.1,
+                "height": 0.1
+            },
+            "scat_kernel" : {
+                "name" : "EMon",
+                "binning": [0.0, 0.01, 40.0],
+                "restore_neutron": true
+            }
+        },
+
+        "posmon_outgoing" : {
+            "position" : [0.0, 0.0, 0.5],
+            "rotation" : [0.0, 0.0, 0.0],
+            "relative" : "Mono_out",
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.1,
+                "height": 0.1
+            },
+            "scat_kernel": {
+                "name": "PSD2d",
+                "axis1_binning": [-0.1, 1e-3, 0.1],
+                "axis2_binning": [-0.1, 1e-3, 0.1],
+                "shape": "plane",
+                "restore_neutron" : true
+            }
+        },
+
+        "sample" : {
+            "position" : [0.0, 0.0, 0.5],
+            "relative" : "Mono_out",
+            "geom_kernel" : {
+                "name" : "GSphere",
+                "radius": 0.02
+            },
+            "scat_kernel" : {
+                "name": "SDelta",
+                "twotheta":$twotheta$,
+                "phi":$phi$,
+                "deltaE":$dE$
+            }
+        },
+
+        "Sample_out" : {
+            "position" : [0.0, 0.0, 0.0],
+            "rotation" : [0.0, $twotheta * np.pi / 180.0$, 0],
+            "relative" : "sample",
+            "geom_kernel": {
+                "name": "GArm"
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        },
+
+        "analyzer" : {
+            "position" : [0.0, 0.0, 1.0],
+            "rotation" : [0.0, $A_ana1$, 0.0],
+            "relative" : "Sample_out",
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.10,
+                "height": 0.10,
+                "orientation": "yz"
+            },
+            "scat_kernel": {
+                "name": "SMonochromator",
+                "slab_width" : 0.10,
+                "slab_height" : 0.10,
+                "gap" : 0.0,
+                "mosaic_horizontal" : $moz$,
+                "mosaic_vertical" : $moz$,
+                "r0" : 0.9,
+                "d_spacing" : $d_spacing$
+            }
+        },
+
+        "ana_out" : {
+            "position" : [0.0, 0.0, 1.0],
+            "rotation" : [0.0, $A_ana2$, 0],
+            "relative" : "Sample_out",
+            "geom_kernel": {
+                "name": "GArm"
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        },
+
+        "posmon_final" : {
+            "position" : [0.0, 0.0, 0.5],
+            "rotation" : [0.0, 0.0, 0.0],
+            "relative" : "ana_out",
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.1,
+                "height": 0.1
+            },
+            "scat_kernel": {
+                "name": "PSD2d",
+                "axis1_binning": [-0.1, 1e-3, 0.1],
+                "axis2_binning": [-0.1, 1e-3, 0.1],
+                "shape": "plane",
+                "restore_neutron" : true
+            }
+        }
+    }
+}

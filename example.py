@@ -20,11 +20,38 @@ if __name__ == '__main__':
     queue = cl.CommandQueue(ctx)
 
     ## Load and simulate instrument
-    inst = Instrument('LET_withchop.json', ctx, queue, v_foc=1000.0, pha_offset = 222e-6)
+    d_spacing=3.3539
+    mono_q=2 * np.pi / d_spacing
+
+    Ei=4.0
+    Li=(6.626e-34) / np.sqrt(2 * 1.674929e-27 * Ei * 1.602e-22) * 1e10
+    ki=2 * np.pi / Li  # focus on lambda 4.522AA
+    
+
+    A2=2 * np.arcsin(mono_q / 2.0 / ki)
+    A1=A2 / 2
+
+    moz=40
+    
+    twotheta=30.0
+    phi=0.0
+    deltaE=0.5
+
+    Eo=Ei + deltaE
+    Lo=(6.626e-34) / np.sqrt(2 * 1.674929e-27 * Eo * 1.602e-22) * 1e10
+    ko=2 * np.pi / Lo
+    
+    A2_ana=2 * np.arcsin(mono_q / 2.0 / ko)
+    A1_ana=A2_ana / 2
+    
+    inst=Instrument('monotest.json', ctx, queue, A1=A1, A2=A2, moz=moz, d_spacing=d_spacing,
+                    twotheta = twotheta, phi=phi, dE=deltaE, A_ana1=A1_ana, A_ana2=A2_ana)
     inst.execute(N)
 
     #cl.enqueue_barrier(queue)
     cl.enqueue_copy(queue, inst.neutrons, inst.neutrons_cl)
     queue.finish()
+
+    print(inst.neutrons)
 
     plt.show()

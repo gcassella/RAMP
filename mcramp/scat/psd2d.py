@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 import os
 
-class PSD2dMon(SPrim):
+class PSD2d(SPrim):
     def __init__(self, shape="", axis1_binning=(0, 0, 0),
                  axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
                  filename=None, logscale = False):
@@ -33,7 +33,7 @@ class PSD2dMon(SPrim):
                                     mf.WRITE_ONLY,
                                     self.histo.nbytes)
 
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'psd2d_mon.cl'), mode='r') as f:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'psd2d.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     def scatter_prg(self, queue, N, neutron_buf, intersection_buf, iidx_buf):

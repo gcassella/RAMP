@@ -1,5 +1,5 @@
 __kernel void terminate(__global float16* neutrons,
-    __global float8* intersections) {
+    __global float8* intersections, uint const restore_neutron) {
 
     uint global_addr = get_global_id(0);
 
@@ -12,7 +12,7 @@ __kernel void terminate(__global float16* neutrons,
     }
 
     /* Didn't intersect anything, terminate */
-    if (length(intersection.s456) == 0.) {
+    if (length(intersection.s456) == 0. && restore_neutron == 0) {
         neutron.sf = 1.;
     }
 
