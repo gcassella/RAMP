@@ -58,10 +58,6 @@ __kernel void monochromator(__global float16* neutrons,
         return;
     }
 
-    if (comp_idx == 9) {
-      printf("We made it\n");
-    }
-
     /* Perform scattering here */
 
     neutron.s012 = intersection.s456;
