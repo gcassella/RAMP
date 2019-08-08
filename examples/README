@@ -1,0 +1,35 @@
+-------------------- LET EXAMPLE
+
+The LET example contains a mostly faithful reproduction of the primary spectrometer
+of the LET instrument at ISIS. The monitor outputs show:
+
+    1. The moderator spectrum (as a function of energy).
+    2. The chopped spectrum (as a function of energy).
+    3. A 2D histogram of x-divergence vs. x (phase space plot) at the sample position.
+    4. A 2D histogram of theta vs. TOF in a banana detector, showing the scattering from
+            a powder sample possessing a single Bragg peak.
+
+The output of all of these monitors have been seen to be in perfect agreement with an
+identical instrument being simulated in McStas.
+
+-------------------- TAS EXAMPLE
+
+The TAS example contains a simple triple-axis spectrometer consisting of a continuous
+source, whose spectrum currently mimics the VCS source at the ILL, a PG monochromator,
+a powder sample possessing a single Bragg peak, a PG analyser, and a point detector.
+
+The python script that wraps the TAS example performs a rocking scan of the analyser angle,
+and plots the resulting intensity as a function of angle to demonstrate the energy
+resolution of the spectrometer around the elastic line.
+
+The monitor outputs show:
+
+    1. The source spectrum (as a function of energy).
+    2. The monochromator output (as a function of energy).
+    3. A planar position sensitive detector at the sample position.
+    4. A twotheta/alpha position sensitive banana detector at the sample position.
+    5. A planar position sensitive detector at the point detector position.
+
+This example makes extensive use of the relative positioning/rotation functionality.
+
+The output of this example has not yet been extensively verified.

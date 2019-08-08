@@ -24,7 +24,8 @@ class MCont():
         self.T3 = np.float32(T3)
         self.I3 = np.float32(I3)
 
-        self.calc_str_area(mod_dim, target_dim, target_dist)
+        # self.calc_str_area(mod_dim, target_dim, target_dist)
+        self.str_area = np.float32(1)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cont_mod.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

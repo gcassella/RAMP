@@ -16,7 +16,7 @@
 __kernel void powder1(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
     uint const comp_idx, float const sigma_scat_v2, float const sigma_abs_v,
-    float const q) {
+    float const q, float const d_phi) {
 
     uint global_addr        = get_global_id(0);
     float16 neutron         = neutrons[global_addr];
@@ -34,7 +34,7 @@ __kernel void powder1(__global float16* neutrons,
     /* Perform scattering here --------------------------------------------- */
 
     float vel, sigma_scat, sigma_abs, p_scat, p_inter, full_path_length, phi,
-            arg, twotheta, pen_depth;
+            arg, twotheta, pen_depth, d_phi0;
     float3 beam_para, beam_perp, path;
     // bool scattered = false; 
 
@@ -76,7 +76,18 @@ __kernel void powder1(__global float16* neutrons,
         beam_perp = normalize(beam_perp);
     }
 
-    phi = 2 * M_PI * rand(&neutron, global_addr);
+    if (d_phi)
+      { 
+        phi = (2*rand(&neutron, global_addr) - 1.0)*(d_phi * M_PI / 180.0);
+        if (rand(&neutron, global_addr) > 0.5) {
+            // go to other side of beam
+            phi += M_PI;
+        }
+
+        phi += M_PI / 2.0;
+      }
+      else
+        phi = 2 * M_PI * rand(&neutron, global_addr);
 
     rotate_about_axis(phi, beam_para, &beam_perp);
 
