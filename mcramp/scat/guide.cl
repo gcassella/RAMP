@@ -95,28 +95,28 @@ __kernel void guide_scatter(__global double16* neutrons,
         {
           case 1:                   /* Left vertical mirror */
             nlen2 = l*l + ww*ww;
-            q = V2Q*(-2)*vdotn_v1/sqrt(nlen2);
+            q = V2K*(-2)*vdotn_v1/sqrt(nlen2);
             d = 2*vdotn_v1/nlen2;
             neutron.s3 = neutron.s3 - d*l;
             neutron.s5 = neutron.s5 - d*ww;
             break;
           case 2:                   /* Right vertical mirror */
             nlen2 = l*l + ww*ww;
-            q = V2Q*(-2)*vdotn_v2/sqrt(nlen2);
+            q = V2K*(-2)*vdotn_v2/sqrt(nlen2);
             d = 2*vdotn_v2/nlen2;
             neutron.s3 = neutron.s3 + d*l;
             neutron.s5 = neutron.s5 - d*ww;
             break;
           case 3:                   /* Lower horizontal mirror */
             nlen2 = l*l + hh*hh;
-            q = V2Q*(-2)*vdotn_h1/sqrt(nlen2);
+            q = V2K*(-2)*vdotn_h1/sqrt(nlen2);
             d = 2*vdotn_h1/nlen2;
             neutron.s4 = neutron.s4 - d*l;
             neutron.s5 = neutron.s5 - d*hh;
             break;
           case 4:                   /* Upper horizontal mirror */
             nlen2 = l*l + hh*hh;
-            q = V2Q*(-2)*vdotn_h2/sqrt(nlen2);
+            q = V2K*(-2)*vdotn_h2/sqrt(nlen2);
             d = 2*vdotn_h2/nlen2;
             neutron.s4 = neutron.s4 + d*l;
             neutron.s5 = neutron.s5 - d*hh;

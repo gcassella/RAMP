@@ -75,7 +75,7 @@ __kernel void guide_scatter(__global double16* neutrons,
         if (mindex == 4) { 
             finished = true;
         } else {
-            q = V2Q*length(vel);
+            q = V2K*length(vel);
 
             refl = reflectivity_func(q, R0, Qc, alpha, m, W);
 
