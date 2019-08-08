@@ -12,7 +12,7 @@ class SCounter(SPrim):
                  filename=None):
         self.idx = idx
         
-        self.counts = np.float32(0.0)
+        self.counts = np.float64(0.0)
         self.filename = filename
 
 
@@ -31,7 +31,7 @@ class SCounter(SPrim):
         cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
 
         counted = np.where((neutrons['s12'].astype(np.uint32) == self.idx))
-        self.counts = np.sum(neutrons['s9'][counted]).astype(np.float32)
+        self.counts = np.sum(neutrons['s9'][counted]).astype(np.float64)
 
         print(self.counts)
 

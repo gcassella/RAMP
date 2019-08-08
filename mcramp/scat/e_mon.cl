@@ -1,30 +1,30 @@
-void AtomicAdd(volatile global float *source, const float operand) {
+void AtomicAdd(volatile global double *source, const double operand) {
     union {
         unsigned int intVal;
-        float floatVal;
+        double doubleVal;
     } newVal;
     union {
         unsigned int intVal;
-        float floatVal;
+        double doubleVal;
     } prevVal;
  
     do {
-        prevVal.floatVal = *source;
-        newVal.floatVal = prevVal.floatVal + operand;
+        prevVal.doubleVal = *source;
+        newVal.doubleVal = prevVal.doubleVal + operand;
     } while (atomic_cmpxchg((volatile global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
 }
 
 
-__kernel void detector(__global float16 *neutrons,
-                       __global float8 *intersections, __global uint *iidx,
-                       uint const comp_idx, volatile __global float *histogram,
-                       float3 const binning, uint const restore_neutron)
+__kernel void detector(__global double16 *neutrons,
+                       __global double8 *intersections, __global uint *iidx,
+                       uint const comp_idx, volatile __global double *histogram,
+                       double3 const binning, uint const restore_neutron)
 {
 
   uint global_addr = get_global_id(0);
-  float16 neutron = neutrons[global_addr];
-  float8 intersection = intersections[global_addr];
-  float ener_val, min_var, step_var, max_var;
+  double16 neutron = neutrons[global_addr];
+  double8 intersection = intersections[global_addr];
+  double ener_val, min_var, step_var, max_var;
 
   uint this_iidx, idx;
   this_iidx = iidx[global_addr];
@@ -62,7 +62,7 @@ __kernel void detector(__global float16 *neutrons,
 
   iidx[global_addr] = 0;
   neutron.sc = comp_idx;
-  intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+  intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 
   neutrons[global_addr] = neutron;

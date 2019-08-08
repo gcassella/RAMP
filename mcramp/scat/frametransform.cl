@@ -1,11 +1,11 @@
 #include "geom.h"
 
-__kernel void transform(__global float16* neutrons,
-    float3 const pos, float3 const rot) {
+__kernel void transform(__global double16* neutrons,
+    double3 const pos, double3 const rot) {
 
     uint global_addr = get_global_id(0);
 
-    float16 neutron = neutrons[global_addr];
+    double16 neutron = neutrons[global_addr];
 
     /* Already terminated? */
     if (neutron.sf > 0.) {
@@ -20,12 +20,12 @@ __kernel void transform(__global float16* neutrons,
     neutrons[global_addr] = neutron;
 }
 
-__kernel void untransform(__global float16* neutrons,
-    float3 const pos, float3 const rot) {
+__kernel void untransform(__global double16* neutrons,
+    double3 const pos, double3 const rot) {
 
     uint global_addr = get_global_id(0);
 
-    float16 neutron = neutrons[global_addr];
+    double16 neutron = neutrons[global_addr];
 
     /* Already terminated? */
     if (neutron.sf > 0.) {

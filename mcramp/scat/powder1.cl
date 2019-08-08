@@ -1,26 +1,15 @@
 #include "rand.h"
 #include "geom.h"
+#include "consts.h"
 
-#ifndef K2V
-#define K2V 629.622368
-#endif
-
-#ifndef V2K
-#define V2K 1.58825361e-3
-#endif
-
-#ifndef M_PI
-#define M_PI 3.141592653589793
-#endif
-
-__kernel void powder1(__global float16* neutrons,
-    __global float8* intersections, __global uint* iidx,
-    uint const comp_idx, float const sigma_scat_v2, float const sigma_abs_v,
-    float const q, float const d_phi) {
+__kernel void powder1(__global double16* neutrons,
+    __global double8* intersections, __global uint* iidx,
+    uint const comp_idx, double const sigma_scat_v2, double const sigma_abs_v,
+    double const q, double const d_phi) {
 
     uint global_addr        = get_global_id(0);
-    float16 neutron         = neutrons[global_addr];
-    float8 intersection     = intersections[global_addr];
+    double16 neutron         = neutrons[global_addr];
+    double8 intersection     = intersections[global_addr];
     uint this_iidx          = iidx[global_addr];
 
     /* Check we are scattering from the intersected component -------------- */
@@ -33,9 +22,9 @@ __kernel void powder1(__global float16* neutrons,
 
     /* Perform scattering here --------------------------------------------- */
 
-    float vel, sigma_scat, sigma_abs, p_scat, p_inter, full_path_length, phi,
+    double vel, sigma_scat, sigma_abs, p_scat, p_inter, full_path_length, phi,
             arg, twotheta, pen_depth, d_phi0;
-    float3 beam_para, beam_perp, path;
+    double3 beam_para, beam_perp, path;
     // bool scattered = false; 
 
     neutron.sa += intersection.s3;
@@ -56,7 +45,7 @@ __kernel void powder1(__global float16* neutrons,
         iidx[global_addr] = 0;
         neutron.sc = comp_idx;
         neutrons[global_addr]      = neutron;
-        intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+        intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
         return;
     }
@@ -68,10 +57,10 @@ __kernel void powder1(__global float16* neutrons,
     pen_depth = -log(1 - rand(&neutron, global_addr)*(1 - p_inter)) / (sigma_abs + sigma_scat);
 
     beam_para = normalize(neutron.s345);
-    beam_perp = cross(beam_para, (float3)(0.0, 1.0, 0.0));
+    beam_perp = cross(beam_para, (double3)(0.0, 1.0, 0.0));
 
     if(length(beam_perp) < 1e-3) { // Beam just happens to be along 0 1 0
-        beam_perp = normalize(cross(beam_para, (float3)(1.0, 0.0, 0.0)));
+        beam_perp = normalize(cross(beam_para, (double3)(1.0, 0.0, 0.0)));
     } else {
         beam_perp = normalize(beam_perp);
     }
@@ -106,7 +95,7 @@ __kernel void powder1(__global float16* neutrons,
     iidx[global_addr] = 0;
     neutron.sc = comp_idx;
     neutrons[global_addr]      = neutron;
-    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 
 }

@@ -14,7 +14,7 @@ class EMon(SPrim):
         self.idx         = idx
 
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
-        self.histo = np.zeros((self.num_bins,), dtype=np.float32)
+        self.histo = np.zeros((self.num_bins,), dtype=np.float64)
         self.restore = np.uint32(1 if restore_neutron else 0)
         self.filename = filename
 

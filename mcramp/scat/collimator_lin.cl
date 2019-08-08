@@ -1,11 +1,11 @@
-__kernel void collimator(__global float16* neutrons,
-    __global float8* intersections, __global uint* iidx,
-    uint const comp_idx, float const length, float const slope_H,
-    float const slope_V, float const transmission) {
+__kernel void collimator(__global double16* neutrons,
+    __global double8* intersections, __global uint* iidx,
+    uint const comp_idx, double const length, double const slope_H,
+    double const slope_V, double const transmission) {
 
     uint global_addr        = get_global_id(0);
-    float16 neutron         = neutrons[global_addr];
-    float8 intersection = intersections[global_addr];
+    double16 neutron         = neutrons[global_addr];
+    double8 intersection = intersections[global_addr];
     uint this_iidx          = iidx[global_addr];
 
     /* Check we are scattering from the intersected component */
@@ -20,7 +20,7 @@ __kernel void collimator(__global float16* neutrons,
 
     /* Perform scattering here */
 
-    float phi;
+    double phi;
 
     if (slope_H > 0.0) {
         phi = fabs(neutron.s3 / neutron.s5);
@@ -47,7 +47,7 @@ __kernel void collimator(__global float16* neutrons,
     neutron.sc = comp_idx;
 
     neutrons[global_addr]      = neutron;
-    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 
 }

@@ -5,8 +5,8 @@ from mcramp import Instrument
 import matplotlib.pyplot as plt
 import os
 
-os.environ["PYOPENCL_NO_CACHE"] = "1"
-os.environ["PYOPENCL_COMPILER_OUTPUT"] = "0"
+os.environ["PYOPENCL_NO_CACHE"] = "0"
+os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
 
 if __name__ == '__main__':
     N = int(1e7)
@@ -57,14 +57,13 @@ if __name__ == '__main__':
     twotheta=2*np.arcsin(Li  / 2 / d_spacing)
 
     for i, aa in enumerate(anangle):
-        inst=Instrument('TAS.json', ctx, queue, Mono_angle=Mono_angle, d_spacing=d_spacing,            #Ana_angle=aa, monodspacing=mono_d_spacing, twotheta=twotheta)
+        inst=Instrument('TAS.json', ctx, queue, Mono_angle=Mono_angle, d_spacing=d_spacing,
+                        Ana_angle=aa, monodspacing=mono_d_spacing, twotheta=twotheta)
         inst.execute(N)
-#
         counts = np.load("tascounts.npy")
         I[i] = counts
-#
         plt.close('all')
-#
+
     plt.figure()
     plt.xlabel("deltaE [meV]")
     plt.ylabel("intensity [arb]")

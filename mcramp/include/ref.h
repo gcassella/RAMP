@@ -1,6 +1,6 @@
-float reflectivity_func(float q, float R0,
-    float Qc, float alpha, float m,
-    float W) {
+double reflectivity_func(double q, double R0,
+    double Qc, double alpha, double m,
+    double W) {
 
     /* Simpler parametrization from Henrik Jacobsen uses these values that depend on m only.
        double m_value=m*0.9853+0.1978;
@@ -14,7 +14,7 @@ float reflectivity_func(float q, float R0,
        Above lifted from the mcstas reflectivity implementation
     */  
 
-    float beta, arg, R = 0.;
+    double beta, arg, R = 0.;
 
     if (W==0. && alpha==0.) {
         m     = m*0.9853+0.1978;

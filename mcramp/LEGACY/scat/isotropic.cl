@@ -1,19 +1,19 @@
 #include "rand.h"
 #include "geom.h"
 
-__kernel void isotropic_scatter(__global float16* neutrons,
-  __global float8* intersections, __global uint* iidx,
+__kernel void isotropic_scatter(__global double16* neutrons,
+  __global double8* intersections, __global uint* iidx,
   uint const comp_idx,
-  __global float* q, __global float* w,
-  __global float* pw_cdf, __global float* pq_cdf,
+  __global double* q, __global double* w,
+  __global double* pw_cdf, __global double* pq_cdf,
   uint const qsamples, uint const wsamples,
-  float const rho, float const sigma_abs,
-  float const sigma_scat) {
+  double const rho, double const sigma_abs,
+  double const sigma_scat) {
 
   uint global_addr    = get_global_id(0);
   uint w_index;
-  float16 neutron     = neutrons[global_addr];
-  float8 intersection = intersections[global_addr];
+  double16 neutron     = neutrons[global_addr];
+  double8 intersection = intersections[global_addr];
   uint this_iidx = iidx[global_addr];
  
   if(!(this_iidx == comp_idx)) {
@@ -24,8 +24,8 @@ __kernel void isotropic_scatter(__global float16* neutrons,
     return;
   }
 
-  float3 path, perp, normvel;
-  float sigma_tot, path_length, ki, sigma_s, sigma_a,
+  double3 path, perp, normvel;
+  double sigma_tot, path_length, ki, sigma_s, sigma_a,
         mu, eta, u, v, Q, omega, kf, arg, theta, x, y, z, alpha,
         Rxx, Rxy, Rxz, Ryx, Ryy, Ryz, Rzx, Rzy, Rzz, mindiff, TOF;
 
@@ -52,7 +52,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
     neutron.sc = comp_idx;
     iidx[global_addr] = 0;
     neutrons[global_addr] = neutron;
-    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
     return;
   } else {
@@ -109,7 +109,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
     neutron.sf = 1;
     iidx[global_addr] = 0;
     neutrons[global_addr] = neutron;
-    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
     return;
   }
@@ -127,7 +127,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
     neutron.sf = 1;
     iidx[global_addr] = 0;
     neutrons[global_addr] = neutron;
-    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
     return;
 
@@ -143,7 +143,7 @@ __kernel void isotropic_scatter(__global float16* neutrons,
   x = 1.;
   y = 1.;
   z = -(neutron.s3+neutron.s4)/(neutron.s5);
-  perp = normalize((float3)( x, y, z ));
+  perp = normalize((double3)( x, y, z ));
   // construct rotation matrix to randomly rotate the scattering
   // vector about the velocity
   alpha = 2*M_PI*rand(&neutron, global_addr);
@@ -159,11 +159,11 @@ __kernel void isotropic_scatter(__global float16* neutrons,
   neutron.s012 = intersection.s012 + (path_length)*path;
   neutron.sa   += intersection.s3 + TOF;
   
-  neutron.s345 = normvel*kf/(float)(1.583*pow(10.,-3.));
+  neutron.s345 = normvel*kf/(double)(1.583*pow(10.,-3.));
 
   neutron.sc = comp_idx;
   iidx[global_addr] = 0;
   neutrons[global_addr] = neutron;
-  intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+  intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 }

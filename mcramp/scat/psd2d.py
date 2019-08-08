@@ -25,7 +25,7 @@ class PSD2d(SPrim):
         self.axis1_num_bins = np.uint32(np.ceil((axis1_binning[2] - axis1_binning[0]) / axis1_binning[1]))
         self.axis2_num_bins = np.uint32(np.ceil((axis2_binning[2] - axis2_binning[0]) / axis2_binning[1]))
         self.num_bins = np.uint32(self.axis1_num_bins * self.axis2_num_bins)
-        self.histo = np.zeros((self.num_bins,), dtype=np.float32)
+        self.histo = np.zeros((self.num_bins,), dtype=np.float64)
         self.histo2d = np.zeros((self.axis1_num_bins, self.axis2_num_bins))
 
         mf               = cl.mem_flags

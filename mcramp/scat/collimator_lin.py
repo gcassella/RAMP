@@ -12,10 +12,10 @@ class SLinearCollimator(SPrim):
         
         min2rad = lambda x: x * np.pi / (60.0 * 180.0)
         
-        self.length = np.float32(length)
-        self.slope_H = np.float32(np.tan(min2rad(divergence_H)))
-        self.slope_V = np.float32(np.tan(min2rad(divergence_V)))
-        self.transmission = np.float32(transmission)
+        self.length = np.float64(length)
+        self.slope_H = np.float64(np.tan(min2rad(divergence_H)))
+        self.slope_V = np.float64(np.tan(min2rad(divergence_V)))
+        self.transmission = np.float64(transmission)
         self.idx    = np.uint32(idx)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'collimator_lin.cl'), mode='r') as f:

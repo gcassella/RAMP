@@ -11,8 +11,8 @@ class GPlane(GPrim):
         orientations = {"xy": 0, "yz": 1}
 
         self.orientation = np.uint32(orientations[orientation])
-        self.width      = np.float32(width)
-        self.height     = np.float32(height)
+        self.width      = np.float64(width)
+        self.height     = np.float64(height)
         self.idx        = np.uint32(idx)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plane.cl'), mode='r') as f:

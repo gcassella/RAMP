@@ -1,12 +1,12 @@
-__kernel void intersect_sphere(__global float16* neutrons, 
-      __global float8* intersections, __global uint* iidx,
-      uint const comp_idx, float const sphere_radius) {
+__kernel void intersect_sphere(__global double16* neutrons, 
+      __global double8* intersections, __global uint* iidx,
+      uint const comp_idx, double const sphere_radius) {
 
   uint global_addr = get_global_id(0);
-  float16 neutron = neutrons[global_addr];
-  float8 intersection;
-  float3 pos, vel;
-  float s_rad, a, b, c, d1, d2, quotient;
+  double16 neutron = neutrons[global_addr];
+  double8 intersection;
+  double3 pos, vel;
+  double s_rad, a, b, c, d1, d2, quotient;
  
   if (neutron.sf > 0.) {
     return;

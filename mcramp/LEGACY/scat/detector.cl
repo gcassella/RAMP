@@ -1,32 +1,32 @@
-inline void AtomicAdd(volatile __global float *source, float const operand) {
+inline void AtomicAdd(volatile __global double *source, double const operand) {
     union {
         unsigned int intVal;
-        float floatVal;
+        double doubleVal;
     } newVal;
     union {
         unsigned int intVal;
-        float floatVal;
+        double doubleVal;
     } prevVal;
     do {
-        prevVal.floatVal = *source;
-        newVal.floatVal = prevVal.floatVal + operand;
+        prevVal.doubleVal = *source;
+        newVal.doubleVal = prevVal.doubleVal + operand;
     } while (atomic_cmpxchg((volatile __global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
 }
 
-__kernel void detector(__global float16* neutrons,
-  __global float8* intersections, __global uint* iidx,
+__kernel void detector(__global double16* neutrons,
+  __global double8* intersections, __global uint* iidx,
   uint const comp_idx,
-  __global float* histogram, float3 const det_pos,
-  float3 const binning, uint const var) {
+  __global double* histogram, double3 const det_pos,
+  double3 const binning, uint const var) {
 
   uint global_addr = get_global_id(0);
   
-  float16 neutron;
-  float8 intersection;
-  float3 planediff_padded, planediff_cross;
-  float2 planediff;
-  float varval;
-  float minvar, maxvar, stepvar;
+  double16 neutron;
+  double8 intersection;
+  double3 planediff_padded, planediff_cross;
+  double2 planediff;
+  double varval;
+  double minvar, maxvar, stepvar;
   uint idx;
 
   uint this_iidx = iidx[global_addr];
@@ -49,9 +49,9 @@ __kernel void detector(__global float16* neutrons,
   switch(var) {
     case 0:
       planediff = intersection.s46 - det_pos.s02;
-      planediff_padded = (float3)( planediff.s0, 0.0f, planediff.s1 );
-      planediff_cross = cross(normalize(planediff_padded), (float3)( 0.0f, 1.0f, 0.0f ));
-      varval = acos(dot(normalize(planediff), (float2)( 0.0f, 1.0f )))
+      planediff_padded = (double3)( planediff.s0, 0.0f, planediff.s1 );
+      planediff_cross = cross(normalize(planediff_padded), (double3)( 0.0f, 1.0f, 0.0f ));
+      varval = acos(dot(normalize(planediff), (double2)( 0.0f, 1.0f )))
                 * sign(planediff_cross.s2);
       break;
     case 1:
@@ -74,7 +74,7 @@ __kernel void detector(__global float16* neutrons,
   neutron.sa += intersection.s7;
   neutron.sc = comp_idx;
   neutron.sf = 1.;
-  intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+  intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 
   neutrons[global_addr] = neutron;
