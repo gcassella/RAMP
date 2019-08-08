@@ -23,4 +23,10 @@ setup(name="RAMP",
       packages=find_packages(),
       package_data={'': ['*.cl']},
       data_files=[('headers', list(file_set))],
-      include_package_data=True)
+      include_package_data=True,
+      
+      install_requires=[
+            'pyopencl',
+            'numpy',
+            'matplotlib'
+      ])

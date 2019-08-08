@@ -6,5 +6,4 @@ from .chopper import SChopper
 from .monochromator import SMonochromator
 from .arm import SArm
 from .collimator_lin import SLinearCollimator
-from .delta import SDelta
 from .counter import SCounter
