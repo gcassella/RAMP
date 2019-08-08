@@ -45,7 +45,7 @@ class Detector(SPrim):
     @position.setter
     def position(self, val):
         self._position = np.array((val[0], val[1], val[2], 0.),
-                                 dtype=clarr.vec.float3)
+                                 dtype=clarr.vec.double3)
 
     @property
     def binning(self):
@@ -54,4 +54,4 @@ class Detector(SPrim):
     @binning.setter
     def binning(self, val):
         self._binning = np.array((val[0], val[1], val[2], 0.),
-                                 dtype=clarr.vec.float3)
+                                 dtype=clarr.vec.double3)

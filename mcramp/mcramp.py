@@ -14,8 +14,8 @@ class Component:
         # Should neutron be terminated if it doesn't hit this component?
         self.restore_neutron = np.uint32(1) if restore_neutron else np.uint32(0)
 
-        self.pos = np.array((pos[0], pos[1], pos[2], 0.), dtype=clarr.vec.float3)
-        self.rot = np.array((rot[0], rot[1], rot[2], 0.), dtype=clarr.vec.float3)
+        self.pos = np.array((pos[0], pos[1], pos[2], 0.), dtype=clarr.vec.double3)
+        self.rot = np.array((rot[0], rot[1], rot[2], 0.), dtype=clarr.vec.double3)
 
 class ExecutionBlock:
     def __init__(self, source, components, parent, linear, max_events):
@@ -213,8 +213,8 @@ class Instrument:
         return blocks
 
     def _initialize_buffers(self, N):
-        self.neutrons = np.zeros((N, ), dtype=clarr.vec.float16)
-        self.intersections = np.zeros((N, ), dtype=clarr.vec.float8)
+        self.neutrons = np.zeros((N, ), dtype=clarr.vec.double16)
+        self.intersections = np.zeros((N, ), dtype=clarr.vec.double8)
         self.iidx = np.zeros((N, ), dtype=np.uint32)
 
         mf = cl.mem_flags

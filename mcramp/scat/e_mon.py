@@ -37,7 +37,7 @@ class EMon(SPrim):
                           self.binning,
                           self.restore)
 
-        neutrons = np.zeros((N, ), dtype=clarr.vec.float16)
+        neutrons = np.zeros((N, ), dtype=clarr.vec.double16)
         cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
 
         counted = np.where((neutrons['s14'] > 0) & (neutrons['s12'].astype(np.uint32) == self.idx))
@@ -61,4 +61,4 @@ class EMon(SPrim):
     @binning.setter
     def binning(self, val):
         self._binning = np.array((val[0], val[1], val[2], 0.),
-                                 dtype=clarr.vec.float3)
+                                 dtype=clarr.vec.double3)

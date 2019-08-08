@@ -11,8 +11,8 @@ class MISIS():
 
         self.ctx = ctx
 
-        self.mod_dim = np.array((mod_dim[0], mod_dim[1]), dtype=clarr.vec.float2)
-        self.target_dim = np.array((target_dim[0], target_dim[1]), dtype=clarr.vec.float2)
+        self.mod_dim = np.array((mod_dim[0], mod_dim[1]), dtype=clarr.vec.double2)
+        self.target_dim = np.array((target_dim[0], target_dim[1]), dtype=clarr.vec.double2)
         self.target_dist = np.float64(target_dist)
         self.E_min = np.float64(E_min)
         self.E_max = np.float64(E_max)

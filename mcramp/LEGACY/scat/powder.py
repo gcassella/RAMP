@@ -44,11 +44,11 @@ class SPowder(SPrim):
 
         reflections_temp = np.loadtxt(fn)
 
-        reflections = np.empty((0,), dtype=clarr.vec.float3)
+        reflections = np.empty((0,), dtype=clarr.vec.double3)
 
         sum_intensity = sum(reflections_temp[:,11])
 
         reflections = np.array([(ref[5], ref[12], ref[16], 0.) for ref in reflections_temp],
-                               dtype=clarr.vec.float3 )
+                               dtype=clarr.vec.double3 )
 
         return (reflections, sigma_abs, Vc)

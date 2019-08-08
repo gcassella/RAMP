@@ -21,7 +21,7 @@ class Float3(object):
     def __get__(self, obj, objtype):
         arr = getattr(obj, self.attr)
         return np.array((arr[0], arr[1], arr[2], 0.),
-                           dtype=clarr.vec.float3)
+                           dtype=clarr.vec.double3)
 
     def __set__(self, obj, value):
         setattr(obj, self.attr, value)

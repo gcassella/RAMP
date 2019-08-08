@@ -27,7 +27,7 @@ class SCounter(SPrim):
                           iidx_buf,
                           np.uint32(self.idx))
            
-        neutrons = np.zeros((N, ), dtype=clarr.vec.float16)
+        neutrons = np.zeros((N, ), dtype=clarr.vec.double16)
         cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
 
         counted = np.where((neutrons['s12'].astype(np.uint32) == self.idx))
