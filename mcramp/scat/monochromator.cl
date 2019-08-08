@@ -97,7 +97,7 @@ __kernel void monochromator(__global double16* neutrons,
 
         ku = normalize(ki);
 
-        if (Q_order > 2*length(ki) / Q) Q_order--;
+        if (Q_order > 2*length(ki) / Q) Q_order-= 1;
 
         // TODO: add higher order restriction here
 
