@@ -230,29 +230,32 @@ class Instrument:
                                  self.iidx.nbytes)
 
     def execute(self, N):
-        # TODO Add buffer chunking to allow neutrons in excess of max buf size
+        device = self.queue.get_info(cl.command_queue_info.DEVICE)
+        max_mem_alloc_size = device.get_info(cl.device_info.MAX_MEM_ALLOC_SIZE)
+        buf_max = int(max_mem_alloc_size / 8 / 26)
 
-        self._initialize_buffers(N)
-
-        # Find source, should be in 1st block but save the headache and search for it
-        # then generate initial neutron buffer
         i = 0
         for block in self.blocks:
             if block.source is not None:
                 source_idx = i
                 break
-            
+
             i += 1
         
-        self.blocks[source_idx].source.gen_prg(self.queue,
-                                N,
-                                self.neutrons_cl,
-                                self.intersections_cl)
+        if (N > buf_max):
+            remaining = N
+            while remaining > 0.0:
+                torun = buf_max if remaining > buf_max else remaining
+                remaining = remaining - torun
+                self._initialize_buffers(torun)
 
-        for block in self.blocks:
-            block.execute(N)
+                self.blocks[source_idx].source.gen_prg(self.queue,
+                                        torun,
+                                        self.neutrons_cl,
+                                        self.intersections_cl)
 
-        return 0
+                for block in self.blocks:
+                    block.execute(torun)
 
 def frame_rotate(vec, rot):
     x_a = rot[0]
