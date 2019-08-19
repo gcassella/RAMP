@@ -32,4 +32,4 @@ class SLinearCollimator(SPrim):
                                 self.length,
                                 self.slope_H,
                                 self.slope_V,
-                                self.transmission).wait()
+                                self.transmission)

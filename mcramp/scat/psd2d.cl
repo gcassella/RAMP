@@ -1,21 +1,19 @@
 #include "consts.h"
 
-void AtomicAdd(volatile global double *source, const double operand) {
+void atomicAdd_g_f(volatile __global float *addr, float val)
+{
     union {
-        unsigned int intVal;
-        double doubleVal;
-    } newVal;
-    union {
-        unsigned int intVal;
-        double doubleVal;
-    } prevVal;
- 
+        unsigned int u32;
+        float        f32;
+    } next, expected, current;
+	current.f32    = *addr;
     do {
-        prevVal.doubleVal = *source;
-        newVal.doubleVal = prevVal.doubleVal + operand;
-    } while (atomic_cmpxchg((volatile global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
+	   expected.f32 = current.f32;
+        next.f32     = expected.f32 + val;
+		current.u32  = atomic_cmpxchg( (volatile __global unsigned int *)addr, 
+                            expected.u32, next.u32);
+    } while( current.u32 != expected.u32 );
 }
-
 
 int find_idx(double val, double3 binning) {
     uint idx;
@@ -30,7 +28,7 @@ int find_idx(double val, double3 binning) {
 
 __kernel void detector(__global double16 *neutrons,
                        __global double8 *intersections, __global uint *iidx,
-                       uint const comp_idx, volatile __global double *histogram,
+                       uint const comp_idx, volatile __global float *histogram,
                        double3 const axis1_binning, double3 const axis2_binning, 
                        uint const axis1_numbins, uint const axis2_numbins,
                        uint const shape, uint const restore_neutron)
@@ -86,9 +84,7 @@ __kernel void detector(__global double16 *neutrons,
 
   if (!((axis1_idx == -1) || (axis2_idx == -1))) {
     flattened_idx = axis1_idx * axis2_numbins + axis2_idx;
-    neutron.se = flattened_idx;
-  } else {
-    neutron.se = -1;
+    atomicAdd_g_f(&histogram[flattened_idx], (float)neutron.s9);
   }
 
   if (restore_neutron == 0) {

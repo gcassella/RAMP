@@ -25,13 +25,19 @@ class PSD2d(SPrim):
         self.axis1_num_bins = np.uint32(np.ceil((axis1_binning[2] - axis1_binning[0]) / axis1_binning[1]))
         self.axis2_num_bins = np.uint32(np.ceil((axis2_binning[2] - axis2_binning[0]) / axis2_binning[1]))
         self.num_bins = np.uint32(self.axis1_num_bins * self.axis2_num_bins)
-        self.histo = np.zeros((self.num_bins,), dtype=np.float64)
+        self.histo = np.zeros((self.num_bins,), dtype=np.float32)
         self.histo2d = np.zeros((self.axis1_num_bins, self.axis2_num_bins))
 
         mf               = cl.mem_flags
         self.histo_cl    = cl.Buffer(ctx,
-                                    mf.WRITE_ONLY,
-                                    self.histo.nbytes)
+                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                     hostbuf=self.histo)
+        
+        x = np.linspace(self.axis1_binning['s0'], self.axis1_binning['s2'], num=self.axis1_num_bins)
+        y = np.linspace(self.axis2_binning['s0'], self.axis2_binning['s2'], num=self.axis2_num_bins)
+
+        self.X, self.Y = np.meshgrid(x, y)
+        self.Z = np.zeros(self.histo2d.T.shape)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'psd2d.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -51,30 +57,30 @@ class PSD2d(SPrim):
                           self.shape,
                           self.restore_neutron)
 
-        neutrons = np.zeros((N, ), dtype=clarr.vec.double16)
-        cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
+    def plot_histo(self, queue):
+        cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
+        self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
 
-        counted = np.where((neutrons['s14'] > 0) & (neutrons['s12'].astype(np.uint32) == self.idx))
-        self.histo, _ = np.histogram(neutrons['s14'][counted], bins=range(self.num_bins + 1), weights=neutrons['s9'][counted])
-        self.histo2d = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins))
-
-        self.plot_histo()
-
-    def plot_histo(self):
         plt.figure()
-        x = np.linspace(self.axis1_binning['s0'], self.axis1_binning['s2'], num=self.axis1_num_bins)
-        y = np.linspace(self.axis2_binning['s0'], self.axis2_binning['s2'], num=self.axis2_num_bins)
+        Z = (np.log(self.Z + 1e-7) if self.logscale else self.Z)
 
-        X, Y = np.meshgrid(x, y)
-        Z = (np.log(self.histo2d.T + 1e-7) if self.logscale else self.histo2d.T)
-
-        plt.pcolormesh(X, Y, Z, cmap='jet', shading='gouraud')
+        plt.pcolormesh(self.X, self.Y, Z, cmap='jet', shading='gouraud')
         plt.colorbar()
 
+    def save_histo(self, queue):
+        cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
+        self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
+
         if self.filename:
-            np.save(self.filename + 'X.dat', X)
-            np.save(self.filename + 'Y.dat', Y)
-            np.save(self.filename + 'Z.dat', self.histo2d.T)
+            np.save(self.filename + 'X.dat', self.X)
+            np.save(self.filename + 'Y.dat', self.Y)
+            np.save(self.filename + 'Z.dat', self.Z)
+
+    def get_histo(self):
+        return (self.X, self.Y, self.Z)
+
+    def sum_histo(self):
+        self.Z += self.histo2d.T
 
     @property
     def sample_pos(self):

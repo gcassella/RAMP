@@ -9,3 +9,6 @@ cloc-1.76.exe
 *modloader.py*
 *.vscode*
 *profile*
+*build*
+*dist*
+*egg*

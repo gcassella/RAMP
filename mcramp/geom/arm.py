@@ -18,4 +18,4 @@ class GArm(GPrim):
                       neutron_buf,
                       intersection_buf,
                       iidx_buf,
-                      self.idx).wait()
+                      self.idx)

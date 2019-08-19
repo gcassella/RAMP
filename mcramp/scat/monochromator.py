@@ -66,4 +66,4 @@ class SMonochromator(SPrim):
                                 self.radius_horizontal,
                                 self.gaussX_opencl,
                                 self.gaussW_opencl,
-                                self.gausslen).wait()
+                                self.gausslen)

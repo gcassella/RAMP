@@ -36,4 +36,4 @@ class SChopper(SPrim):
                                 self.freq,
                                 self.n_slits,
                                 self.phase,
-                                self.jitter).wait()
+                                self.jitter)

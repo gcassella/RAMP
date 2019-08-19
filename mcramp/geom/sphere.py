@@ -22,4 +22,4 @@ class GSphere(GPrim):
                                   intersection_buf,
                                   iidx_buf,
                                   np.uint32(self.idx),
-                                  self.radius).wait()
+                                  self.radius)

@@ -28,4 +28,4 @@ class GBanana(GPrim):
                                   self.radius,
                                   self.height,
                                   self.mintheta,
-                                  self.maxtheta).wait()
+                                  self.maxtheta)

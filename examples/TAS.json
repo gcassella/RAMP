@@ -9,8 +9,8 @@
                 "mod_dim": [0.02, 0.02],
                 "target_dim": [0.02, 0.02],
                 "target_dist": 1.0,
-                "E_min": 3.0,
-                "E_max": 7.0,
+                "E_min": 4.5,
+                "E_max": 5.5,
                 "T1" : 216.8,
                 "I1" : 1.24e13,
                 "T2" : 33.9,
@@ -30,7 +30,7 @@
             },
             "scat_kernel" : {
                 "name" : "EMon",
-                "binning": [3.0, 0.01, 7.0],
+                "binning": [4.0, 0.01, 6.0],
                 "restore_neutron": true
             }
         },
@@ -69,9 +69,8 @@
             },
             "scat_kernel": {
                 "name": "SMonochromator",
-                "slab_width" : 0.01,
-                "slab_height" : 0.01,
-                "gap" : 0.001,
+                "slab_width" : 0.1,
+                "slab_height" : 0.1,
                 "mosaic_horizontal" : 40,
                 "mosaic_vertical" : 40,
                 "r0" : 0.9,
@@ -92,7 +91,7 @@
             },
             "scat_kernel" : {
                 "name" : "EMon",
-                "binning": [3.0, 0.01, 7.0],
+                "binning": [4.0, 0.01, 6.0],
                 "restore_neutron": true
             }
         },
@@ -108,9 +107,9 @@
             },
             "scat_kernel": {
                 "name": "PSD2d",
-                "axis1_binning": [-0.1, 1e-3, 0.1],
-                "axis2_binning": [-0.1, 1e-3, 0.1],
-                "shape": "plane",
+                "axis1_binning": [-0.02, 1e-3, 0.02],
+                "axis2_binning": [-1.0, 1e-2, 1.0],
+                "shape": "divpos",
                 "restore_neutron" : true
             }
         },
@@ -132,26 +131,6 @@
                 "DW" : 1.0,
                 "F2" : 75.0,
                 "d_phi" : 1.0
-            }
-        },
-
-        "twotheta_det" : {
-            "position" : [0.0, 0.0, 0.5],
-            "relative" : "Mono_out",
-            "restore_neutron" : true,
-            "geom_kernel" : {
-                "name" : "GBanana",
-                "radius" : 1.0,
-                "height" : 0.1,
-                "mintheta" : -120.0,
-                "maxtheta" : 120.0
-            },
-            "scat_kernel" : {
-                "name" : "PSD2d",
-                "axis1_binning" : [-120.0, 1.0, 120.0],
-                "axis2_binning" : [-5.0, 0.2, 5.0],
-                "shape" : "banana",
-                "restore_neutron": true
             }
         },
 
@@ -199,24 +178,6 @@
             },
             "scat_kernel": {
                 "name": "SArm"
-            }
-        },
-
-        "posmon_final" : {
-            "position" : [0.0, 0.0, 0.5],
-            "rotation" : [0.0, 0.0, 0.0],
-            "relative" : "ana_out",
-            "geom_kernel": {
-                "name": "GPlane",
-                "width": 0.1,
-                "height": 0.1
-            },
-            "scat_kernel": {
-                "name": "PSD2d",
-                "axis1_binning": [-0.1, 1e-3, 0.1],
-                "axis2_binning": [-0.1, 1e-3, 0.1],
-                "shape": "plane",
-                "restore_neutron" : true
             }
         },
 

@@ -14,14 +14,17 @@ class EMon(SPrim):
         self.idx         = idx
 
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
-        self.histo = np.zeros((self.num_bins,), dtype=np.float64)
+        self.histo = np.zeros((self.num_bins,), dtype=np.float32)
         self.restore = np.uint32(1 if restore_neutron else 0)
         self.filename = filename
 
         mf               = cl.mem_flags
         self.histo_cl    = cl.Buffer(ctx,
-                                    mf.WRITE_ONLY,
-                                    self.histo.nbytes)
+                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                     hostbuf=self.histo)
+
+        self.axis = np.linspace(self.binning['s0'], self.binning['s2'], num=self.num_bins)
+        self.Z = np.zeros(self.histo.shape)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'e_mon.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -37,22 +40,19 @@ class EMon(SPrim):
                           self.binning,
                           self.restore)
 
-        neutrons = np.zeros((N, ), dtype=clarr.vec.double16)
-        cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
-
-        counted = np.where((neutrons['s14'] > 0) & (neutrons['s12'].astype(np.uint32) == self.idx))
-        self.histo, _ = np.histogram(neutrons['s14'][counted], bins=range(self.num_bins + 1), weights=neutrons['s9'][counted])
-
-        self.plot_histo()
-
-    def plot_histo(self):
+    def plot_histo(self, queue):
+        cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
         plt.figure()
-        axis = np.linspace(self.binning['s0'], self.binning['s2'], num=self.num_bins)
-        plt.plot(axis, self.histo)
+        plt.plot(self.axis, self.histo)
 
+    def save_histo(self, queue):
+        cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
         if self.filename:
-            np.save(self.filename + 'X.dat', axis)
-            np.save(self.filename + 'Y.dat', self.histo)
+            np.save(self.filename + 'X.dat', self.axis)
+            np.save(self.filename + 'Z.dat', self.histo)
+
+    def get_histo(self):
+        return (self.axis, self.histo)
 
     @property
     def binning(self):

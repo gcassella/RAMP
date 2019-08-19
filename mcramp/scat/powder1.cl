@@ -23,7 +23,7 @@ __kernel void powder1(__global double16* neutrons,
     /* Perform scattering here --------------------------------------------- */
 
     double vel, sigma_scat, sigma_abs, p_scat, p_inter, full_path_length, phi,
-            arg, twotheta, pen_depth, d_phi0;
+            arg, twotheta, pen_depth;
     double3 beam_para, beam_perp, path;
     // bool scattered = false; 
 

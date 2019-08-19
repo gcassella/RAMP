@@ -12,9 +12,13 @@ class SCounter(SPrim):
                  filename=None):
         self.idx = idx
         
-        self.counts = np.float64(0.0)
+        self.counts = np.zeros((2,), dtype=np.float32)
         self.filename = filename
 
+        mf = cl.mem_flags
+        self.counts_cl = cl.Buffer(ctx,
+                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                     hostbuf=self.counts)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'counter.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -25,15 +29,10 @@ class SCounter(SPrim):
                           neutron_buf,
                           intersection_buf,
                           iidx_buf,
-                          np.uint32(self.idx))
-           
-        neutrons = np.zeros((N, ), dtype=clarr.vec.double16)
-        cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
-
-        counted = np.where((neutrons['s12'].astype(np.uint32) == self.idx))
-        self.counts = np.sum(neutrons['s9'][counted]).astype(np.float64)
-
-        print(self.counts)
+                          np.uint32(self.idx),
+                          self.counts_cl)
+        
+        cl.enqueue_copy(queue, self.counts, self.counts_cl)
 
         if self.filename:
             np.save(self.filename, self.counts)

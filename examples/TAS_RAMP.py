@@ -7,12 +7,17 @@ import os
 
 os.environ["PYOPENCL_NO_CACHE"] = "0"
 os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
+os.environ["PYOPENCL_CTX"] = ":1"
 
 if __name__ == '__main__':
-    N = int(1e7)
+    N = int(1e8)
     
     ## OpenCL setup and internals
-    ctx = cl.create_some_context()
+    plat=cl.get_platforms()[0]
+    devices=plat.get_devices()
+    dev=devices[1]
+    ctx = cl.Context(devices=[dev], 
+        properties=[(cl.context_properties.PLATFORM, plat)])
     queue = cl.CommandQueue(ctx)
 
     ## Load and simulate instrument
@@ -56,27 +61,26 @@ if __name__ == '__main__':
 
     twotheta=2*np.arcsin(Li  / 2 / d_spacing)
 
-    for i, aa in enumerate(anangle):
-        inst=Instrument('TAS.json', ctx, queue, Mono_angle=Mono_angle, d_spacing=d_spacing,
-                        Ana_angle=aa, monodspacing=mono_d_spacing, twotheta=twotheta)
-        inst.execute(N)
-        counts = np.load("tascounts.npy")
-        I[i] = counts
-        plt.close('all')
+   #for i, aa in enumerate(anangle):
+   #    inst=Instrument('TAS.json', ctx, queue, Mono_angle=Mono_angle, d_spacing=d_spacing,
+   #                    Ana_angle=aa, monodspacing=mono_d_spacing, twotheta=twotheta)
+   #    inst.execute(N)
+   #    counts = np.load("tascounts.npy")
+   #    I[i] = counts
+   #    plt.close('all')
 
-    plt.figure()
-    plt.xlabel("deltaE [meV]")
-    plt.ylabel("intensity [arb]")
-    plt.plot(deltaE, I)
-    plt.show()
+   #plt.figure()
+   #plt.xlabel("deltaE [meV]")
+   #plt.ylabel("intensity [arb]")
+   #plt.plot(deltaE, I)
+   #plt.show()
 
     # Run once a final time to show all of the monitors off
 
     inst=Instrument('TAS.json', ctx, queue, Mono_angle=Mono_angle, d_spacing=d_spacing, 
                     Ana_angle=Ana_angle, monodspacing=mono_d_spacing, twotheta=twotheta)
     inst.execute(N)
-
-    plt.show()
+    inst.plot()
 
     os.remove("tascounts.npy")
 

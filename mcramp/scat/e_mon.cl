@@ -1,23 +1,23 @@
-void AtomicAdd(volatile global double *source, const double operand) {
+void atomicAdd_g_f(volatile __global float *addr, float val)
+{
     union {
-        unsigned int intVal;
-        double doubleVal;
-    } newVal;
-    union {
-        unsigned int intVal;
-        double doubleVal;
-    } prevVal;
- 
+        unsigned int u32;
+        float        f32;
+    } next, expected, current;
+	current.f32    = *addr;
     do {
-        prevVal.doubleVal = *source;
-        newVal.doubleVal = prevVal.doubleVal + operand;
-    } while (atomic_cmpxchg((volatile global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
+	   expected.f32 = current.f32;
+        next.f32     = expected.f32 + val;
+		current.u32  = atomic_cmpxchg( (volatile __global unsigned int *)addr, 
+                            expected.u32, next.u32);
+    } while( current.u32 != expected.u32 );
 }
+
 
 
 __kernel void detector(__global double16 *neutrons,
                        __global double8 *intersections, __global uint *iidx,
-                       uint const comp_idx, volatile __global double *histogram,
+                       uint const comp_idx, volatile __global float *histogram,
                        double3 const binning, uint const restore_neutron)
 {
 
@@ -47,7 +47,7 @@ __kernel void detector(__global double16 *neutrons,
 
   if(min_var<=ener_val && ener_val<=max_var) {    
     idx = round((ener_val -  min_var) / step_var);
-   // AtomicAdd(&histogram[idx], neutron.s9);
+    atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
     neutron.se = idx;
   } else {
     neutron.se = -1;

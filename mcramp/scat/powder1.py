@@ -37,4 +37,4 @@ class SPowder1(SPrim):
                           self.sigma_scat_v2,
                           self.sigma_abs_v,
                           self.q,
-                          self.d_phi).wait()
+                          self.d_phi)

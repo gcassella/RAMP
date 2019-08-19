@@ -6,6 +6,15 @@ import os, json, importlib, re
 
 from time import time
 
+DETECTOR_KERNELS = ["PSD2d", "EMon"]
+
+class Detector:
+    # Keeps track of the execution block and component that a detector kernel
+    # belongs to in order to retrieve it's histogram at the end of execution
+    def __init__(self, block, comp):
+        self.block = block
+        self.comp = comp
+
 class Component:
     def __init__(self, geom_kernel, scat_kernel, restore_neutron, pos, rot=[0, 0, 0]):
         self.geom_kernel = geom_kernel
@@ -26,7 +35,7 @@ class ExecutionBlock:
         self.parent = parent
 
     @staticmethod
-    def fromJSON(block, parent, linear, events):
+    def fromJSON(block, parent, linear, events, idx):
         comps = {}
         i = 1
 
@@ -44,7 +53,7 @@ class ExecutionBlock:
                 source = mk(**args)
             else:
                 pos = comp['position'] if 'position' in comp else [0, 0, 0]
-                rot = comp['rotation'] if 'rotation' in comp else[0, 0, 0]
+                rot = comp['rotation'] if 'rotation' in comp else [0, 0, 0]
                 restore_neutron = comp['restore_neutron'] if 'restore_neutron' in comp else False
                 
                 if 'relative' in comp:
@@ -68,6 +77,9 @@ class ExecutionBlock:
                 sargs['ctx'] = parent.ctx
 
                 comps[name] = Component(gk(**gargs), sk(**sargs), restore_neutron, pos, rot)
+
+                if comp['scat_kernel']['name'] in DETECTOR_KERNELS:
+                    parent.detectors.append(Detector(idx, name))
             
             i += 1
 
@@ -88,7 +100,7 @@ class ExecutionBlock:
 
         if self.linear:
 
-            for (idx, comp) in self.components.items():
+            for (_, comp) in self.components.items():
                 self.trans_prg.transform(self.parent.queue, (N,), None,
                                          self.parent.neutrons_cl,
                                          comp.pos,
@@ -167,10 +179,23 @@ class Instrument:
     def __init__(self, fn, ctx, queue, **kwargs):
         self.ctx = ctx
         self.queue = queue
+        self.detectors = []
+
         self.blocks = self.fromJSON(fn, ctx, queue, **kwargs)
 
         self.dev = self.ctx.devices[0]
-        self.max_buf = int(1E7)
+
+    def plot(self):
+        from matplotlib.pyplot import show
+
+        for d in self.detectors:
+            self.blocks[d.block].components[d.comp].scat_kernel.plot_histo(self.queue)
+
+        show()
+
+    def save(self):
+        for d in self.detectors:
+            self.blocks[d.block].components[d.comp].scat_kernel.save_histo(self.queue)
 
     def substitute_params(self, json_str, **kwargs):
         # FIXME: if a token contains another as a substring things get effed up
@@ -194,6 +219,7 @@ class Instrument:
         inst = json.loads(json_str)
 
         blocks = []
+        i = 0
 
         for block in inst.values():
 
@@ -208,7 +234,8 @@ class Instrument:
                 linear = True
                 events = 1
 
-            blocks.append(ExecutionBlock.fromJSON(block, self, linear, events))
+            blocks.append(ExecutionBlock.fromJSON(block, self, linear, events, i))
+            i += 1
 
         return blocks
 
@@ -224,7 +251,7 @@ class Instrument:
                                      hostbuf=self.neutrons)
         self.intersections_cl = cl.Buffer(self.ctx,
                                           mf.READ_WRITE,
-                                          self.neutrons.nbytes)
+                                          self.intersections.nbytes)
         self.iidx_cl = cl.Buffer(self.ctx,
                                  mf.WRITE_ONLY,
                                  self.iidx.nbytes)
@@ -242,20 +269,22 @@ class Instrument:
 
             i += 1
         
-        if (N > buf_max):
-            remaining = N
-            while remaining > 0.0:
-                torun = buf_max if remaining > buf_max else remaining
-                remaining = remaining - torun
-                self._initialize_buffers(torun)
+        self._initialize_buffers(buf_max if N > buf_max else N)
 
-                self.blocks[source_idx].source.gen_prg(self.queue,
-                                        torun,
-                                        self.neutrons_cl,
-                                        self.intersections_cl)
+        remaining = N
+        while remaining > 0.0:
+            torun = buf_max if remaining > buf_max else remaining
+            remaining = remaining - torun
 
-                for block in self.blocks:
-                    block.execute(torun)
+            self.blocks[source_idx].source.gen_prg(self.queue,
+                                    torun,
+                                    self.neutrons_cl,
+                                    self.intersections_cl)
+
+            for block in self.blocks:
+                block.execute(torun)
+
+        self.queue.finish()
 
 def frame_rotate(vec, rot):
     x_a = rot[0]

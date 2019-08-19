@@ -44,4 +44,4 @@ class SGuide(SPrim):
                                 self.alpha,
                                 self.m,
                                 self.W,
-                                self.max_bounces).wait()
+                                self.max_bounces)
