@@ -14,7 +14,7 @@ class Detector(SPrim):
         self.idx         = idx
 
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
-        self.histo       = np.zeros((self.num_bins, ), dtype=np.float64)
+        self.histo       = np.zeros((self.num_bins, ), dtype=np.float32)
 
         mf               = cl.mem_flags
         self.histo_cl    = cl.Buffer(ctx,
@@ -45,7 +45,7 @@ class Detector(SPrim):
     @position.setter
     def position(self, val):
         self._position = np.array((val[0], val[1], val[2], 0.),
-                                 dtype=clarr.vec.double3)
+                                 dtype=clarr.vec.float3)
 
     @property
     def binning(self):
@@ -54,4 +54,4 @@ class Detector(SPrim):
     @binning.setter
     def binning(self, val):
         self._binning = np.array((val[0], val[1], val[2], 0.),
-                                 dtype=clarr.vec.double3)
+                                 dtype=clarr.vec.float3)

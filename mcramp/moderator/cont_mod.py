@@ -11,21 +11,21 @@ class MCont():
                  E_min=0.0, E_max=0.0, T1=0.0, I1=0.0, T2=0.0, I2=0.0,
                  T3 = 0.0, I3 = 0.0):
 
-        self.mod_dim = np.array((mod_dim[0], mod_dim[1]), dtype=clarr.vec.double2)
-        self.target_dim = np.array((target_dim[0], target_dim[1]), dtype=clarr.vec.double2)
-        self.target_dist = np.float64(target_dist)
-        self.E_min = np.float64(E_min)
-        self.E_max = np.float64(E_max)
+        self.mod_dim = np.array((mod_dim[0], mod_dim[1]), dtype=clarr.vec.float2)
+        self.target_dim = np.array((target_dim[0], target_dim[1]), dtype=clarr.vec.float2)
+        self.target_dist = np.float32(target_dist)
+        self.E_min = np.float32(E_min)
+        self.E_max = np.float32(E_max)
 
-        self.T1 = np.float64(T1)
-        self.I1 = np.float64(I1)
-        self.T2 = np.float64(T2)
-        self.I2 = np.float64(I2)
-        self.T3 = np.float64(T3)
-        self.I3 = np.float64(I3)
+        self.T1 = np.float32(T1)
+        self.I1 = np.float32(I1)
+        self.T2 = np.float32(T2)
+        self.I2 = np.float32(I2)
+        self.T3 = np.float32(T3)
+        self.I3 = np.float32(I3)
 
         # self.calc_str_area(mod_dim, target_dim, target_dist)
-        self.str_area = np.float64(1)
+        self.str_area = np.float32(1)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cont_mod.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -48,7 +48,7 @@ class MCont():
         A *= (mod_dim[0] * mod_dim[1]) / (n_steps**4.0)
         A *= target_dim[0] * target_dim[1] * 10000
 
-        self.str_area = np.float64(A)
+        self.str_area = np.float32(A)
 
     def gen_prg(self, queue, N, neutron_buf, intersection_buf):
         self.prg.generate_neutrons(queue, (N,), None, neutron_buf, intersection_buf,

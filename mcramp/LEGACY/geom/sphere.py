@@ -8,7 +8,7 @@ import os
 
 class GSphere(GPrim):
     def __init__(self, radius=0, position=(0, 0, 0), idx=0, ctx=None):
-        self.radius     = np.float64(radius)
+        self.radius     = np.float32(radius)
         self.position   = position
         self.idx        = idx
 

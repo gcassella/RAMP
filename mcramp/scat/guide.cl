@@ -6,17 +6,17 @@
 #include "ref.h"
 #include "consts.h"
 
-__kernel void guide_scatter(__global double16* neutrons,
-    __global double8* intersections, __global uint* iidx,
+__kernel void guide_scatter(__global float16* neutrons,
+    __global float8* intersections, __global uint* iidx,
     uint const comp_idx,
-    double const w1, double const h1,
-    double const w2, double const h2, double const l,
-    double const R0, double const Qc, double const alpha,
-    double const m, double const W, uint const max_bounces) {
+    float const w1, float const h1,
+    float const w2, float const h2, float const l,
+    float const R0, float const Qc, float const alpha,
+    float const m, float const W, uint const max_bounces) {
 
     uint global_addr        = get_global_id(0);
-    double16 neutron         = neutrons[global_addr];
-    double8 intersection = intersections[global_addr];
+    float16 neutron         = neutrons[global_addr];
+    float8 intersection = intersections[global_addr];
     uint this_iidx          = iidx[global_addr];
 
     /* Check we are scattering from the intersected component */
@@ -36,9 +36,9 @@ __kernel void guide_scatter(__global double16* neutrons,
     neutron.s012 = intersection.s456;
     neutron.sa += intersection.s7;
 
-    double3 pos, vel;
-    double t1, t2, av, ah, bv, bh, cv1, cv2, ch1, ch2, d, ww, hh, whalf, hhalf;
-    double vdotn_v1, vdotn_v2, vdotn_h1, vdotn_h2, q, nlen2;
+    float3 pos, vel;
+    float t1, t2, av, ah, bv, bh, cv1, cv2, ch1, ch2, d, ww, hh, whalf, hhalf;
+    float vdotn_v1, vdotn_v2, vdotn_h1, vdotn_h2, q, nlen2;
 
     uint i = 0;
 
@@ -134,7 +134,7 @@ __kernel void guide_scatter(__global double16* neutrons,
     neutron.sc = comp_idx;
 
     neutrons[global_addr]      = neutron;
-    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 
 }

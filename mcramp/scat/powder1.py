@@ -18,11 +18,11 @@ class SPowder1(SPrim):
         sigma_scat_numer = 4 * np.pi ** 3.0 * pack * multiplicity * F2 * 100 * DW
         sigma_scat_denom = vc ** 2.0 * q
 
-        self.sigma_scat_v2 = np.float64(sigma_scat_numer / sigma_scat_denom)
-        self.sigma_abs_v = np.float64(pack * sigma_abs / vc * 100)
-        self.q = np.float64(q)
+        self.sigma_scat_v2 = np.float32(sigma_scat_numer / sigma_scat_denom)
+        self.sigma_abs_v = np.float32(pack * sigma_abs / vc * 100)
+        self.q = np.float32(q)
         self.idx = np.uint32(idx)
-        self.d_phi = np.float64(d_phi)
+        self.d_phi = np.float32(d_phi)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'powder1.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

@@ -1,17 +1,17 @@
 #include "rand.h"
 
-__kernel void generate_neutrons(__global double16* neutrons,
-    __global double8* intersections,
-    double3 const source_pos, double3 const source_normal,
-    double const source_radius, double2 const target_dimensions,
-    double3 const target_pos, double const E,
-    double const dE) {
+__kernel void generate_neutrons(__global float16* neutrons,
+    __global float8* intersections,
+    float3 const source_pos, float3 const source_normal,
+    float const source_radius, float2 const target_dimensions,
+    float3 const target_pos, float const E,
+    float const dE) {
 
   uint global_addr;
 
-  double chi, x, y, r2, tx, ty, u1, u2, calcE, vel;
-  double3 dir, target_norm;
-  double16 neutron;
+  float chi, x, y, r2, tx, ty, u1, u2, calcE, vel;
+  float3 dir, target_norm;
+  float16 neutron;
 
   global_addr = get_global_id(0);
   neutron = neutrons[global_addr];
@@ -19,7 +19,7 @@ __kernel void generate_neutrons(__global double16* neutrons,
   // Choose a point on the moderator to emit neutrons
   chi = 2.*M_PI_F*(rand(&neutron, global_addr));
   
-  r2 = pow(source_radius * rand(&neutron, global_addr), (double)2.);
+  r2 = pow(source_radius * rand(&neutron, global_addr), (float)2.);
   
 
   x = sqrt(r2) * cos(chi);
@@ -38,8 +38,8 @@ __kernel void generate_neutrons(__global double16* neutrons,
   target_norm = normalize(source_pos - target_pos);
 
   // Calculate emission point -> target point vector
-  dir = (tx*cross(target_norm, (double3)( 0.0f, 1.0f, 0.0f )) + 
-    ty*(double3)( 0.0f, 1.0f, 0.0f )) + target_pos - neutron.s012;
+  dir = (tx*cross(target_norm, (float3)( 0.0f, 1.0f, 0.0f )) + 
+    ty*(float3)( 0.0f, 1.0f, 0.0f )) + target_pos - neutron.s012;
 
   // Generate a normally distributed wavelength
 
@@ -67,6 +67,6 @@ __kernel void generate_neutrons(__global double16* neutrons,
   neutron.sf = 0.;
 
   neutrons[global_addr] = neutron;
-  intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+  intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 }

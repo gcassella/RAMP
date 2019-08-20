@@ -89,7 +89,7 @@ class PSD2d(SPrim):
     @sample_pos.setter
     def sample_pos(self, val):
         self._sample_pos = np.array((val[0], val[1], val[2], 0.),
-                                 dtype=clarr.vec.double3)
+                                 dtype=clarr.vec.float3)
 
     @property
     def axis1_binning(self):
@@ -98,7 +98,7 @@ class PSD2d(SPrim):
     @axis1_binning.setter
     def axis1_binning(self, val):
         self._axis1_binning = np.array((val[0], val[1], val[2], 0.),
-                                 dtype=clarr.vec.double3)
+                                 dtype=clarr.vec.float3)
 
     @property
     def axis2_binning(self):
@@ -107,4 +107,4 @@ class PSD2d(SPrim):
     @axis2_binning.setter
     def axis2_binning(self, val):
         self._axis2_binning = np.array((val[0], val[1], val[2], 0.),
-                                 dtype=clarr.vec.double3)
+                                 dtype=clarr.vec.float3)

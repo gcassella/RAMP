@@ -1,13 +1,13 @@
 #include "rand.h"
 #include "geom.h"
 
-__kernel void vanadium_scatter(__global double16* neutrons,
-    __global double8* intersections, __global uint* iidx,
+__kernel void vanadium_scatter(__global float16* neutrons,
+    __global float8* intersections, __global uint* iidx,
     uint const comp_idx) {
 
     uint global_addr        = get_global_id(0);
-    double16 neutron         = neutrons[global_addr];
-    double8 intersection     = intersections[global_addr];
+    float16 neutron         = neutrons[global_addr];
+    float8 intersection     = intersections[global_addr];
     uint this_iidx          = iidx[global_addr];
 
     /* Check we are scattering from the intersected component */
@@ -20,8 +20,8 @@ __kernel void vanadium_scatter(__global double16* neutrons,
 
     /* Perform scattering here */
 
-    double3 path, perp, normvel;
-    double vel, phi, theta, x, y, z, q2ki, alpha;
+    float3 path, perp, normvel;
+    float vel, phi, theta, x, y, z, q2ki, alpha;
 
     q2ki       = rand(&neutron, global_addr);
 
@@ -31,7 +31,7 @@ __kernel void vanadium_scatter(__global double16* neutrons,
     x = 1.;
     y = 1.;
     z = -(neutron.s3+neutron.s4)/(neutron.s5);
-    perp = normalize((double3)( x, y, z ));
+    perp = normalize((float3)( x, y, z ));
 
     // construct rotation matrix to randomly rotate the scattering
     // vector about the velocity
@@ -54,7 +54,7 @@ __kernel void vanadium_scatter(__global double16* neutrons,
 
     /* Update global memory and reset intersection */
     neutrons[global_addr]      = neutron;
-    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 
 }

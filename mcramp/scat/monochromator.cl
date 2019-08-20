@@ -7,11 +7,11 @@
   (exp(-((x)-(mean))*((x)-(mean))/(2*(rms)*(rms)))/(sqrt(2*M_PI)*(rms)))
 #endif
 
-double randnorm(double16* neutron, uint global_addr) {
+float randnorm(float16* neutron, uint global_addr) {
 
   // Samples normal distn by box muller transform
 
-  double u1, u2;
+  float u1, u2;
 
   u1 = rand(neutron, global_addr);
   u2 = rand(neutron, global_addr);
@@ -19,18 +19,18 @@ double randnorm(double16* neutron, uint global_addr) {
   return sqrt(-2*log(u1))*cos(2*M_PI*u2);
 }
 
-__kernel void monochromator(__global double16* neutrons,
-    __global double8* intersections, __global uint* iidx,
-    uint const comp_idx, double const slab_width, double const slab_height, 
-    double const gap, uint const n_horizontal, uint const n_vertical, 
-    double const mosaic_horizontal, double const mosaic_vertical,
-    double const r0, double const d_spacing, double const radius_vertical, 
-    double const radius_horizontal, __global double* gaussx,
-    __global double* gaussw, uint const gausslen) {
+__kernel void monochromator(__global float16* neutrons,
+    __global float8* intersections, __global uint* iidx,
+    uint const comp_idx, float const slab_width, float const slab_height, 
+    float const gap, uint const n_horizontal, uint const n_vertical, 
+    float const mosaic_horizontal, float const mosaic_vertical,
+    float const r0, float const d_spacing, float const radius_vertical, 
+    float const radius_horizontal, __global float* gaussx,
+    __global float* gaussw, uint const gausslen) {
 
     uint global_addr        = get_global_id(0);
-    double16 neutron         = neutrons[global_addr];
-    double8 intersection = intersections[global_addr];
+    float16 neutron         = neutrons[global_addr];
+    float8 intersection = intersections[global_addr];
     uint this_iidx          = iidx[global_addr];
 
     /* Check we are scattering from the intersected component */
@@ -48,10 +48,10 @@ __kernel void monochromator(__global double16* neutrons,
     neutron.s012 = intersection.s456;
     neutron.sa += intersection.s7;
 
-    double mos_rms_y, mos_rms_z, mos_rms_max, Q, tilt_horizontal, tilt_vertical,
+    float mos_rms_y, mos_rms_z, mos_rms_max, Q, tilt_horizontal, tilt_vertical,
           zmin, zmax, ymin, ymax, ratio, Q_order, row, col, q0, q0x, theta, delta,
           p_reflect;
-    double3 ki, ku;
+    float3 ki, ku;
 
     mos_rms_y = MIN2RAD*mosaic_horizontal / sqrt(8.0*log(2.0));
     mos_rms_z = MIN2RAD*mosaic_vertical / sqrt(8.0*log(2.0));
@@ -68,15 +68,15 @@ __kernel void monochromator(__global double16* neutrons,
       col = ceil((neutron.s2 - zmin)/(slab_width + gap));
       row = ceil((neutron.s1 - ymin)/(slab_height + gap));
 
-      tilt_horizontal = radius_horizontal ? asin((col - (double)(n_horizontal+1)/2.0) * (slab_width + gap) / radius_horizontal) : 0.0;
-      tilt_vertical = radius_vertical ? -asin((row - (double)(n_vertical+1)/2.0)*(slab_height + gap) / radius_vertical) : 0.0;
+      tilt_horizontal = radius_horizontal ? asin((col - (float)(n_horizontal+1)/2.0) * (slab_width + gap) / radius_horizontal) : 0.0;
+      tilt_vertical = radius_vertical ? -asin((row - (float)(n_vertical+1)/2.0)*(slab_height + gap) / radius_vertical) : 0.0;
 
       // Transform to slab frame MAKE SURE TO LEAVE SLAB FRAME WHEN WE'RE DONE
 
-      double center_z = zmin + (col - 0.5)*(slab_width + gap) - gap / 2.0;
-      double center_y = ymin + (row - 0.5)*(slab_height + gap) - gap / 2.0;
-      double3 slab_pos = (double3){ 0.0, center_y, center_z };
-      double3 slab_rot = (double3){ 0.0, tilt_horizontal, tilt_vertical };
+      float center_z = zmin + (col - 0.5)*(slab_width + gap) - gap / 2.0;
+      float center_y = ymin + (row - 0.5)*(slab_height + gap) - gap / 2.0;
+      float3 slab_pos = (float3){ 0.0, center_y, center_z };
+      float3 slab_rot = (float3){ 0.0, tilt_horizontal, tilt_vertical };
       neutron.s345 = frame_derotate(neutron.s345, slab_rot);
       neutron.s012 -= slab_pos;
       neutron.s012 = frame_derotate(neutron.s012, slab_rot);
@@ -110,14 +110,14 @@ __kernel void monochromator(__global double16* neutrons,
         p_reflect = fabs(r0) * exp(-ki.s2*ki.s2/length(ki.s12) * delta*delta/(2*mos_rms_y*mos_rms_y)) * exp(-ki.s1*ki.s1 / length(ki.s12) * delta*delta/(2*mos_rms_z*mos_rms_z));
 
         if (rand(&neutron, global_addr) <= p_reflect) { // reflect
-          double3 b, a, c1, q;
-          double phi, cos_2theta, k_sin_2theta, cos_phi, sin_phi;
-          double total, w, mos_sample;
+          float3 b, a, c1, q;
+          float phi, cos_2theta, k_sin_2theta, cos_phi, sin_phi;
+          float total, w, mos_sample;
 
           cos_2theta = cos(2*theta);
           k_sin_2theta = length(ki)*sin(2*theta);
 
-          b = normalize(cross(ki, (double3){ q0x, 0.0, 0.0 }));
+          b = normalize(cross(ki, (float3){ q0x, 0.0, 0.0 }));
           b *= k_sin_2theta;
 
           a = cross(b, ku);
@@ -191,7 +191,7 @@ __kernel void monochromator(__global double16* neutrons,
     neutron.sc = comp_idx;
 
     neutrons[global_addr]      = neutron;
-    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 
 }

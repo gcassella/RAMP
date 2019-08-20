@@ -11,12 +11,12 @@ class SChopper(SPrim):
     def __init__(self, slit_width=0.0, radius=0.0, freq=0.0,
                  n_slits = 0, phase = 0.0, jitter = 0.0, idx=0, ctx=0):
 
-        self.slit_width = np.float64(slit_width)
-        self.radius = np.float64(radius)
-        self.freq = np.float64(freq)
+        self.slit_width = np.float32(slit_width)
+        self.radius = np.float32(radius)
+        self.freq = np.float32(freq)
         self.n_slits = np.uint32(n_slits)
-        self.phase = np.float64(phase)
-        self.jitter = np.float64(jitter)
+        self.phase = np.float32(phase)
+        self.jitter = np.float32(jitter)
 
         self.idx = np.uint32(idx)
 

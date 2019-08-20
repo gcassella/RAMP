@@ -1,16 +1,16 @@
 #include "ref.h"
 #include "consts.h"
 
-__kernel void guide_scatter(__global double16* neutrons,
-    __global double8* intersections, __global uint* iidx,
-    uint const comp_idx, double3 const g_pos, 
-    double const w1, double const h1,
-    double const w2, double const h2, double const l,
-    double const R0, double const Qc, double const alpha,
-    double const m, double const W, uint const max_bounces) {
+__kernel void guide_scatter(__global float16* neutrons,
+    __global float8* intersections, __global uint* iidx,
+    uint const comp_idx, float3 const g_pos, 
+    float const w1, float const h1,
+    float const w2, float const h2, float const l,
+    float const R0, float const Qc, float const alpha,
+    float const m, float const W, uint const max_bounces) {
 
     uint global_addr        = get_global_id(0);
-    double16 neutron         = neutrons[global_addr];
+    float16 neutron         = neutrons[global_addr];
     uint this_iidx          = iidx[global_addr];
 
     /* Check we are scattering from the intersected component */
@@ -25,23 +25,23 @@ __kernel void guide_scatter(__global double16* neutrons,
 
     /* Perform scattering here */
 
-    double3 n1v, n2v, n1h, n2h, O1v, O2v, O1h, O2h, pos, vel;
-    double t1v, t2v, t1h, t2h, texit, q, tmin;
-    double refl = 1;
+    float3 n1v, n2v, n1h, n2h, O1v, O2v, O1h, O2h, pos, vel;
+    float t1v, t2v, t1h, t2h, texit, q, tmin;
+    float refl = 1;
 
     uint attempts = 0;
     bool finished = false;
 
-    n1v = (double3)( l, 0.0f, (w2 - w1)/2.0f );
-    n2v = (double3)( -l, 0.0f, (w2 - w1)/2.0f );
-    n1h = (double3)( 0.0f, l, (h2 - h1)/2.0f );
-    n2h = (double3)( 0.0f, -l, (h2-h1)/2.0f );
-    O1v = (double3)( -w1/2.0f, 0.0f, 0.0f );
-    O2v = (double3)( w1/2.0f, 0.0f, 0.0f );
-    O1h = (double3)( 0.0f, -h1/2.0f, 0.0f );
-    O2h = (double3)( 0.0f, h1/2.0f, 0.0f );
+    n1v = (float3)( l, 0.0f, (w2 - w1)/2.0f );
+    n2v = (float3)( -l, 0.0f, (w2 - w1)/2.0f );
+    n1h = (float3)( 0.0f, l, (h2 - h1)/2.0f );
+    n2h = (float3)( 0.0f, -l, (h2-h1)/2.0f );
+    O1v = (float3)( -w1/2.0f, 0.0f, 0.0f );
+    O2v = (float3)( w1/2.0f, 0.0f, 0.0f );
+    O1h = (float3)( 0.0f, -h1/2.0f, 0.0f );
+    O2h = (float3)( 0.0f, h1/2.0f, 0.0f );
 
-    double3 norms[4] = {n1v, n2v, n1h, n2h};
+    float3 norms[4] = {n1v, n2v, n1h, n2h};
 
    while (!finished && attempts < max_bounces) {
         attempts+=1;
@@ -57,7 +57,7 @@ __kernel void guide_scatter(__global double16* neutrons,
 
         /* 0: 1h, 1: 2h, 2: 1v, 3: 2v, 4: exit */
 
-        double times[5] = {t1h, t2h, t1v, t2v, texit};
+        float times[5] = {t1h, t2h, t1v, t2v, texit};
 
         tmin=1000.0f;
         uint mindex=0;
@@ -93,7 +93,7 @@ __kernel void guide_scatter(__global double16* neutrons,
     neutron.sc = comp_idx;
 
     neutrons[global_addr]      = neutron;
-    intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 
 }

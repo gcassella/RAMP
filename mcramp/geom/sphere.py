@@ -8,7 +8,7 @@ import os
 
 class GSphere(GPrim):
     def __init__(self, radius=0, idx=0, ctx=None):
-        self.radius     = np.float64(radius)
+        self.radius     = np.float32(radius)
         self.idx        = idx
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sphere.cl'), mode='r') as f:

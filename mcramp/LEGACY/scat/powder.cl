@@ -1,16 +1,16 @@
 #include "rand.h"
 #include "geom.h"
 
-__kernel void powder_scatter(__global double16* neutrons,
-  __global double8* intersections, __global uint* iidx,
+__kernel void powder_scatter(__global float16* neutrons,
+  __global float8* intersections, __global uint* iidx,
   uint const comp_idx,
-  __global double3* reflections, uint const num_reflections,
-  double const sigma_abs, double const Vc) {
+  __global float3* reflections, uint const num_reflections,
+  float const sigma_abs, float const Vc) {
 
   // Choose a reflection
   uint global_addr = get_global_id(0);
-  double16 neutron = neutrons[global_addr];
-  double8 intersection = intersections[global_addr];
+  float16 neutron = neutrons[global_addr];
+  float8 intersection = intersections[global_addr];
   uint this_iidx = iidx[global_addr];
 
   if(!(this_iidx == comp_idx)) {
@@ -22,9 +22,9 @@ __kernel void powder_scatter(__global double16* neutrons,
   }
 
   uint NReflection, attempts, scattered;
-  double3 reflection, perp, normvel, path;
-  double x, y, z, Rxx, Rxy, Rxz, Ryx, Ryy, Ryz, Rzx, Rzy, Rzz, arg, q_p;
-  double vel, q_v, alpha, sigma_s, sigma_a, sigma_tot, mu, ki;
+  float3 reflection, perp, normvel, path;
+  float x, y, z, Rxx, Rxy, Rxz, Ryx, Ryy, Ryz, Rzx, Rzy, Rzz, arg, q_p;
+  float vel, q_v, alpha, sigma_s, sigma_a, sigma_tot, mu, ki;
 
 
 
@@ -74,7 +74,7 @@ __kernel void powder_scatter(__global double16* neutrons,
         neutron.sc = comp_idx;
         iidx[global_addr] = 0;
         neutrons[global_addr] = neutron;
-        intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+        intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                              0.0f, 0.0f, 0.0f, 100000.0f );
         neutrons[global_addr] = neutron;
         return;
@@ -83,7 +83,7 @@ __kernel void powder_scatter(__global double16* neutrons,
       x = 1.;
       y = 1.;
       z = -(neutron.s3+neutron.s4)/(neutron.s5);
-      perp = normalize((double3)( x, y, z ));
+      perp = normalize((float3)( x, y, z ));
       // construct rotation matrix to randomly rotate the scattering
       // vector about the velocity
 
@@ -110,6 +110,6 @@ __kernel void powder_scatter(__global double16* neutrons,
   neutron.sc = comp_idx;
 
   neutrons[global_addr] = neutron;
-  intersections[global_addr] = (double8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+  intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 }

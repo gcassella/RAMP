@@ -11,11 +11,11 @@ class MISIS():
 
         self.ctx = ctx
 
-        self.mod_dim = np.array((mod_dim[0], mod_dim[1]), dtype=clarr.vec.double2)
-        self.target_dim = np.array((target_dim[0], target_dim[1]), dtype=clarr.vec.double2)
-        self.target_dist = np.float64(target_dist)
-        self.E_min = np.float64(E_min)
-        self.E_max = np.float64(E_max)
+        self.mod_dim = np.array((mod_dim[0], mod_dim[1]), dtype=clarr.vec.float2)
+        self.target_dim = np.array((target_dim[0], target_dim[1]), dtype=clarr.vec.float2)
+        self.target_dist = np.float32(target_dist)
+        self.E_min = np.float32(E_min)
+        self.E_max = np.float32(E_max)
         self.load_spectrum(spec_file)
         self.calc_str_area(mod_dim, target_dim, target_dist)
 
@@ -57,7 +57,7 @@ class MISIS():
         A *= target_dim[0] * target_dim[1] * 10000
 
 
-        self.str_area = np.float64(A)
+        self.str_area = np.float32(A)
 
     def load_spectrum(self, spec_file):
         with open(spec_file, 'r') as mod_file:
@@ -70,7 +70,7 @@ class MISIS():
             # Regex parses data values in line format FLOAT FLOAT FLOAT
             pattern = r"(?:[+\-]?\d*\.\d* [+\-]?\d*\.\d* [+\-]?\d*\.\d*)"
             rdum = re.findall(pattern, lines)
-            rdum = np.array([r.split() for r in rdum[1:]]).astype(np.float64) # Skip "points at"
+            rdum = np.array([r.split() for r in rdum[1:]]).astype(np.float32) # Skip "points at"
 
             mod_file.seek(0)
 
@@ -79,7 +79,7 @@ class MISIS():
             while 'TimeOffset' not in line:
                 line = mod_file.readline()
                 offset_linenum += 1
-            self.time_offset = np.float64(line.split()[-1])
+            self.time_offset = np.float32(line.split()[-1])
 
             time_linenum = offset_linenum
             while 'time' not in line:
@@ -142,8 +142,8 @@ class MISIS():
         fractions = np.repeat(np.array([[f] for f in fractions]), i_vals_cropped.shape[1], axis=1)
         i_vals_cropped = np.multiply(i_vals_cropped, fractions)
 
-        flux = np.cumsum(i_vals_cropped.flatten()).astype(np.float64)
-        e_int = np.insert((flux.reshape(i_vals_cropped.shape)[:,-1]), 0, 0.0).astype(np.float64)
+        flux = np.cumsum(i_vals_cropped.flatten()).astype(np.float32)
+        e_int = np.insert((flux.reshape(i_vals_cropped.shape)[:,-1]), 0, 0.0).astype(np.float32)
 
         total = np.sum(i_vals_cropped)
 
@@ -158,10 +158,10 @@ class MISIS():
         self.num_ener_bins = np.int32(num_ener_bins)
 
         self.flux = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=flux)
-        self.time_bins = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=t_bins.astype(np.float64))
-        self.ener_bins = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=e_bins.astype(np.float64))
+        self.time_bins = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=t_bins.astype(np.float32))
+        self.ener_bins = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=e_bins.astype(np.float32))
         self.e_int = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=e_int)
-        self.total = np.float64(total)
+        self.total = np.float32(total)
 
     def gen_prg(self, queue, N, neutron_buf, intersection_buf):
         self.prg.generate_neutrons(queue, (N,), None, neutron_buf, intersection_buf,

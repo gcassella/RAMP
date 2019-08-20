@@ -30,25 +30,25 @@ class SPowder(SPrim):
                                    np.uint32(self.idx),
                                    self.reflections_opencl,
                                    np.uint32(self.nreflections),
-                                   np.float64(self.sigma_abs),
-                                   np.float64(self.Vc)).wait()
+                                   np.float32(self.sigma_abs),
+                                   np.float32(self.Vc)).wait()
 
     def _LoadLAZ(self, fn):
         with open(fn, 'r') as fin:
             lines = fin.readlines()
             for line in lines:
                 if "sigma_abs" in line:
-                    sigma_abs = np.float64(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
+                    sigma_abs = np.float32(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
                 elif "Vc" in line:
-                    Vc = np.float64(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
+                    Vc = np.float32(re.findall(r"[-+]?\d*\.\d+|\d+", line)[0])
 
         reflections_temp = np.loadtxt(fn)
 
-        reflections = np.empty((0,), dtype=clarr.vec.double3)
+        reflections = np.empty((0,), dtype=clarr.vec.float3)
 
         sum_intensity = sum(reflections_temp[:,11])
 
         reflections = np.array([(ref[5], ref[12], ref[16], 0.) for ref in reflections_temp],
-                               dtype=clarr.vec.double3 )
+                               dtype=clarr.vec.float3 )
 
         return (reflections, sigma_abs, Vc)

@@ -9,9 +9,9 @@ import re
 
 class GAnnulus(GPrim):
     def __init__(self, inner_radius=0, outer_radius=0, position=(0, 0, 0), height=0, idx=0, ctx=None):
-        self.inner_radius     = np.float64(inner_radius)
-        self.outer_radius     = np.float64(outer_radius)
-        self.height     = np.float64(height)
+        self.inner_radius     = np.float32(inner_radius)
+        self.outer_radius     = np.float32(outer_radius)
+        self.height     = np.float32(height)
         self.position   = position
         self.idx        = idx
 
