@@ -9,7 +9,7 @@ import os
 
 class SCounter(SPrim):
     def __init__(self, idx=0, ctx=None,
-                 filename=None):
+                 filename=None, **kwargs):
         self.idx = idx
         
         self.counts = np.zeros((2,), dtype=np.float32)

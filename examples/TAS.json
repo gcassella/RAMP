@@ -6,11 +6,11 @@
             "position" : [0.0, 0.0, 0.0],
             "moderator_kernel": {
                 "name": "MCont",
-                "mod_dim": [0.02, 0.02],
-                "target_dim": [0.02, 0.02],
+                "mod_dim": [0.01, 0.01],
+                "target_dim": [0.01, 0.01],
                 "target_dist": 1.0,
-                "E_min": 4.5,
-                "E_max": 5.5,
+                "E_min": 4.75,
+                "E_max": 5.25,
                 "T1" : 216.8,
                 "I1" : 1.24e13,
                 "T2" : 33.9,
@@ -118,25 +118,24 @@
             "position" : [0.0, 0.0, 0.5],
             "relative" : "Mono_out",
             "geom_kernel" : {
-                "name" : "GSphere",
-                "radius": 0.005
+                "name" : "GBox",
+                "width": 0.01,
+                "height": 0.01,
+                "depth": 0.01
             },
             "scat_kernel" : {
-                "name": "SPowder1",
-                "d_spacing":$d_spacing$,
-                "pack":1.0,
-                "vc" : 50,
-                "sigma_abs" : 0.0,
-                "multiplicity" : 1,
-                "DW" : 1.0,
-                "F2" : 75.0,
-                "d_phi" : 1.0
+                "name": "SRescal",
+                "target": $sample_target$,
+                "E0" : 5.0,
+                "dE" : 0.2,
+                "focus_r" : 0.05
+
             }
         },
 
         "Sample_out" : {
             "position" : [0.0, 0.0, 0.0],
-            "rotation" : [0.0, $twotheta$, 0],
+            "rotation" : [0.0, $sample_trot$, 0],
             "relative" : "sample",
             "geom_kernel": {
                 "name": "GArm"
@@ -158,14 +157,13 @@
             },
             "scat_kernel": {
                 "name": "SMonochromator",
-                "slab_width" : 0.01,
-                "slab_height" : 0.01,
-                "gap" : 0.001,
-                "mosaic_horizontal" : 40,
-                "mosaic_vertical" : 40,
+                "slab_width" : 0.1,
+                "slab_height" : 0.1,
+                "mosaic_horizontal" : 25,
+                "mosaic_vertical" : 25,
                 "r0" : 0.9,
                 "d_spacing" : $monodspacing$,
-                "radius_vertical" : 1.0
+                "radius_vertical" : 0.0
             }
         },
 
@@ -187,8 +185,8 @@
             "relative" : "ana_out",
             "geom_kernel": {
                 "name": "GPlane",
-                "width": 0.005,
-                "height": 0.005
+                "width": 0.01,
+                "height": 0.01
             },
             "scat_kernel": {
                 "name": "SCounter",

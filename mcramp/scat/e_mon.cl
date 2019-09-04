@@ -48,9 +48,6 @@ __kernel void detector(__global float16 *neutrons,
   if(min_var<=ener_val && ener_val<=max_var) {    
     idx = round((ener_val -  min_var) / step_var);
     atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
-    neutron.se = idx;
-  } else {
-    neutron.se = -1;
   }
   
   

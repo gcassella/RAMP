@@ -9,7 +9,7 @@ import os
 
 class EMon(SPrim):
     def __init__(self, binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
-                 filename=None):
+                 filename=None, **kwargs):
         self.binning     = binning
         self.idx         = idx
 
@@ -40,12 +40,12 @@ class EMon(SPrim):
                           self.binning,
                           self.restore)
 
-    def plot_histo(self, queue):
+    def plot(self, queue):
         cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
         plt.figure()
         plt.plot(self.axis, self.histo)
 
-    def save_histo(self, queue):
+    def save(self, queue):
         cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
         if self.filename:
             np.save(self.filename + 'X.dat', self.axis)

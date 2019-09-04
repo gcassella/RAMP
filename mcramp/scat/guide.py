@@ -9,7 +9,8 @@ import re
 
 class SGuide(SPrim):
     def __init__(self, w1=0, h1=0, w2=0, h2=0, l=0, 
-                 R0=0, Qc=0, alpha=0, m=1, W=0, idx=0, ctx=0, max_bounces=50):
+                 R0=0, Qc=0, alpha=0, m=1, W=0, idx=0, ctx=0, max_bounces=50,
+                 **kwargs):
         self.w1     = np.float32(w1)
         self.h1     = np.float32(h1)
         self.w2     = np.float32(w2)

@@ -8,7 +8,7 @@ from time import time
 
 DETECTOR_KERNELS = ["PSD2d", "EMon"]
 
-class Detector:
+class KernelRef:
     # Keeps track of the execution block and component that a detector kernel
     # belongs to in order to retrieve it's histogram at the end of execution
     def __init__(self, block, comp):
@@ -75,11 +75,12 @@ class ExecutionBlock:
                 sargs = {k: v for (k, v) in comp['scat_kernel'].items() if not k == 'name'}
                 sargs['idx'] = i
                 sargs['ctx'] = parent.ctx
+                sargs['inst'] = parent
+                sargs['block'] = idx
 
                 comps[name] = Component(gk(**gargs), sk(**sargs), restore_neutron, pos, rot)
 
-                if comp['scat_kernel']['name'] in DETECTOR_KERNELS:
-                    parent.detectors.append(Detector(idx, name))
+                parent.kernel_refs.append(KernelRef(idx, name))
             
             i += 1
 
@@ -179,23 +180,36 @@ class Instrument:
     def __init__(self, fn, ctx, queue, **kwargs):
         self.ctx = ctx
         self.queue = queue
-        self.detectors = []
+        self.kernel_refs = []
 
         self.blocks = self.fromJSON(fn, ctx, queue, **kwargs)
 
         self.dev = self.ctx.devices[0]
 
+    def data(self):
+        # Returns a dictionary with the data provided by each scattering kernel
+
+        data = {}
+
+        for d in self.kernel_refs:
+            data[d.comp] = self.blocks[d.block].components[d.comp].scat_kernel.data(self.queue)
+
+        return data
+
     def plot(self):
+        # Runs the plotting function of each scattering kernel
+        
         from matplotlib.pyplot import show
 
-        for d in self.detectors:
-            self.blocks[d.block].components[d.comp].scat_kernel.plot_histo(self.queue)
+        for d in self.kernel_refs:
+            self.blocks[d.block].components[d.comp].scat_kernel.plot(self.queue)
 
         show()
 
     def save(self):
-        for d in self.detectors:
-            self.blocks[d.block].components[d.comp].scat_kernel.save_histo(self.queue)
+        # Runs the save function of each scattering kernel
+        for d in self.kernel_refs:
+            self.blocks[d.block].components[d.comp].scat_kernel.save(self.queue)
 
     def substitute_params(self, json_str, **kwargs):
         # FIXME: if a token contains another as a substring things get effed up
@@ -283,6 +297,9 @@ class Instrument:
 
             for block in self.blocks:
                 block.execute(torun)
+
+            for d in self.kernel_refs:
+                self.blocks[d.block].components[d.comp].scat_kernel.data_reduce(self.queue)
 
         self.queue.finish()
 

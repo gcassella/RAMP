@@ -11,7 +11,7 @@ class SMonochromator(SPrim):
     def __init__(self, slab_width=0.0, slab_height=0.0, gap=0.0, n_horizontal=1,
                  n_vertical=1, mosaic_horizontal=0.0, mosaic_vertical=0.0,
                  r0=1.0, d_spacing=0.0, radius_vertical=0.0, radius_horizontal=0.0,
-                 idx=0, ctx=0):
+                 idx=0, ctx=0, **kwargs):
                 
         mf = cl.mem_flags
 

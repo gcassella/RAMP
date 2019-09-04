@@ -8,7 +8,8 @@ import os
 import re
 
 class SLinearCollimator(SPrim):
-    def __init__(self, length=0.0, divergence_H=0.0, divergence_V=0.0, transmission=1.0, idx=0, ctx=0):
+    def __init__(self, length=0.0, divergence_H=0.0, divergence_V=0.0, transmission=1.0, idx=0, ctx=0,
+                **kwargs):
         
         min2rad = lambda x: x * np.pi / (60.0 * 180.0)
         

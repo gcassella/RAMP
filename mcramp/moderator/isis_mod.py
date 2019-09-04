@@ -2,6 +2,8 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
+from random import randint
+
 import os
 import re
 
@@ -179,4 +181,5 @@ class MISIS():
                                    self.total,
                                    self.str_area,
                                    self.time_offset,
-                                   np.int32(N))
+                                   np.int32(N),
+                                   np.int32(randint(0,4096)))

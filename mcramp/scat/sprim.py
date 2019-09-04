@@ -11,7 +11,19 @@ class SPrim():
         return []
 
     @abstractmethod
-    def data(self):
+    def data_reduce(self, queue):
+        return 0
+
+    @abstractmethod
+    def data(self, queue):
+        return 0
+
+    @abstractmethod
+    def plot(self, queue):
+        return 0
+
+    @abstractmethod
+    def save(self, queue):
         return 0
 
 class Float3(object):

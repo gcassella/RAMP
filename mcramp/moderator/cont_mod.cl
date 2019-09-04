@@ -13,7 +13,7 @@ __kernel void generate_neutrons(__global float16* neutrons,
     float2 const target_dim, float const target_dist, float const E_min,
     float const E_max, float const T1, float const I1, float const T2,
     float const I2, float const T3, float const I3, float const str_area,
-    int const num_sim) {
+    int const num_sim, int const seed) {
 
   // FIXME: make sure the emission intensities are correct for this
 
@@ -22,6 +22,10 @@ __kernel void generate_neutrons(__global float16* neutrons,
   
   global_addr = get_global_id(0);
   neutron = neutrons[global_addr];
+
+  // Clear old neutron data and seed
+
+  neutron = (float16){0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,(float)seed,0.0f,0.0f,0.0f,0.0f};
 
   // Generate an energy val by linearly sampling the range, then weight
   // from a joint Maxwellian distribution according to T1/T2/T3

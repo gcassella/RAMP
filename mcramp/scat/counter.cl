@@ -36,6 +36,7 @@ __kernel void counter(__global float16 *neutrons,
   }
 
   atomicAdd_g_f(counts, (float)neutron.s9);
+  neutron.se = 1.0f;
 
   iidx[global_addr] = 0;
   neutron.sc = comp_idx;

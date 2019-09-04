@@ -17,7 +17,7 @@ __kernel void generate_neutrons(__global float16* neutrons,
     float const E_max, int const num_time_bins, int const num_ener_bins,
     __global float* flux, __global float* time_bins, __global float* ener_bins,
     global float* E_int, float const total, float const str_area,
-    float const time_offset, int const num_sim) {
+    float const time_offset, int const num_sim, int const seed) {
 
   int global_addr, idx, Epnt, Tpnt, interpol_start, interpol_end;
   float deviate, time_val, time_range, time_spread, R, ener_val, ener_spread, 
@@ -26,6 +26,10 @@ __kernel void generate_neutrons(__global float16* neutrons,
   
   global_addr = get_global_id(0);
   neutron = neutrons[global_addr];
+  
+  // Clear old neutron data and seed
+
+  neutron = (float16){0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,(float)seed,0.0f,0.0f,0.0f,0.0f};
 
   deviate = total * rand(&neutron, global_addr);
 

@@ -7,3 +7,4 @@ from .monochromator import SMonochromator
 from .arm import SArm
 from .collimator_lin import SLinearCollimator
 from .counter import SCounter
+from .rescal import SRescal

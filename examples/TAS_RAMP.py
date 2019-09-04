@@ -1,18 +1,18 @@
 import numpy as np
 import pyopencl as cl
-from mcramp import Instrument
+from pyopencl.algorithm import copy_if
+from mcramp import Instrument, frame_rotate
 
 import matplotlib.pyplot as plt
 import os
 
 os.environ["PYOPENCL_NO_CACHE"] = "0"
-os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
-os.environ["PYOPENCL_CTX"] = ":1"
+os.environ["PYOPENCL_COMPILER_OUTPUT"] = "0"
 
 if __name__ == '__main__':
-    N = int(1e8)
+    N = int(1e7)
     
-    ## OpenCL setup and internals
+    ########### OpenCL setup and internals ###########
     plat=cl.get_platforms()[0]
     devices=plat.get_devices()
     dev=devices[1]
@@ -20,7 +20,7 @@ if __name__ == '__main__':
         properties=[(cl.context_properties.PLATFORM, plat)])
     queue = cl.CommandQueue(ctx)
 
-    ## Load and simulate instrument
+    ########### Instrument parameters ###########
 
     # Constants
     h=6.62607015e-34
@@ -44,43 +44,53 @@ if __name__ == '__main__':
     Mono_angle=np.arcsin(mono_q / 2.0 / ki)
 
     # Analyzer parameters, set for choosing |Kf| to look at
-    Ef=Ei
+    Ef=5.0
     Lf=h / np.sqrt(2 * mn * Ef * meV) * overAA
     kf=2 * np.pi / Lf
     
     Ana_angle=np.arcsin(mono_q / 2.0 / kf)
-
-    # Determine nominal kf to look exactly at sample scattering point
-    anangle=np.linspace(Ana_angle-0.02, Ana_angle+0.02, num=20)
-    I=np.ones(anangle.shape)
     
-    Lf=4 * np.pi * np.sin(anangle) / mono_q
-    
-    Ef=(h / np.sqrt(2 * mn * meV) / Lf * overAA)**2.0
-    deltaE=Ei - Ef
+    sample_target_rot=1.3  # radians
+    sample_target = frame_rotate([0.0, 0.0, 1.0], [0.0, sample_target_rot, 0.0])
 
-    twotheta=2*np.arcsin(Li  / 2 / d_spacing)
-
-   #for i, aa in enumerate(anangle):
-   #    inst=Instrument('TAS.json', ctx, queue, Mono_angle=Mono_angle, d_spacing=d_spacing,
-   #                    Ana_angle=aa, monodspacing=mono_d_spacing, twotheta=twotheta)
-   #    inst.execute(N)
-   #    counts = np.load("tascounts.npy")
-   #    I[i] = counts
-   #    plt.close('all')
-
-   #plt.figure()
-   #plt.xlabel("deltaE [meV]")
-   #plt.ylabel("intensity [arb]")
-   #plt.plot(deltaE, I)
-   #plt.show()
-
-    # Run once a final time to show all of the monitors off
+    ########### Run instrument ###########
 
     inst=Instrument('TAS.json', ctx, queue, Mono_angle=Mono_angle, d_spacing=d_spacing, 
-                    Ana_angle=Ana_angle, monodspacing=mono_d_spacing, twotheta=twotheta)
+                    Ana_angle=Ana_angle, monodspacing=mono_d_spacing, sample_target=sample_target, sample_trot=sample_target_rot)
     inst.execute(N)
+
+    ########### Get and plot results ###########
+
     inst.plot()
 
-    os.remove("tascounts.npy")
+    data=inst.data()
+    qx,qy,qz,dE,p=data['sample']
 
+    fig=plt.figure()
+    ax=fig.subplots(2, 3)
+    ax[0, 0].hist2d(qx, qy, weights=p, bins=50)
+    ax[0, 0].set_xlabel("Qx")
+    ax[0, 0].set_ylabel("Qy")
+
+    ax[0, 1].hist2d(qx, qz, weights=p, bins=50)
+    ax[0, 1].set_xlabel("Qx")
+    ax[0, 1].set_ylabel("Qz")
+
+    ax[0, 2].hist2d(qy, qz, weights=p, bins=50)
+    ax[0, 2].set_xlabel("Qy")
+    ax[0, 2].set_ylabel("Qz")
+
+    ax[1, 0].hist2d(qx, dE, weights=p, bins=50)
+    ax[1, 0].set_xlabel("Qx")
+    ax[1, 0].set_ylabel("dE")
+
+    ax[1, 1].hist2d(qy, dE, weights=p, bins=50)
+    ax[1, 1].set_xlabel("Qy")
+    ax[1, 1].set_ylabel("dE")
+
+    ax[1, 2].hist2d(qz, dE, weights=p, bins=50)
+    ax[1, 2].set_xlabel("Qz")
+    ax[1, 2].set_ylabel("dE")
+
+    plt.tight_layout()
+    plt.show()

@@ -2,6 +2,8 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
+from random import randint
+
 import os
 import re
 
@@ -64,4 +66,5 @@ class MCont():
                                    self.T3,
                                    self.I3,
                                    self.str_area,
-                                   np.int32(N))
+                                   np.int32(N),
+                                   np.int32(randint(0,4096)))

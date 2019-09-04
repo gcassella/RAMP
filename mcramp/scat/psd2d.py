@@ -10,7 +10,7 @@ import os
 class PSD2d(SPrim):
     def __init__(self, shape="", axis1_binning=(0, 0, 0),
                  axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
-                 filename=None, logscale = False):
+                 filename=None, logscale = False, **kwargs):
         
         shapes = {"plane" : 0, "banana": 1, "thetatof": 2, "div" : 3, "divpos": 4}
 
@@ -57,7 +57,7 @@ class PSD2d(SPrim):
                           self.shape,
                           self.restore_neutron)
 
-    def plot_histo(self, queue):
+    def plot(self, queue):
         cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
         self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
 
@@ -67,7 +67,7 @@ class PSD2d(SPrim):
         plt.pcolormesh(self.X, self.Y, Z, cmap='jet', shading='gouraud')
         plt.colorbar()
 
-    def save_histo(self, queue):
+    def save(self, queue):
         cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
         self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
 

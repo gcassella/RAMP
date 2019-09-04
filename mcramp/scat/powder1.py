@@ -8,7 +8,8 @@ import os
 
 class SPowder1(SPrim):
     def __init__(self, d_spacing=0.0, pack=0.0, vc=0.0, sigma_abs=0.0,
-                 multiplicity=0, DW=0.0, F2=0.0, d_phi=180.0, idx=0, ctx=None):
+                 multiplicity=0, DW=0.0, F2=0.0, d_phi=180.0, idx=0, ctx=None,
+                 **kwargs):
         # F2 in barns         
 
         # Scattering cross section will be divided by v^2 in Kernel
