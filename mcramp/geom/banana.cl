@@ -10,7 +10,7 @@ __kernel void intersect_banana(__global float16* neutrons,
   float2 plane_pos, plane_vel;
   float theta2, a, b, c, t1, t2, quotient;
 
-  if (neutron.sf > 0.) {
+  if (neutron.sf > 0.f) {
     return;
   }
 
@@ -22,23 +22,23 @@ __kernel void intersect_banana(__global float16* neutrons,
   plane_vel = neutron.s35;
 
   a = dot(plane_vel, plane_vel);
-  b = 2*dot(plane_pos, plane_vel);
+  b = 2.0f*dot(plane_pos, plane_vel);
   c = dot(plane_pos, plane_pos) - banana_radius*banana_radius;
 
-  quotient = b*b-4*a*c;
+  quotient = b*b-4.0f*a*c;
 
-  t1 = (-b - sqrt(quotient)) / (2.*a);
-  t2 = (-b + sqrt(quotient)) / (2.*a);
+  t1 = (-b - sqrt(quotient)) / (2.f*a);
+  t2 = (-b + sqrt(quotient)) / (2.f*a);
 
   intersection = intersections[global_addr];
 
   theta2 = acos(dot(normalize(plane_pos+t2*plane_vel), (float2)( 0.0f, 1.0f )));
-  if ((quotient > 0) &&
-      ((-banana_height/2) < (neutron.s1 + t2*neutron.s4)) &&
+  if ((quotient > 0.0f) &&
+      ((-banana_height/2.0f) < (neutron.s1 + t2*neutron.s4)) &&
       ((neutron.s1 + t2*neutron.s4) < (banana_height/2)) &&
       (mintheta < theta2 < maxtheta)) {
   
-    if (t2 < intersection.s3 && t1 < 0 && t2 > 0) {
+    if (t2 < intersection.s3 && t1 < 0.0f && t2 > 0.0f) {
         
         intersection.s012 = neutron.s012 + t1*neutron.s345;
         intersection.s3   = t1;

@@ -8,7 +8,7 @@ __kernel void intersect_box(__global float16* neutrons,
   float8 intersection;
   float3 pos, vel;
  
-  if (neutron.sf > 0.) {
+  if (neutron.sf > 0.f) {
     return;
   }
 
@@ -37,7 +37,7 @@ __kernel void intersect_box(__global float16* neutrons,
   tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
   tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
 
-  if (tmax < 0) {
+  if (tmax < 0.0f) {
     // Hit the box in the past
   } else if (tmin > tmax) {
     // No intersection

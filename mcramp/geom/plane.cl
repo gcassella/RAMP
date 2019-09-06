@@ -8,7 +8,7 @@ __kernel void intersect_plane(__global float16* neutrons,
     float8 intersection     = intersections[global_addr];
 
     /* Check termination flag */
-    if (neutron.sf > 0.) 
+    if (neutron.sf > 0.f) 
         return;
 
     if (neutron.sc == comp_idx) {
@@ -32,11 +32,11 @@ __kernel void intersect_plane(__global float16* neutrons,
         y = pos.s1 + t*vel.s1;
     }
 
-    if ((fabs(x) < width / 2) && (fabs(y) < height / 2)
+    if ((fabs(x) < width / 2.0f) && (fabs(y) < height / 2.0f)
         && t < intersection.s3
         && t < intersection.s7
-        && t > 0
-        && dot(vel, (float3)( 0.0f, 0.0f, 1.0f )) > 0.) {
+        && t > 0.0f
+        && dot(vel, (float3)( 0.0f, 0.0f, 1.0f )) > 0.f) {
 
         intersection.s012 = pos + t*vel;
         intersection.s456 = pos + t*vel;

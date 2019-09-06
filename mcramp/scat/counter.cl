@@ -30,7 +30,7 @@ __kernel void counter(__global float16 *neutrons,
       return;
   }
 
-  if (neutron.sf > 0.)
+  if (neutron.sf > 0.f)
   {
       return;
   }

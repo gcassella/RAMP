@@ -34,7 +34,7 @@ __kernel void detector(__global float16 *neutrons,
       return;
   }
 
-  if (neutron.sf > 0.)
+  if (neutron.sf > 0.f)
   {
       return;
   }
@@ -43,7 +43,7 @@ __kernel void detector(__global float16 *neutrons,
   step_var = binning.s1;
   max_var = binning.s2;
 
-  ener_val = pow(length(neutron.s345) / 438.01, 2.0);
+  ener_val = pow(length(neutron.s345) / 438.01f, 2.0f);
 
   if(min_var<=ener_val && ener_val<=max_var) {    
     idx = round((ener_val -  min_var) / step_var);
@@ -54,7 +54,7 @@ __kernel void detector(__global float16 *neutrons,
   if (restore_neutron == 0) {
     neutron.s012 = intersection.s456;
     neutron.sa += intersection.s7;
-    neutron.sf = 1.;
+    neutron.sf = 1.f;
   }
 
   iidx[global_addr] = 0;

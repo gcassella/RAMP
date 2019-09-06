@@ -1,23 +1,23 @@
 /* Scientific constants */
 
 #ifndef k_B
-#define k_B (1.38066e-23)
+#define k_B (1.38066e-23f)
 #endif
 
 #ifndef M_PI
-#define M_PI (3.14159265)
+#define M_PI (3.14159265f)
 #endif
 
 #ifndef V2K
-#define V2K (1.58825361e-3)
+#define V2K (1.58825361e-3f)
 #endif
 
 #ifndef K2V
-#define K2V (629.622368)
+#define K2V (629.622368f)
 #endif
 
 #ifndef MIN2RAD
-#define MIN2RAD (M_PI/(180.0*60.0))
+#define MIN2RAD (M_PI/(180.0f*60.0f))
 #endif
 
 #ifndef VS2E

@@ -17,7 +17,7 @@ __kernel void powder1(__global float16* neutrons,
         return;
 
     /* Check termination flag ---------------------------------------------- */
-    if (neutron.sf > 0.) 
+    if (neutron.sf > 0.f) 
         return;
 
     /* Perform scattering here --------------------------------------------- */
@@ -39,8 +39,8 @@ __kernel void powder1(__global float16* neutrons,
     p_scat = sigma_scat / (sigma_abs + sigma_scat);
     p_inter = 1 - exp(-(sigma_scat + sigma_abs)*full_path_length);
 
-    arg = q * K2V / (2.0 * vel);
-    if (arg > 1.0) { // No bragg reflection possible
+    arg = q * K2V / (2.0f * vel);
+    if (arg > 1.0f) { // No bragg reflection possible
         
         iidx[global_addr] = 0;
         neutron.sc = comp_idx;
@@ -50,33 +50,33 @@ __kernel void powder1(__global float16* neutrons,
         return;
     }
 
-    twotheta = 2.0*asin(arg);
+    twotheta = 2.0f*asin(arg);
 
     neutron.s9 *= p_scat; // Adjust weight to model absorption
 
-    pen_depth = -log(1 - rand(&neutron, global_addr)*(1 - p_inter)) / (sigma_abs + sigma_scat);
+    pen_depth = -log(1.0f - rand(&neutron, global_addr)*(1.0f - p_inter)) / (sigma_abs + sigma_scat);
 
     beam_para = normalize(neutron.s345);
-    beam_perp = cross(beam_para, (float3)(0.0, 1.0, 0.0));
+    beam_perp = cross(beam_para, (float3)(0.0f, 1.0f, 0.0f));
 
-    if(length(beam_perp) < 1e-3) { // Beam just happens to be along 0 1 0
-        beam_perp = normalize(cross(beam_para, (float3)(1.0, 0.0, 0.0)));
+    if(length(beam_perp) < 1e-3f) { // Beam just happens to be along 0 1 0
+        beam_perp = normalize(cross(beam_para, (float3)(1.0f, 0.0f, 0.0f)));
     } else {
         beam_perp = normalize(beam_perp);
     }
 
     if (d_phi)
       { 
-        phi = (2*rand(&neutron, global_addr) - 1.0)*(d_phi * M_PI / 180.0);
-        if (rand(&neutron, global_addr) > 0.5) {
+        phi = (2.0f*rand(&neutron, global_addr) - 1.0f)*(d_phi * M_PI / 180.0f);
+        if (rand(&neutron, global_addr) > 0.5f) {
             // go to other side of beam
             phi += M_PI;
         }
 
-        phi += M_PI / 2.0;
+        phi += M_PI / 2.0f;
       }
       else
-        phi = 2 * M_PI * rand(&neutron, global_addr);
+        phi = 2.0f * M_PI * rand(&neutron, global_addr);
 
     rotate_about_axis(phi, beam_para, &beam_perp);
 

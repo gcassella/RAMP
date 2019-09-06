@@ -14,7 +14,7 @@ __kernel void collimator(__global float16* neutrons,
     }
 
     /* Check termination flag */
-    if (neutron.sf > 0.)  {
+    if (neutron.sf > 0.f)  {
         return;
     }
 
@@ -22,21 +22,21 @@ __kernel void collimator(__global float16* neutrons,
 
     float phi;
 
-    if (slope_H > 0.0) {
+    if (slope_H > 0.0f) {
         phi = fabs(neutron.s3 / neutron.s5);
         if (phi > slope_H) {
-            neutron.sf = 1.0
+            neutron.sf = 1.0f
         } else {
-            neutron.s9 *= transmission*(1.0 - phi / slope_H);
+            neutron.s9 *= transmission*(1.0f - phi / slope_H);
         }
     }
 
-    if (slope_V > 0.0) {
+    if (slope_V > 0.0f) {
         phi = fabs(neutron.s4 / neutron.s5);
         if (phi > slope_V) {
-            neutron.sf = 1.0;
+            neutron.sf = 1.0f;
         } else {
-            neutron.s9 *= transmission*(1.0 - phi / slope_V);
+            neutron.s9 *= transmission*(1.0f - phi / slope_V);
         }
     }
 

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 
 os.environ["PYOPENCL_NO_CACHE"] = "0"
-os.environ["PYOPENCL_COMPILER_OUTPUT"] = "0"
+os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
 
 if __name__ == '__main__':
     N = int(1e7)

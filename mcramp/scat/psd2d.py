@@ -6,13 +6,17 @@ import pyopencl.array as clarr
 import matplotlib.pyplot as plt
 
 import os
+import datetime
 
 class PSD2d(SPrim):
     def __init__(self, shape="", axis1_binning=(0, 0, 0),
                  axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
                  filename=None, logscale = False, **kwargs):
         
-        shapes = {"plane" : 0, "banana": 1, "thetatof": 2, "div" : 3, "divpos": 4}
+        shapes = {"plane": 0, "banana": 1, "thetatof": 2, "div": 3, "divpos": 4}
+        
+        self.last_ran_datetime = datetime.datetime.now()
+        self.last_copy_datetime = datetime.datetime.now()
 
         self.axis1_binning = axis1_binning
         self.axis2_binning = axis2_binning
@@ -57,9 +61,10 @@ class PSD2d(SPrim):
                           self.shape,
                           self.restore_neutron)
 
+        self.last_ran_datetime = datetime.datetime.now()
+
     def plot(self, queue):
-        cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
-        self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
+        self._cached_copy(queue)
 
         plt.figure()
         Z = (np.log(self.Z + 1e-7) if self.logscale else self.Z)
@@ -68,13 +73,16 @@ class PSD2d(SPrim):
         plt.colorbar()
 
     def save(self, queue):
-        cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
-        self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
+        self._cached_copy(queue)
 
         if self.filename:
             np.save(self.filename + 'X.dat', self.X)
             np.save(self.filename + 'Y.dat', self.Y)
             np.save(self.filename + 'Z.dat', self.Z)
+
+    def data(self, queue):
+        self._cached_copy(queue)
+        return (self.X, self.Y, self.Z)
 
     def get_histo(self):
         return (self.X, self.Y, self.Z)
@@ -108,3 +116,10 @@ class PSD2d(SPrim):
     def axis2_binning(self, val):
         self._axis2_binning = np.array((val[0], val[1], val[2], 0.),
                                  dtype=clarr.vec.float3)
+
+    def _cached_copy(self, queue):        
+        if self.last_ran_datetime > self.last_copy_datetime:
+            cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
+            self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
+        
+        self.last_copy_datetime = datetime.datetime.now()

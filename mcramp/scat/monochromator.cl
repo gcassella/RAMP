@@ -4,7 +4,7 @@
 
 #ifndef GAUSS
 #define GAUSS(x,mean,rms) \
-  (exp(-((x)-(mean))*((x)-(mean))/(2*(rms)*(rms)))/(sqrt(2*M_PI)*(rms)))
+  (exp(-((x)-(mean))*((x)-(mean))/(2*(rms)*(rms)))/(sqrt(2.0f*M_PI)*(rms)))
 #endif
 
 float randnorm(float16* neutron, uint global_addr) {
@@ -16,7 +16,7 @@ float randnorm(float16* neutron, uint global_addr) {
   u1 = rand(neutron, global_addr);
   u2 = rand(neutron, global_addr);
 
-  return sqrt(-2*log(u1))*cos(2*M_PI*u2);
+  return sqrt(-2*log(u1))*cos(2.0f*M_PI*u2);
 }
 
 __kernel void monochromator(__global float16* neutrons,
@@ -39,7 +39,7 @@ __kernel void monochromator(__global float16* neutrons,
     }
 
     /* Check termination flag */
-    if (neutron.sf > 0.)  {
+    if (neutron.sf > 0.f)  {
         return;
     }
 
@@ -53,90 +53,90 @@ __kernel void monochromator(__global float16* neutrons,
           p_reflect;
     float3 ki, ku;
 
-    mos_rms_y = MIN2RAD*mosaic_horizontal / sqrt(8.0*log(2.0));
-    mos_rms_z = MIN2RAD*mosaic_vertical / sqrt(8.0*log(2.0));
+    mos_rms_y = MIN2RAD*mosaic_horizontal / sqrt(8.0f*log(2.0f));
+    mos_rms_z = MIN2RAD*mosaic_vertical / sqrt(8.0f*log(2.0f));
     mos_rms_max = mos_rms_y > mos_rms_z ? mos_rms_y : mos_rms_z;
 
-    Q = 2 * M_PI / d_spacing;
+    Q = 2.0f * M_PI / d_spacing;
 
-    zmax = ((n_horizontal*(slab_width+gap))-gap)/2.0;
+    zmax = ((n_horizontal*(slab_width+gap))-gap)/2.0f;
     zmin = -zmax;
-    ymax = ((n_vertical*(slab_height+gap))-gap)/2.0;
+    ymax = ((n_vertical*(slab_height+gap))-gap)/2.0f;
     ymin = -ymax;
 
     if (neutron.s2 > zmin && neutron.s2 < zmax && neutron.s1 > ymin && neutron.s1 < ymax) {
       col = ceil((neutron.s2 - zmin)/(slab_width + gap));
       row = ceil((neutron.s1 - ymin)/(slab_height + gap));
 
-      tilt_horizontal = radius_horizontal ? asin((col - (float)(n_horizontal+1)/2.0) * (slab_width + gap) / radius_horizontal) : 0.0;
-      tilt_vertical = radius_vertical ? -asin((row - (float)(n_vertical+1)/2.0)*(slab_height + gap) / radius_vertical) : 0.0;
+      tilt_horizontal = radius_horizontal ? asin((col - (float)(n_horizontal+1)/2.0f) * (slab_width + gap) / radius_horizontal) : 0.0f;
+      tilt_vertical = radius_vertical ? -asin((row - (float)(n_vertical+1)/2.0f)*(slab_height + gap) / radius_vertical) : 0.0f;
 
       // Transform to slab frame MAKE SURE TO LEAVE SLAB FRAME WHEN WE'RE DONE
 
-      float center_z = zmin + (col - 0.5)*(slab_width + gap) - gap / 2.0;
-      float center_y = ymin + (row - 0.5)*(slab_height + gap) - gap / 2.0;
-      float3 slab_pos = (float3){ 0.0, center_y, center_z };
-      float3 slab_rot = (float3){ 0.0, tilt_horizontal, tilt_vertical };
+      float center_z = zmin + (col - 0.5f)*(slab_width + gap) - gap / 2.0f;
+      float center_y = ymin + (row - 0.5f)*(slab_height + gap) - gap / 2.0f;
+      float3 slab_pos = (float3){ 0.0f, center_y, center_z };
+      float3 slab_rot = (float3){ 0.0f, tilt_horizontal, tilt_vertical };
       neutron.s345 = frame_derotate(neutron.s345, slab_rot);
       neutron.s012 -= slab_pos;
       neutron.s012 = frame_derotate(neutron.s012, slab_rot);
 
-      if (fabs(neutron.s2) <= slab_width / 2.0 && fabs(neutron.s1) <= slab_height / 2.0) {
+      if (fabs(neutron.s2) <= slab_width / 2.0f && fabs(neutron.s1) <= slab_height / 2.0f) {
         // Didn't hit the gap
 
         ki = V2K*neutron.s345;
 
         // Determine order of Bragg scattering
-        ratio = -2*ki.s0 / Q;
-        Q_order = floor(ratio + 0.5);
+        ratio = -2.0f*ki.s0 / Q;
+        Q_order = floor(ratio + 0.5f);
 
-        if (Q_order == 0.0) Q_order = ratio < 0 ? -1 : 1;
-        if (Q_order < 0) Q_order = -Q_order;
+        if (Q_order == 0.0f) Q_order = ratio < 0 ? -1.0f : 1.0f;
+        if (Q_order < 0.0f) Q_order = -Q_order;
 
         // Ensure scattering is possible
 
         ku = normalize(ki);
 
-        if (Q_order > 2*length(ki) / Q) Q_order-= 1;
+        if (Q_order > 2.0f*length(ki) / Q) Q_order-= 1.0f;
 
         // TODO: add higher order restriction here
 
         q0 = Q_order*Q;
-        q0x = ratio < 0 ? -q0 : q0;
-        theta = asin(q0 / (2*length(ki)));
+        q0x = ratio < 0.0f ? -q0 : q0;
+        theta = asin(q0 / (2.0f*length(ki)));
 
         delta = asin(fabs(ku.s0)) - theta;
 
-        p_reflect = fabs(r0) * exp(-ki.s2*ki.s2/length(ki.s12) * delta*delta/(2*mos_rms_y*mos_rms_y)) * exp(-ki.s1*ki.s1 / length(ki.s12) * delta*delta/(2*mos_rms_z*mos_rms_z));
+        p_reflect = fabs(r0) * exp(-ki.s2*ki.s2/(length(ki.s12)*length(ki.s12)) * delta*delta/(2.0f*mos_rms_y*mos_rms_y)) * exp(-ki.s1*ki.s1 / (length(ki.s12)*length(ki.s12)) * delta*delta/(2.0f*mos_rms_z*mos_rms_z));
 
         if (rand(&neutron, global_addr) <= p_reflect) { // reflect
           float3 b, a, c1, q;
           float phi, cos_2theta, k_sin_2theta, cos_phi, sin_phi;
           float total, w, mos_sample;
 
-          cos_2theta = cos(2*theta);
-          k_sin_2theta = length(ki)*sin(2*theta);
+          cos_2theta = cos(2.0f*theta);
+          k_sin_2theta = length(ki)*sin(2.0f*theta);
 
-          b = normalize(cross(ki, (float3){ q0x, 0.0, 0.0 }));
+          b = normalize(cross(ki, (float3){ q0x, 0.0f, 0.0f }));
           b *= k_sin_2theta;
 
           a = cross(b, ku);
-          total = 0;
+          total = 0.0f;
 
           mos_sample = mos_rms_max / cos(theta);
-          c1 = ki*(cos_2theta - 1.0);
+          c1 = ki*(cos_2theta - 1.0f);
 
           for(uint i = 0; i<100; i++) {
-            w = 5*mos_sample;
+            w = 5.0f*mos_sample;
             cos_phi = cos(w);
             sin_phi = sin(w);
             q = c1 + cos_phi*a + sin_phi*b;
             q.s1 = q.s1 / mos_rms_z;
             q.s2 = q.s2 / mos_rms_y;
 
-            if (q.s2*q.s2 + q.s1*q.s1 < (25.0/(2.0/3.0))*(q.s0*q.s0))
+            if (q.s2*q.s2 + q.s1*q.s1 < (25.0f/(2.0f/3.0f))*(q.s0*q.s0))
               break;
-            mos_sample *= (2.0 / 3.0);
+            mos_sample *= (2.0f / 3.0f);
           }
 
           for(uint i = 0; i < gausslen; i++) {
@@ -146,7 +146,7 @@ __kernel void monochromator(__global float16* neutrons,
 
             q = c1 + cos_phi*a + sin_phi*b;
 
-            p_reflect = GAUSS((q.s2/q.s0),0,mos_rms_y)*GAUSS((q.s1/q.s0),0,mos_rms_z);
+            p_reflect = GAUSS((q.s2/q.s0),0.0f,mos_rms_y)*GAUSS((q.s1/q.s0),0.0f,mos_rms_z);
             total += gaussw[i]*p_reflect;
           }
 
@@ -159,13 +159,13 @@ __kernel void monochromator(__global float16* neutrons,
 
           q = c1 + cos_phi*a + sin_phi*b;
 
-          p_reflect = GAUSS((q.s2/q.s0),0,mos_rms_y)*GAUSS((q.s1/q.s0),0,mos_rms_z);
+          p_reflect = GAUSS((q.s2/q.s0),0.0f,mos_rms_y)*GAUSS((q.s1/q.s0),0.0f,mos_rms_z);
 
           neutron.s345 = K2V*(ki + q);
 
-          p_reflect /= total*GAUSS(phi, 0, mos_sample);
+          p_reflect /= total*GAUSS(phi, 0.0f, mos_sample);
           // if (p_reflect <= 0) // absorb
-          if (p_reflect > 1) p_reflect = 1;
+          if (p_reflect > 1.0f) p_reflect = 1.0f;
 
           neutron.s9 *= p_reflect;
         } else {

@@ -3,9 +3,9 @@
 
 float maxwell_energy_distn(float E, float T) {
   float rootE = sqrt(E);
-  float overKT = 1.0 / (k_B * T);
+  float overKT = 1.0f / (k_B * T);
 
-  return 2*rootE/sqrt(M_PI)*pow(overKT, (float)(3.0/2.0))*exp(-E*overKT);
+  return 2.0f*rootE/sqrt(M_PI)*pow(overKT, (float)(3.0f/2.0f))*exp(-E*overKT);
 }
 
 __kernel void generate_neutrons(__global float16* neutrons,
@@ -34,7 +34,7 @@ __kernel void generate_neutrons(__global float16* neutrons,
 
   E_range = (E_max - E_min);
   E_val = E_min + E_range*rand(&neutron, global_addr);
-  E_val_Joules = 1.6021765e-22 * E_val;
+  E_val_Joules = 1.6021765e-22f * E_val;
 
   distmax_T1 = maxwell_energy_distn(k_B*T1, T1);
   distmax_T2 = maxwell_energy_distn(k_B*T2, T2);
@@ -46,18 +46,18 @@ __kernel void generate_neutrons(__global float16* neutrons,
 
   neutron.s9 = M_intensity / num_sim;
 
-  neutron.s0 = mod_dim.x*(0.5 - rand(&neutron, global_addr));
-  neutron.s1 = mod_dim.y*(0.5 - rand(&neutron, global_addr));
-  neutron.s2 = 0.0;
+  neutron.s0 = mod_dim.x*(0.5f - rand(&neutron, global_addr));
+  neutron.s1 = mod_dim.y*(0.5f - rand(&neutron, global_addr));
+  neutron.s2 = 0.0f;
 
-  vel = 437.393377*sqrt(E_val);
-  Dx = target_dim.x*(0.5 - rand(&neutron, global_addr)) - neutron.s0;
-  Dy = target_dim.y*(0.5 - rand(&neutron, global_addr)) - neutron.s1;
+  vel = SE2V*sqrt(E_val);
+  Dx = target_dim.x*(0.5f - rand(&neutron, global_addr)) - neutron.s0;
+  Dy = target_dim.y*(0.5f - rand(&neutron, global_addr)) - neutron.s1;
   
   neutron.s345 = vel*normalize((float3)( Dx, Dy, target_dist ));
 
   // Revive terminated neutrons
-  neutron.sf = 0.;
+  neutron.sf = 0.f;
 
   neutrons[global_addr] = neutron;
   intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,

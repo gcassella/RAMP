@@ -8,7 +8,7 @@ __kernel void transform(__global float16* neutrons,
     float16 neutron = neutrons[global_addr];
 
     /* Already terminated? */
-    if (neutron.sf > 0.) {
+    if (neutron.sf > 0.f) {
         return;
     }
 
@@ -28,7 +28,7 @@ __kernel void untransform(__global float16* neutrons,
     float16 neutron = neutrons[global_addr];
 
     /* Already terminated? */
-    if (neutron.sf > 0.) {
+    if (neutron.sf > 0.f) {
         return;
     }
 

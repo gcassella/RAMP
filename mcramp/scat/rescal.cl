@@ -29,16 +29,15 @@ __kernel void rescal(__global float16* neutrons,
 
     float8 ev;
     float3 target_perp, target_perp_perp, target_final, ki, kf;
-    float l2, costhetamax, solid_angle, theta, phi, vf, Ef;
+    float l2, costhetamax, theta, phi, vf, Ef;
 
     ki = V2K*neutron.s345;
 
     l2 = length(target)*length(target);
     costhetamax = sqrt(l2 / (focus_r*focus_r + l2));
-    solid_angle = 2*M_PI*(1 - costhetamax);
 
-    theta = acos(1 - rand(&neutron, global_addr) * (1 - costhetamax));
-    phi = rand(&neutron, global_addr)*2*M_PI;
+    theta = acos(1.0f - rand(&neutron, global_addr) * (1.0f - costhetamax));
+    phi = rand(&neutron, global_addr)*2.0f*M_PI;
 
     if (target.s0 == 0.0f && target.s2 == 0.0f) {
         target_perp = (float3){ 1.0f, 0.0f, 0.0f };
@@ -54,7 +53,7 @@ __kernel void rescal(__global float16* neutrons,
     
     target_final = normalize(target_final);
 
-    Ef = E0 + dE*(1 - 2*rand(&neutron, global_addr));
+    Ef = E0 + dE*(1.0f - 2.0f*rand(&neutron, global_addr));
     vf = SE2V*sqrt(Ef);
 
     neutron.s345 = target_final*vf;
@@ -62,7 +61,7 @@ __kernel void rescal(__global float16* neutrons,
 
     ev.s012 = ki - kf;
     ev.s6 = neutron.s9;
-    ev.s7 = Ef - VS2E*pow(length(K2V*ki), 2.0f);
+    ev.s7 = VS2E*pow(length(K2V*ki), 2.0f) - Ef;
 
     eventlist[global_addr] = ev;
     /* ----------------------- */

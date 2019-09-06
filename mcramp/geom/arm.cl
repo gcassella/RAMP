@@ -8,12 +8,12 @@ __kernel void arm(__global float16* neutrons,
     float8 intersection = intersections[global_addr];
 
     /* Already terminated? */
-    if (neutron.sf > 0.) {
+    if (neutron.sf > 0.f) {
         return;
     }
 
     // Have to add some intersection to avoid neutron termination
-    intersection.s456 = (float3){ 1.0, 1.0, 1.0 };
+    intersection.s456 = (float3){ 1.0f, 1.0f, 1.0f };
     iidx[global_addr] = comp_idx;
 
     intersections[global_addr] = intersection;

@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import os
 
 os.environ["PYOPENCL_NO_CACHE"] = "1"
-os.environ["PYOPENCL_COMPILER_OUTPUT"] = "0"
-#os.environ["PYOPENCL_CTX"] = "0:0"
+os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
+os.environ["PYOPENCL_CTX"] = "0:1"
 
 if __name__ == '__main__':
     N = int(9999360)

@@ -16,7 +16,7 @@ void atomicAdd_g_f(volatile __global float *addr, float val)
 }
 
 int find_idx(float val, float3 binning) {
-    uint idx;
+    int idx;
     if(binning.s0<=val && val<=binning.s2) {    
         idx = round((val -  binning.s0) / binning.s1);
     } else {
@@ -46,7 +46,7 @@ __kernel void detector(__global float16 *neutrons,
       return;
 
   /* Check termination flag ---------------------------------------------- */
-  if (neutron.sf > 0.) 
+  if (neutron.sf > 0.f) 
       return;
 
   /* Perform scattering here --------------------------------------------- */
@@ -90,7 +90,7 @@ __kernel void detector(__global float16 *neutrons,
   if (restore_neutron == 0) {
     neutron.s012 = intersection.s456;
     neutron.sa += intersection.s7;
-    neutron.sf = 1.;
+    neutron.sf = 1.f;
   }
 
   iidx[global_addr] = 0;
