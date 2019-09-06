@@ -8,9 +8,9 @@ import os
 import re
 
 class SGuide(SPrim):
-    def __init__(self, pos=(0., 0., 0.), w1=0, h1=0, w2=0, h2=0, l=0, 
-                 R0=0, Qc=0, alpha=0, m=1, W=0, idx=0, ctx=0, max_bounces=50):
-        self.g_pos  = np.array((pos[0], pos[1], pos[2], 0. ), dtype=clarr.vec.float3)
+    def __init__(self, w1=0, h1=0, w2=0, h2=0, l=0, 
+                 R0=0, Qc=0, alpha=0, m=1, W=0, idx=0, ctx=0, max_bounces=50,
+                 **kwargs):
         self.w1     = np.float32(w1)
         self.h1     = np.float32(h1)
         self.w2     = np.float32(w2)
@@ -35,7 +35,6 @@ class SGuide(SPrim):
                                 intersection_buf,
                                 iidx_buf,
                                 self.idx,
-                                self.g_pos,
                                 self.w1,
                                 self.h1,
                                 self.w2,
@@ -46,4 +45,4 @@ class SGuide(SPrim):
                                 self.alpha,
                                 self.m,
                                 self.W,
-                                self.max_bounces).wait()
+                                self.max_bounces)

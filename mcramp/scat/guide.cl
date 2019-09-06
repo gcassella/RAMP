@@ -6,13 +6,9 @@
 #include "ref.h"
 #include "consts.h"
 
-#ifndef V2K
-#define V2K 1.58825361e-3
-#endif
-
 __kernel void guide_scatter(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
-    uint const comp_idx, float3 const g_pos, 
+    uint const comp_idx,
     float const w1, float const h1,
     float const w2, float const h2, float const l,
     float const R0, float const Qc, float const alpha,
@@ -29,7 +25,7 @@ __kernel void guide_scatter(__global float16* neutrons,
     }
 
     /* Check termination flag */
-    if (neutron.sf > 0.)  {
+    if (neutron.sf > 0.f)  {
         return;
     }
 
@@ -46,11 +42,11 @@ __kernel void guide_scatter(__global float16* neutrons,
 
     uint i = 0;
 
-    ww = 0.5*(w2 - w1); hh = 0.5*(h2 - h1);
-    whalf = 0.5*w1; hhalf = 0.5*h1;
+    ww = 0.5f*(w2 - w1); hh = 0.5f*(h2 - h1);
+    whalf = 0.5f*w1; hhalf = 0.5f*h1;
 
     while(true) {
-        pos = neutron.s012 - g_pos;
+        pos = neutron.s012;
         vel = neutron.s345;
 
         av = l*vel.s0; bv = ww*vel.s2;
@@ -67,22 +63,22 @@ __kernel void guide_scatter(__global float16* neutrons,
 
         t1 = (l - pos.s2)/vel.s2;
         i = 0;
-        if(vdotn_v1 < 0 && (t2 = (cv1 - cv2)/vdotn_v1) < t1)
+        if(vdotn_v1 < 0.0f && (t2 = (cv1 - cv2)/vdotn_v1) < t1)
         {
           t1 = t2;
           i = 1;
         }
-        if(vdotn_v2 < 0 && (t2 = (cv1 + cv2)/vdotn_v2) < t1)
+        if(vdotn_v2 < 0.0f && (t2 = (cv1 + cv2)/vdotn_v2) < t1)
         {
           t1 = t2;
           i = 2;
         }
-        if(vdotn_h1 < 0 && (t2 = (ch1 - ch2)/vdotn_h1) < t1)
+        if(vdotn_h1 < 0.0f && (t2 = (ch1 - ch2)/vdotn_h1) < t1)
         {
           t1 = t2;
           i = 3;
         }
-        if(vdotn_h2 < 0 && (t2 = (ch1 + ch2)/vdotn_h2) < t1)
+        if(vdotn_h2 < 0.0f && (t2 = (ch1 + ch2)/vdotn_h2) < t1)
         {
           t1 = t2;
           i = 4;
@@ -99,29 +95,29 @@ __kernel void guide_scatter(__global float16* neutrons,
         {
           case 1:                   /* Left vertical mirror */
             nlen2 = l*l + ww*ww;
-            q = V2Q*(-2)*vdotn_v1/sqrt(nlen2);
-            d = 2*vdotn_v1/nlen2;
+            q = V2K*(-2.0f)*vdotn_v1/sqrt(nlen2);
+            d = 2.0f*vdotn_v1/nlen2;
             neutron.s3 = neutron.s3 - d*l;
             neutron.s5 = neutron.s5 - d*ww;
             break;
           case 2:                   /* Right vertical mirror */
             nlen2 = l*l + ww*ww;
-            q = V2Q*(-2)*vdotn_v2/sqrt(nlen2);
-            d = 2*vdotn_v2/nlen2;
+            q = V2K*(-2.0f)*vdotn_v2/sqrt(nlen2);
+            d = 2.0f*vdotn_v2/nlen2;
             neutron.s3 = neutron.s3 + d*l;
             neutron.s5 = neutron.s5 - d*ww;
             break;
           case 3:                   /* Lower horizontal mirror */
             nlen2 = l*l + hh*hh;
-            q = V2Q*(-2)*vdotn_h1/sqrt(nlen2);
-            d = 2*vdotn_h1/nlen2;
+            q = V2K*(-2.0f)*vdotn_h1/sqrt(nlen2);
+            d = 2.0f*vdotn_h1/nlen2;
             neutron.s4 = neutron.s4 - d*l;
             neutron.s5 = neutron.s5 - d*hh;
             break;
           case 4:                   /* Upper horizontal mirror */
             nlen2 = l*l + hh*hh;
-            q = V2Q*(-2)*vdotn_h2/sqrt(nlen2);
-            d = 2*vdotn_h2/nlen2;
+            q = V2K*(-2.0f)*vdotn_h2/sqrt(nlen2);
+            d = 2.0f*vdotn_h2/nlen2;
             neutron.s4 = neutron.s4 + d*l;
             neutron.s5 = neutron.s5 - d*hh;
             break;

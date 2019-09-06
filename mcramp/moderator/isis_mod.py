@@ -2,16 +2,17 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
+from random import randint
+
 import os
 import re
 
 class MISIS():
-    def __init__(self, ctx=None, pos=(0.0, 0.0, 0.0), spec_file="Let_Base.mcstas",
+    def __init__(self, ctx=None, spec_file="Let_Base.mcstas",
                  mod_dim=(0.0, 0.0), target_dim=(0.0, 0.0), target_dist=0.0, E_min=0.0, E_max=0.0):
 
         self.ctx = ctx
 
-        self.pos = np.array((pos[0], pos[1], pos[2], 0.0), dtype=clarr.vec.float3)
         self.mod_dim = np.array((mod_dim[0], mod_dim[1]), dtype=clarr.vec.float2)
         self.target_dim = np.array((target_dim[0], target_dim[1]), dtype=clarr.vec.float2)
         self.target_dist = np.float32(target_dist)
@@ -166,7 +167,6 @@ class MISIS():
 
     def gen_prg(self, queue, N, neutron_buf, intersection_buf):
         self.prg.generate_neutrons(queue, (N,), None, neutron_buf, intersection_buf,
-                                   self.pos,
                                    self.mod_dim,
                                    self.target_dim,
                                    self.target_dist,
@@ -181,4 +181,5 @@ class MISIS():
                                    self.total,
                                    self.str_area,
                                    self.time_offset,
-                                   np.int32(N))
+                                   np.int32(N),
+                                   np.int32(randint(0,4096)))

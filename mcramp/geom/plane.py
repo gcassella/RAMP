@@ -7,8 +7,10 @@ import pyopencl.array as clarr
 import os
 
 class GPlane(GPrim):
-    def __init__(self, width=0, height=0, position=[0, 0, 0], idx=0, ctx=None):
-        self.position   = position
+    def __init__(self, width=0, height=0, idx=0, orientation="xy", ctx=None):
+        orientations = {"xy": 0, "yz": 1}
+
+        self.orientation = np.uint32(orientations[orientation])
         self.width      = np.float32(width)
         self.height     = np.float32(height)
         self.idx        = np.uint32(idx)
@@ -24,6 +26,6 @@ class GPlane(GPrim):
                                  intersection_buf,
                                  iidx_buf,
                                  self.idx,
-                                 self.position,
                                  self.width,
-                                 self.height)
+                                 self.height,
+                                 self.orientation)

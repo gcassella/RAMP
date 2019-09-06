@@ -13,20 +13,16 @@ void atomicAdd_g_f(volatile __global float *addr, float val)
     } while( current.u32 != expected.u32 );
 }
 
-
-
-__kernel void detector(__global float16 *neutrons,
+__kernel void counter(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
-                       uint const comp_idx, volatile __global float *histogram,
-                       float3 const binning, uint const restore_neutron)
+                       uint const comp_idx, __global float* counts)
 {
 
   uint global_addr = get_global_id(0);
   float16 neutron = neutrons[global_addr];
-  float8 intersection = intersections[global_addr];
-  float ener_val, min_var, step_var, max_var;
-
-  uint this_iidx, idx;
+  //float8 intersection = intersections[global_addr];
+ 
+  uint this_iidx;
   this_iidx = iidx[global_addr];
 
   if (!(this_iidx == comp_idx))
@@ -39,23 +35,8 @@ __kernel void detector(__global float16 *neutrons,
       return;
   }
 
-  min_var = binning.s0;
-  step_var = binning.s1;
-  max_var = binning.s2;
-
-  ener_val = pow(length(neutron.s345) / 438.01f, 2.0f);
-
-  if(min_var<=ener_val && ener_val<=max_var) {    
-    idx = round((ener_val -  min_var) / step_var);
-    atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
-  }
-  
-  
-  if (restore_neutron == 0) {
-    neutron.s012 = intersection.s456;
-    neutron.sa += intersection.s7;
-    neutron.sf = 1.f;
-  }
+  atomicAdd_g_f(counts, (float)neutron.s9);
+  neutron.se = 1.0f;
 
   iidx[global_addr] = 0;
   neutron.sc = comp_idx;

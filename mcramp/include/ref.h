@@ -3,10 +3,10 @@ float reflectivity_func(float q, float R0,
     float W) {
 
     /* Simpler parametrization from Henrik Jacobsen uses these values that depend on m only.
-       double m_value=m*0.9853+0.1978;
-       double W=-0.0002*m_value+0.0022;
-       double alpha=0.2304*m_value+5.0944;
-       double beta=-7.6251*m_value+68.1137; 
+       float m_value=m*0.9853+0.1978;
+       float W=-0.0002*m_value+0.0022;
+       float alpha=0.2304*m_value+5.0944;
+       float beta=-7.6251*m_value+68.1137; 
        If W and alpha are set to 0, use Henrik's approach for estimating these parameters
        and apply the formulation:
        arg = R0*0.5*(1-tanh(arg))*(1-alpha*(q-Qc)+beta*(q-Qc)*(q-Qc));

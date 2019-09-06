@@ -6,21 +6,25 @@ import pyopencl.array as clarr
 import matplotlib.pyplot as plt
 
 import os
+import datetime
 
-class PSD2dMon(SPrim):
-    def __init__(self, sample_pos=(0, 0, 0), shape="", axis1_binning=(0, 0, 0),
+class PSD2d(SPrim):
+    def __init__(self, shape="", axis1_binning=(0, 0, 0),
                  axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
-                 filename=None):
+                 filename=None, logscale = False, **kwargs):
         
-        shapes = {"plane" : 0, "banana": 1, "thetatof": 2, "div" : 3, "divpos": 4}
+        shapes = {"plane": 0, "banana": 1, "thetatof": 2, "div": 3, "divpos": 4}
+        
+        self.last_ran_datetime = datetime.datetime.now()
+        self.last_copy_datetime = datetime.datetime.now()
 
         self.axis1_binning = axis1_binning
         self.axis2_binning = axis2_binning
-        self.sample_pos = sample_pos
         self.shape = np.uint32(shapes[shape])
         self.idx = np.uint32(idx)
         self.restore_neutron = np.uint32(1 if restore_neutron else 0)
         self.filename = filename
+        self.logscale = logscale
 
         self.axis1_num_bins = np.uint32(np.ceil((axis1_binning[2] - axis1_binning[0]) / axis1_binning[1]))
         self.axis2_num_bins = np.uint32(np.ceil((axis2_binning[2] - axis2_binning[0]) / axis2_binning[1]))
@@ -30,10 +34,16 @@ class PSD2dMon(SPrim):
 
         mf               = cl.mem_flags
         self.histo_cl    = cl.Buffer(ctx,
-                                    mf.WRITE_ONLY,
-                                    self.histo.nbytes)
+                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                     hostbuf=self.histo)
+        
+        x = np.linspace(self.axis1_binning['s0'], self.axis1_binning['s2'], num=self.axis1_num_bins)
+        y = np.linspace(self.axis2_binning['s0'], self.axis2_binning['s2'], num=self.axis2_num_bins)
 
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'psd2d_mon.cl'), mode='r') as f:
+        self.X, self.Y = np.meshgrid(x, y)
+        self.Z = np.zeros(self.histo2d.T.shape)
+
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'psd2d.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     def scatter_prg(self, queue, N, neutron_buf, intersection_buf, iidx_buf):
@@ -44,7 +54,6 @@ class PSD2dMon(SPrim):
                           iidx_buf,
                           self.idx,
                           self.histo_cl,
-                          self.sample_pos,
                           self.axis1_binning,
                           self.axis2_binning,
                           self.axis1_num_bins,
@@ -52,29 +61,34 @@ class PSD2dMon(SPrim):
                           self.shape,
                           self.restore_neutron)
 
-        neutrons = np.zeros((N, ), dtype=clarr.vec.float16)
-        cl.enqueue_copy(queue, neutrons, neutron_buf).wait()
+        self.last_ran_datetime = datetime.datetime.now()
 
-        counted = np.where((neutrons['s14'] > 0) & (neutrons['s12'].astype(np.uint32) == self.idx))
-        self.histo, _ = np.histogram(neutrons['s14'][counted], bins=range(self.num_bins + 1), weights=neutrons['s9'][counted])
-        self.histo2d = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins))
+    def plot(self, queue):
+        self._cached_copy(queue)
 
-        self.plot_histo()
-
-    def plot_histo(self):
         plt.figure()
-        x = np.linspace(self.axis1_binning['s0'], self.axis1_binning['s2'], num=self.axis1_num_bins)
-        y = np.linspace(self.axis2_binning['s0'], self.axis2_binning['s2'], num=self.axis2_num_bins)
+        Z = (np.log(self.Z + 1e-7) if self.logscale else self.Z)
 
-        X, Y = np.meshgrid(x, y)
-
-        plt.pcolormesh(X, Y, self.histo2d.T, cmap='jet', shading='gouraud')
+        plt.pcolormesh(self.X, self.Y, Z, cmap='jet', shading='gouraud')
         plt.colorbar()
 
+    def save(self, queue):
+        self._cached_copy(queue)
+
         if self.filename:
-            np.save(self.filename + 'X.dat', X)
-            np.save(self.filename + 'Y.dat', Y)
-            np.save(self.filename + 'Z.dat', self.histo2d.T)
+            np.save(self.filename + 'X.dat', self.X)
+            np.save(self.filename + 'Y.dat', self.Y)
+            np.save(self.filename + 'Z.dat', self.Z)
+
+    def data(self, queue):
+        self._cached_copy(queue)
+        return (self.X, self.Y, self.Z)
+
+    def get_histo(self):
+        return (self.X, self.Y, self.Z)
+
+    def sum_histo(self):
+        self.Z += self.histo2d.T
 
     @property
     def sample_pos(self):
@@ -102,3 +116,10 @@ class PSD2dMon(SPrim):
     def axis2_binning(self, val):
         self._axis2_binning = np.array((val[0], val[1], val[2], 0.),
                                  dtype=clarr.vec.float3)
+
+    def _cached_copy(self, queue):        
+        if self.last_ran_datetime > self.last_copy_datetime:
+            cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
+            self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
+        
+        self.last_copy_datetime = datetime.datetime.now()

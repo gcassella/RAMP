@@ -1,14 +1,6 @@
 #include "consts.h"
 #include "rand.h"
 
-#ifndef V2K
-#define V2K 1.58825361e-3
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265
-#endif
-
 __kernel void chopper(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
     uint const comp_idx, float const slit_width,
@@ -26,7 +18,7 @@ __kernel void chopper(__global float16* neutrons,
   }
 
   /* Check termination flag */
-  if (neutron.sf > 0.)  {
+  if (neutron.sf > 0.f)  {
       return;
   }
 
@@ -35,12 +27,12 @@ __kernel void chopper(__global float16* neutrons,
   neutron.s012 = intersection.s456;
   neutron.sa += intersection.s7;
 
-  float Tg, toff, thi_chop,thi_neut,thi_diff,ang_diff,width,pha_error;
+  float Tg, thi_chop,thi_neut,thi_diff,ang_diff,width,pha_error;
 
-  Tg = 2*M_PI / (float)n_slits;
+  Tg = 2.0f*M_PI / (float)n_slits;
   
 	/*pha_error is the error in the phasing of the chopper in radians*/
-  pha_error=jitter*2.0*(rand(&neutron, global_addr)-0.5); 
+  pha_error=jitter*2.0f*(rand(&neutron, global_addr)-0.5f); 
   thi_chop=freq*(neutron.sa - fabs(phase))+pha_error;
   thi_neut=atan2(neutron.s0, neutron.s1+radius);
   thi_diff=fabs(thi_chop-thi_neut); 
@@ -51,8 +43,8 @@ __kernel void chopper(__global float16* neutrons,
   width=atan2(slit_width, neutron.s1+radius);
 
   /* does neutron hit the slit? */
-  if (ang_diff>width/2.0) 
-    neutron.sf = 1.0;
+  if (ang_diff>width/2.0f) 
+    neutron.sf = 1.0f;
   
 
   /* ----------------------- */

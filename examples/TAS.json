@@ -1,0 +1,197 @@
+{
+    "all" : {
+        "linear" : true,
+        "mod" : {
+            "source": true,
+            "position" : [0.0, 0.0, 0.0],
+            "moderator_kernel": {
+                "name": "MCont",
+                "mod_dim": [0.01, 0.01],
+                "target_dim": [0.01, 0.01],
+                "target_dist": 1.0,
+                "E_min": 4.75,
+                "E_max": 5.25,
+                "T1" : 216.8,
+                "I1" : 1.24e13,
+                "T2" : 33.9,
+                "I2" : 1.02e13,
+                "T3" : 16.7,
+                "I3" : 3.0423e12
+            }
+        },
+
+        "Emon_incident" : {
+            "position" : [0.0, 0.0, 0.01],
+            "rotation" : [0.0, 0.0, 0.0],
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.1,
+                "height": 0.1
+            },
+            "scat_kernel" : {
+                "name" : "EMon",
+                "binning": [4.0, 0.01, 6.0],
+                "restore_neutron": true
+            }
+        },
+
+        "Mono_arm" : {
+            "position" : [0.0, 0.0, 1.0],
+            "rotation" : [0.0, $Mono_angle$, 0.0],
+            "geom_kernel": {
+                "name": "GArm"
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        },
+
+        "Mono_out" : {
+            "position" : [0.0, 0.0, 1.0],
+            "rotation" : [0.0, $2*Mono_angle$, 0.0],
+            "geom_kernel": {
+                "name": "GArm"
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        },
+
+        "mono" : {
+            "position" : [0.0, 0.0, 0.0],
+            "rotation" : [0.0, 0.0, 0.0],
+            "relative" : "Mono_arm",
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.10,
+                "height": 0.10,
+                "orientation": "yz"
+            },
+            "scat_kernel": {
+                "name": "SMonochromator",
+                "slab_width" : 0.1,
+                "slab_height" : 0.1,
+                "mosaic_horizontal" : 40,
+                "mosaic_vertical" : 40,
+                "r0" : 0.9,
+                "d_spacing" : $monodspacing$,
+                "radius_vertical" : 0.0
+            }
+        },
+
+        "emon_outgoing" :{
+            "position" : [0.0, 0.0, 0.5],
+            "rotation" : [0.0, 0.0, 0.0],
+            "restore_neutron" : true,
+            "relative" : "Mono_out",
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.1,
+                "height": 0.1
+            },
+            "scat_kernel" : {
+                "name" : "EMon",
+                "binning": [4.0, 0.01, 6.0],
+                "restore_neutron": true
+            }
+        },
+
+        "posmon_outgoing" : {
+            "position" : [0.0, 0.0, 0.5],
+            "rotation" : [0.0, 0.0, 0.0],
+            "relative" : "Mono_out",
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.1,
+                "height": 0.1
+            },
+            "scat_kernel": {
+                "name": "PSD2d",
+                "axis1_binning": [-0.02, 1e-3, 0.02],
+                "axis2_binning": [-1.0, 1e-2, 1.0],
+                "shape": "divpos",
+                "restore_neutron" : true
+            }
+        },
+
+        "sample" : {
+            "position" : [0.0, 0.0, 0.5],
+            "relative" : "Mono_out",
+            "geom_kernel" : {
+                "name" : "GBox",
+                "width": 0.01,
+                "height": 0.01,
+                "depth": 0.01
+            },
+            "scat_kernel" : {
+                "name": "SRescal",
+                "target": $sample_target$,
+                "E0" : 5.0,
+                "dE" : 0.2,
+                "focus_r" : 0.05
+
+            }
+        },
+
+        "Sample_out" : {
+            "position" : [0.0, 0.0, 0.0],
+            "rotation" : [0.0, $sample_trot$, 0],
+            "relative" : "sample",
+            "geom_kernel": {
+                "name": "GArm"
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        },
+
+        "analyzer" : {
+            "position" : [0.0, 0.0, 1.0],
+            "rotation" : [0.0, $Ana_angle$, 0.0],
+            "relative" : "Sample_out",
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.10,
+                "height": 0.10,
+                "orientation": "yz"
+            },
+            "scat_kernel": {
+                "name": "SMonochromator",
+                "slab_width" : 0.1,
+                "slab_height" : 0.1,
+                "mosaic_horizontal" : 25,
+                "mosaic_vertical" : 25,
+                "r0" : 0.9,
+                "d_spacing" : $monodspacing$,
+                "radius_vertical" : 0.0
+            }
+        },
+
+        "ana_out" : {
+            "position" : [0.0, 0.0, 1.0],
+            "rotation" : [0.0, $Ana_angle*2$, 0],
+            "relative" : "Sample_out",
+            "geom_kernel": {
+                "name": "GArm"
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        },
+
+        "counter_final" : {
+            "position" : [0.0, 0.0, 0.5],
+            "rotation" : [0.0, 0.0, 0.0],
+            "relative" : "ana_out",
+            "geom_kernel": {
+                "name": "GPlane",
+                "width": 0.01,
+                "height": 0.01
+            },
+            "scat_kernel": {
+                "name": "SCounter",
+                "filename" : "tascounts"
+            }
+        }
+    }
+}
