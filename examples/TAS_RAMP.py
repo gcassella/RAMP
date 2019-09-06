@@ -13,11 +13,7 @@ if __name__ == '__main__':
     N = int(1e7)
     
     ########### OpenCL setup and internals ###########
-    plat=cl.get_platforms()[0]
-    devices=plat.get_devices()
-    dev=devices[1]
-    ctx = cl.Context(devices=[dev], 
-        properties=[(cl.context_properties.PLATFORM, plat)])
+    ctx = cl.create_some_context()
     queue = cl.CommandQueue(ctx)
 
     ########### Instrument parameters ###########
