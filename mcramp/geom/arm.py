@@ -5,8 +5,22 @@ import pyopencl as cl
 import numpy as np
 
 class GArm(GPrim):
-    def __init__(self, idx=0, ctx=None):
+    """
+    Geometry kernel for Arm component - does not store a real intersection.
 
+    ...
+
+    Parameters
+    ----------
+    None
+
+    Intersections
+    -------------
+    None
+
+    """
+
+    def __init__(self, idx=0, ctx=None):
         self.idx = np.uint32(idx)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'arm.cl'), mode='r') as f:

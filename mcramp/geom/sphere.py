@@ -7,6 +7,27 @@ import pyopencl.array as clarr
 import os
 
 class GSphere(GPrim):
+    """
+    Geometry kernel for 'sphere' geometry. Intersects with the exterior of the
+    sphere, i.e. first intersection time must be positive for scattering to
+    occur.
+
+    ...
+
+    Parameters
+    ----------
+    radius : float
+        The radius of the sphere
+
+    Intersections
+    -------------
+    Intersection 1 :
+        First point of intersection with the sphere geometry - 'entering' sphere.
+    Intersection 2 :
+        Second point of intersection with the sphere geometry - 'exiting' sphere.
+
+    """
+
     def __init__(self, radius=0, idx=0, ctx=None):
         self.radius     = np.float32(radius)
         self.idx        = idx

@@ -7,6 +7,30 @@ import pyopencl.array as clarr
 import os
 
 class GBox(GPrim):
+    """
+    Geometry kernel for 'box' geometry. Intersects with the exterior of the
+    box, i.e. first intersection must be at positive time for scattering to occur.
+
+    ...
+
+    Parameters
+    ----------
+    width : float
+        The width of the box
+    height : float
+        The height of the box
+    depth : float
+        The depth of the box
+
+    Intersections
+    -------------
+    Intersection 1 :
+        First point of intersection with the box geometry - 'entering' box.
+    Intersection 2 :
+        Second point of intersection with the box geometry - 'exiting' box.
+
+    """
+
     def __init__(self, width=0, height=0, depth=0, idx=0, ctx=None):
         self.width = np.float32(width)
         self.height = np.float32(height)

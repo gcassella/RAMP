@@ -4,6 +4,30 @@ import pyopencl.array as clarr
 from abc import ABCMeta, abstractmethod
 
 class SPrim():
+    """
+    Primitive class from which all scattering kernels inherit.
+
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    lines()
+        Returns a list of lines used for rendering the geometry of the kernel
+        in matplotlib - currently deprecated.
+    data_reduce(queue)
+        Called every time the scattering kernel executes - used to reduce
+        component data between execution of buffer chunks.
+    data(queue)
+        Returns the component data.
+    plot(queue)
+        Plots the component data.
+    save(queue)
+        Saves the component data.
+
+    """
+
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -25,15 +49,3 @@ class SPrim():
     @abstractmethod
     def save(self, queue):
         return 0
-
-class Float3(object):
-    def __init__(self, attr):
-        self.attr = '_' + attr
-
-    def __get__(self, obj, objtype):
-        arr = getattr(obj, self.attr)
-        return np.array((arr[0], arr[1], arr[2], 0.),
-                           dtype=clarr.vec.float3)
-
-    def __set__(self, obj, value):
-        setattr(obj, self.attr, value)

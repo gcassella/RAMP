@@ -8,6 +8,35 @@ import os
 import re
 
 class GBanana(GPrim):
+    """
+    Geometry kernel for 'banana' geometry. Intersects with the interior of the
+    banana, i.e. first intersection must be at negative time for scattering to
+    occur.
+
+    ...
+
+    Parameters
+    ----------
+    radius : float
+        The radius of the banana
+    height : float
+        The height of the banana
+    mintheta : float
+        The minimum valid intersection angle with the banana
+    maxtheta : float
+        The maximum valid intersection angle with the banana
+
+    Intersections
+    -------------
+    Intersection 1 :
+        Negative time intersection with the portion of the banana behind the
+        neutron trajectory.
+    Intersection 2 :
+        Positive time intersection with the portion of the banana ahead of the
+        neutron trajectory.
+
+    """
+
     def __init__(self, radius=0, height=0, mintheta=0, maxtheta=0, idx=0, ctx=None):
         self.radius     = np.float32(radius)
         self.height     = np.float32(height)

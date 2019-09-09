@@ -8,6 +8,53 @@ import os
 import re
 
 class SMonochromator(SPrim):
+    """
+    Scattering kernel for general curved Monochromator. Recreates the functionality
+    of the Monochromator_curved component in McStas. Reflection takes place
+    from the local yz plane, higher order scattering and anisotropic gaussian 
+    mosaic is simulated.
+
+    ...
+
+    Parameters
+    ----------
+    slab_width : float
+        Width of monochromator crystal slabs in meters
+    slab_height : float
+        Height of monochromator crystal slabs in meters
+    gap : float
+        Gap between monochromator crystal slabs in meters
+    n_horizontal : float
+        Number of monochromator crystal slabs in the z direction
+    n_vertical : float
+        Number of monochromator crystal slabs in the y direction
+    mosaic_horizontal : float
+        Crystal mosaic in the z direction in arc minutes
+    mosaic_vertical : float
+        Crystal mosaic in the y direction in arc minutes
+    r0 : float
+        Maximum reflectivity of the monochromator crystal
+    d_spacing : float
+        Lattice spacing of the monochromator crystal plane in AA
+    radius_vertical : float
+        Radius of curvature normal to the z direction in meters
+    radius_horizontal : float
+        Radius of curvature normal to the y direction in meters
+
+    Data
+    ----
+    None
+
+    Plot
+    ----
+    None
+
+    Save
+    ----
+    None
+
+    """
+
     def __init__(self, slab_width=0.0, slab_height=0.0, gap=0.0, n_horizontal=1,
                  n_vertical=1, mosaic_horizontal=0.0, mosaic_vertical=0.0,
                  r0=1.0, d_spacing=0.0, radius_vertical=0.0, radius_horizontal=0.0,
