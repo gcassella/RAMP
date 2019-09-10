@@ -17,8 +17,6 @@ class SGuide(SPrim):
     Intersection is taken as the point at which the neutron enters the guide and
     the guide geometry is taken to lie centered along the z axis.
 
-    ...
-
     Parameters
     ----------
     w1 : float
@@ -44,17 +42,14 @@ class SGuide(SPrim):
     max_bounces : float
         Cutoff to prevent infinite scattering due to numerical error in the kernel
 
+    Methods
+    -------
     Data
-    ----
-    None
-
+        None
     Plot
-    ----
-    None
-
+        None
     Save
-    ----
-    None
+        None
 
     """
 

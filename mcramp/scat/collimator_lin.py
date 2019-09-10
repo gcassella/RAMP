@@ -12,7 +12,6 @@ class SLinearCollimator(SPrim):
     Scattering kernel for Linear Collimator component. Recreates the functionality
     of the Collimator_linear component in McStas. Neutrons with divergence
     exceeding that permitted by the collimator are terminated.
-    ...
 
     Parameters
     ----------
@@ -25,17 +24,14 @@ class SLinearCollimator(SPrim):
     transmission : float
         Transmission coefficient of the collimator
 
+    Methods
+    -------
     Data
-    ----
-    None
-
+        None
     Plot
-    ----
-    None
-
+        None
     Save
-    ----
-    None
+        None
 
     """
 

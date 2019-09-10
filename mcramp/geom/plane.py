@@ -10,8 +10,6 @@ class GPlane(GPrim):
     """
     Geometry kernel for 'plane' geometry.
 
-    ...
-
     Parameters
     ----------
     width : float
@@ -22,8 +20,8 @@ class GPlane(GPrim):
         The orientation of the plane. "xy" gives a plane normal to the z axis,
         "yz" gives a plane normal to the x axis.
 
-    Intersections
-    -------------
+    See also
+    --------
     Intersection 1 :
         Point of intersection with the plane
     Intersection 2 :

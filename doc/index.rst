@@ -3,14 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to RAMP's documentation!
-================================
+Raytracing Achieved via Massive Parallelisation
+===============================================
+
+Kernel list
+-----------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
 
-   kernels/scattering/powder1    
+   kernels/geom_kernels
+   kernels/scat_kernels
 
 
 Indices and tables

@@ -44,6 +44,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'numpydoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -179,3 +180,7 @@ epub_exclude_files = ['search.html']
 
 
 # -- Extension configuration -------------------------------------------------
+
+# -- Additional configuration ------------------------------------------------
+
+autodoc_mock_imports = ["pyopencl"]

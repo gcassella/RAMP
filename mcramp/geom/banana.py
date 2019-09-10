@@ -26,8 +26,8 @@ class GBanana(GPrim):
     maxtheta : float
         The maximum valid intersection angle with the banana
 
-    Intersections
-    -------------
+    See also
+    --------
     Intersection 1 :
         Negative time intersection with the portion of the banana behind the
         neutron trajectory.

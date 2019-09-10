@@ -14,8 +14,8 @@ class GArm(GPrim):
     ----------
     None
 
-    Intersections
-    -------------
+    See also
+    --------
     None
 
     """

@@ -12,15 +12,13 @@ class GSphere(GPrim):
     sphere, i.e. first intersection time must be positive for scattering to
     occur.
 
-    ...
-
     Parameters
     ----------
     radius : float
         The radius of the sphere
 
-    Intersections
-    -------------
+    See also
+    --------
     Intersection 1 :
         First point of intersection with the sphere geometry - 'entering' sphere.
     Intersection 2 :

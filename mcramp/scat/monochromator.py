@@ -14,8 +14,6 @@ class SMonochromator(SPrim):
     from the local yz plane, higher order scattering and anisotropic gaussian 
     mosaic is simulated.
 
-    ...
-
     Parameters
     ----------
     slab_width : float
@@ -41,17 +39,14 @@ class SMonochromator(SPrim):
     radius_horizontal : float
         Radius of curvature normal to the y direction in meters
 
+    Methods
+    -------
     Data
-    ----
-    None
-
+        None
     Plot
-    ----
-    None
-
+        None
     Save
-    ----
-    None
+        None
 
     """
 

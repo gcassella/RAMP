@@ -13,8 +13,6 @@ class EMon(SPrim):
     Scattering kernel for energy monitor. Histograms neutron weights binned
     according to energy.
 
-    ...
-
     Parameters
     ----------
     binning : 3-tuple of floats
@@ -25,20 +23,18 @@ class EMon(SPrim):
         Name of the file to which spectrum will be saved. No file saved if
         filename is None
 
+    Methods
+    -------
     Data
-    ----
-    Returns a 2-tuple of numpy arrays, the first containing the generated energy
-    binning axis and the second containing the histogrammed neutron weights in each
-    energy bin.
-
+        Returns a 2-tuple of numpy arrays, the first containing the generated energy\
+        binning axis and the second containing the histogrammed neutron weights in each\
+        energy bin.
     Plot
-    ----
-    None
-
+        Displays a plot of histogrammed neutron weights as a function of neutron\
+        energy
     Save
-    ----
-    Saves the energy axis and histogrammed neutron weights in each energy bin to
-    numpy files "filename_X.dat" and "filename_Z.dat" if filename is not None.
+        Saves the energy axis and histogrammed neutron weights in each energy bin to\
+        numpy files "filename_X.dat" and "filename_Z.dat" if filename is not None.
 
     """
 

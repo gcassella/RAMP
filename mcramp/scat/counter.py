@@ -14,26 +14,21 @@ class SCounter(SPrim):
     alongside the 'SRescal' component, and outputs a floating point number equal
     to the sum of the weights of detected neutrons.
 
-    ...
-
     Parameters
     ----------
     filename : str or None
         Name of the file to which neutron counts will be saved. No file saved if
         filename is None
 
+    Methods
+    -------
     Data
-    ----
-    Returns the sum of detected neutron weights as a floating point number.
-
+        Returns the sum of detected neutron weights as a floating point number.
     Plot
-    ----
-    None
-
+        None
     Save
-    ----
-    Saves the sum of detected neutron weights as a npy file if the parameter
-    filename is not None.
+        Saves the sum of detected neutron weights as a npy file if the parameter\
+        filename is not None.
 
     """
 

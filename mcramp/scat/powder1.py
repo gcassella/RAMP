@@ -17,8 +17,6 @@ class SPowder1(SPrim):
     WARNING: Neutron weights are NOT verified to be physically accurate for the
     scattering from this component, however the lineshape is correct.
 
-    ...
-
     Parameters
     ----------
     d_spacing : float
@@ -38,17 +36,14 @@ class SPowder1(SPrim):
     d_phi : float in range [0.0, 180.0]
         Max angle around Debye-Scherrer cone into which neutrons are scattered
 
+    Methods
+    -------
     Data
-    ----
-    None
-
+        None
     Plot
-    ----
-    None
-
+        None
     Save
-    ----
-    None
+        None
 
     """
 

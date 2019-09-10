@@ -22,8 +22,8 @@ class GBox(GPrim):
     depth : float
         The depth of the box
 
-    Intersections
-    -------------
+    See also
+    --------
     Intersection 1 :
         First point of intersection with the box geometry - 'entering' box.
     Intersection 2 :

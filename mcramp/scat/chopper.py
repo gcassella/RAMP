@@ -13,8 +13,6 @@ class SChopper(SPrim):
     DiskChopper component in McStas. Neutrons with velocities that are not
     permitted by the chopper are terminated.
 
-    ...
-
     Parameters
     ----------
     slit_width : float
@@ -30,17 +28,14 @@ class SChopper(SPrim):
     jitter : float
         Jitter in the chopper phase in radians
 
+    Methods
+    -------
     Data
-    ----
-    None
-
+        None
     Plot
-    ----
-    None
-
+        None
     Save
-    ----
-    None
+        None
 
     """
 

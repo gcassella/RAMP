@@ -4,23 +4,18 @@ class SArm(SPrim):
     """
     Scattering kernel for Arm component - does not alter the neutron state.
 
-    ...
-
     Parameters
     ----------
     None
 
+    Methods
+    -------
     Data
-    ----
-    None
-
+        None
     Plot
-    ----
-    None
-
+        None
     Save
-    ----
-    None
+        None
 
     """
 
