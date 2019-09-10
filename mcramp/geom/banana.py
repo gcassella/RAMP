@@ -26,15 +26,18 @@ class GBanana(GPrim):
     maxtheta : float
         The maximum valid intersection angle with the banana
 
-    See also
-    --------
+    Notes
+    -----
     Intersection 1 :
-        Negative time intersection with the portion of the banana behind the
+        Negative time intersection with the portion of the banana behind the\
         neutron trajectory.
     Intersection 2 :
-        Positive time intersection with the portion of the banana ahead of the
+        Positive time intersection with the portion of the banana ahead of the\
         neutron trajectory.
 
+    Methods
+    -------
+    None
     """
 
     def __init__(self, radius=0, height=0, mintheta=0, maxtheta=0, idx=0, ctx=None):

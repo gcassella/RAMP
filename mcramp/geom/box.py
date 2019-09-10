@@ -22,13 +22,16 @@ class GBox(GPrim):
     depth : float
         The depth of the box
 
-    See also
-    --------
+    Notes
+    -----
     Intersection 1 :
         First point of intersection with the box geometry - 'entering' box.
     Intersection 2 :
         Second point of intersection with the box geometry - 'exiting' box.
 
+    Methods
+    -------
+    None
     """
 
     def __init__(self, width=0, height=0, depth=0, idx=0, ctx=None):

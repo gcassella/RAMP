@@ -20,13 +20,16 @@ class GPlane(GPrim):
         The orientation of the plane. "xy" gives a plane normal to the z axis,
         "yz" gives a plane normal to the x axis.
 
-    See also
-    --------
+    Notes
+    -----
     Intersection 1 :
         Point of intersection with the plane
     Intersection 2 :
         Same as Intersection 1.
 
+    Methods
+    -------
+    None
     """
 
     def __init__(self, width=0, height=0, idx=0, orientation="xy", ctx=None):

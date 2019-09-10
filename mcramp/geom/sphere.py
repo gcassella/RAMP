@@ -17,13 +17,16 @@ class GSphere(GPrim):
     radius : float
         The radius of the sphere
 
-    See also
-    --------
+    Notes
+    -----
     Intersection 1 :
         First point of intersection with the sphere geometry - 'entering' sphere.
     Intersection 2 :
         Second point of intersection with the sphere geometry - 'exiting' sphere.
 
+    Methods
+    -------
+    None
     """
 
     def __init__(self, radius=0, idx=0, ctx=None):

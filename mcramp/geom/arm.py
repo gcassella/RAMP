@@ -8,14 +8,16 @@ class GArm(GPrim):
     """
     Geometry kernel for Arm component - does not store a real intersection.
 
-    ...
-
     Parameters
     ----------
     None
 
-    See also
-    --------
+    Notes
+    -----
+    None
+
+    Methods
+    -------
     None
 
     """
