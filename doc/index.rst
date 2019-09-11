@@ -12,8 +12,8 @@ User guide
 .. toctree::
     :maxdepth: 2
 
-    user/introduction
     user/installation
+    user/hello
 
 Kernel list
 -----------

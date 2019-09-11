@@ -1,0 +1,32 @@
+{
+    "all" : {
+        "linear" : true,
+        "mod" : {
+            "source": true,
+            "position" : [0.0, 0.0, 0.0],
+            "moderator_kernel": {
+                "name": "MISIS",
+                "spec_file": "Let_Base.mcstas",
+                "mod_dim": [0.04, 0.09],
+                "target_dim": [0.04, 0.09],
+                "target_dist": 1.7,
+                "E_min": 0.0,
+                "E_max": 30.0
+            }
+        },
+
+        "moderator_Emon" : {
+            "position" : [0.0, 0.0, 0.01],
+            "geom_kernel" : {
+                "name" : "GPlane",
+                "width" : 0.1,
+                "height" : 0.1
+            },
+            "scat_kernel" : {
+                "name" : "EMon",
+                "binning" : [0.0, 0.05, 30.0],
+                "restore_neutron" : true
+            }
+        }
+    }
+}
