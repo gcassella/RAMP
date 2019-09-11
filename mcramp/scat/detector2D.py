@@ -8,24 +8,22 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-class PSD2d(SPrim):
+class SDetector2D(SPrim):
     """
     Scattering kernel for a two axis monitor supporting a variety of axis variables.
 
     Parameters
     ----------
-    shape : { "plane", "banana", "thetatof", "div", "divpos" }
+    axis1_var, axis2_var : { "x", "y", "theta", "alpha", "tof", "divX", "divY" }
         Chooses the variables of each axis. These correspond to:
-            - "plane" : Axis 1 is x cooordinate and axis 2 is y coordinate in\
-                meters
-            - "banana" : Axis 1 is in-plane scattering angle and axis 2 is out-of-plane\
-                scattering angle in radians
-            - "thetatof" : Axis 1 is in-plane scattering angle and axis 2 is time\
-                of flight in radians and seconds, respectively
-            - "div" : Axis 1 is horizontal divergence and axis 2 is vertical\
-                divergence in radians
-            - "divpos" : Axis 1 is x coordinate and axis 2 is horizontal divergence\
-                in meters and radians, respectively
+            - "x" : x coordinate of intersection point with the detector
+            - "y" : y coordinate of intersection point with the detector
+            - "theta" : Angle made by intersection point in xz plane with z axis, \
+                typically the in-plane scattering angle
+            - "alpha" : Angle made by intersection point in yz plane with z axis, \
+                typically the out-of-plane scattering angle
+            - "divX" : Horizontal divergence of neutron velocity
+            - "divY" : Vertical divergence of neutron velocity
     axis1_binning : 3-tuple of floats
         Lower bin edge, bin size, and upper bin edge for axis 1
     axis2_binning : 3-tuple of floats
@@ -55,17 +53,35 @@ class PSD2d(SPrim):
     """
 
     def __init__(self, shape="", axis1_binning=(0, 0, 0),
-                 axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
-                 filename=None, logscale = False, **kwargs):
-        
-        shapes = {"plane": 0, "banana": 1, "thetatof": 2, "div": 3, "divpos": 4}
+                 axis2_binning=(0, 0, 0), axis1_var="theta", axis2_var="tof",
+                 restore_neutron=False, idx=0, ctx=None, filename=None, logscale = False, **kwargs):
+        var_dict = {
+            "x" : 0,
+            "y" : 1,
+            "theta" : 2,
+            "alpha" : 3,
+            "tof" : 4,
+            "divX" : 5,
+            "divY" : 6
+        }
+
+        self.var_label_dict = {
+            0 : "x [m]",
+            1 : "y [m]",
+            2 : "Theta [deg]",
+            3 : "Alpha [deg]",
+            4 : "Time-of-flight [us]",
+            5 : "Horizontal divergence [deg]",
+            6 : "Vertical divergence [deg]"
+        }
         
         self.last_ran_datetime = datetime.datetime.now()
         self.last_copy_datetime = datetime.datetime.now()
 
+        self.axis1_var = np.uint32(var_dict[axis1_var])
+        self.axis2_var = np.uint32(var_dict[axis2_var])
         self.axis1_binning = axis1_binning
         self.axis2_binning = axis2_binning
-        self.shape = np.uint32(shapes[shape])
         self.idx = np.uint32(idx)
         self.restore_neutron = np.uint32(1 if restore_neutron else 0)
         self.filename = filename
@@ -88,7 +104,7 @@ class PSD2d(SPrim):
         self.X, self.Y = np.meshgrid(x, y)
         self.Z = np.zeros(self.histo2d.T.shape)
 
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'psd2d.cl'), mode='r') as f:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'detector2D.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     def scatter_prg(self, queue, N, neutron_buf, intersection_buf, iidx_buf):
@@ -103,7 +119,8 @@ class PSD2d(SPrim):
                           self.axis2_binning,
                           self.axis1_num_bins,
                           self.axis2_num_bins,
-                          self.shape,
+                          self.axis1_var,
+                          self.axis2_var,
                           self.restore_neutron)
 
         self.last_ran_datetime = datetime.datetime.now()
@@ -115,7 +132,10 @@ class PSD2d(SPrim):
         Z = (np.log(self.Z + 1e-7) if self.logscale else self.Z)
 
         plt.pcolormesh(self.X, self.Y, Z, cmap='jet', shading='gouraud')
+        plt.xlabel(self.var_label_dict[self.axis1_var])
+        plt.ylabel(self.var_label_dict[self.axis2_var])
         plt.colorbar()
+        plt.tight_layout()
 
     def save(self, queue):
         self._cached_copy(queue)

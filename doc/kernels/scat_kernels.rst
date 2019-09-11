@@ -8,13 +8,13 @@ Counter (`SCounter`)
 ~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: mcramp.scat.SCounter
 
-Energy monitor (`EMon`)
-~~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: mcramp.scat.EMon
-
-2D multi-detector (`PSD2d`)
+1D Detector (`SDetector1D`)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: mcramp.scat.PSD2d
+.. autoclass:: mcramp.scat.SDetector1D
+
+2D Detector (`SDetector2D`)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: mcramp.scat.SDetector2D
     :no-undoc-members:
 
 Optics
