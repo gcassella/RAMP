@@ -9,6 +9,51 @@ import os
 import datetime
 
 class PSD2d(SPrim):
+    """
+    Scattering kernel for a two axis monitor supporting a variety of axis variables.
+
+    Parameters
+    ----------
+    shape : { "plane", "banana", "thetatof", "div", "divpos" }
+        Chooses the variables of each axis. These correspond to:
+            - "plane" : Axis 1 is x cooordinate and axis 2 is y coordinate in\
+                meters
+            - "banana" : Axis 1 is in-plane scattering angle and axis 2 is out-of-plane\
+                scattering angle in radians
+            - "thetatof" : Axis 1 is in-plane scattering angle and axis 2 is time\
+                of flight in radians and seconds, respectively
+            - "div" : Axis 1 is horizontal divergence and axis 2 is vertical\
+                divergence in radians
+            - "divpos" : Axis 1 is x coordinate and axis 2 is horizontal divergence\
+                in meters and radians, respectively
+    axis1_binning : 3-tuple of floats
+        Lower bin edge, bin size, and upper bin edge for axis 1
+    axis2_binning : 3-tuple of floats
+        Lower bin edge, bin size, and upper bin edge for axis 2
+    restore_neutron : Boolean
+        If False, neutron is terminated upon intersection with this component
+    filename : str or None
+        Name of the file to which histogram will be saved. No file saved if
+        filename is None
+    logscale : Boolean
+        If True, histogram intensity is plotted on a logarithmic scale
+
+    Methods
+    -------
+    Data
+        Returns a 3-tuple of numpy arrays, the first two containing the binning\
+        for axes 1 and 2, respectively, and the third containing the histogrammed\
+        neutron weights for each bin
+    Plot
+        Displays a plot of the two dimensional histogram of neutron weights along\
+        the chosen axes.
+    Save
+        Saves the binning along axes 1 and 2 and the histogrammed neutron weights\
+        for each bin as filename_X, filename_Y, and filename_Z, respectively, if\
+        filename is not None.
+
+    """
+
     def __init__(self, shape="", axis1_binning=(0, 0, 0),
                  axis2_binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
                  filename=None, logscale = False, **kwargs):

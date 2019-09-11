@@ -8,6 +8,37 @@ import os
 import re
 
 class SChopper(SPrim):
+    """
+    Scattering kernel for Chopper component. Replicates the functionality of the
+    DiskChopper component in McStas. Neutrons with velocities that are not
+    permitted by the chopper are terminated.
+
+    Parameters
+    ----------
+    slit_width : float
+        Width of the chopper slits in meters
+    radius : float
+        Radius of the chopper disc in meters
+    freq : float
+        Angular frequency of the chopper in radians per second
+    n_slits : float
+        Number of chopper slits
+    phase : float
+        Initial phase of the chopper in radians
+    jitter : float
+        Jitter in the chopper phase in radians
+
+    Methods
+    -------
+    Data
+        None
+    Plot
+        None
+    Save
+        None
+
+    """
+
     def __init__(self, slit_width=0.0, radius=0.0, freq=0.0,
                  n_slits = 0, phase = 0.0, jitter = 0.0, idx=0, ctx=0, **kwargs):
 

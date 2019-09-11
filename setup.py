@@ -28,5 +28,8 @@ setup(name="RAMP",
       install_requires=[
             'pyopencl',
             'numpy',
-            'matplotlib'
+            'matplotlib',
+            'nbsphinx',
+            'numpydoc',
+            'pandoc'
       ])

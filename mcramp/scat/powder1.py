@@ -7,6 +7,46 @@ import pyopencl.array as clarr
 import os
 
 class SPowder1(SPrim):
+    """
+    Scattering kernel for single Bragg scattering powder sample. Recreates the
+    functionality of the Powder1 component in McStas. If a neutron satisfies
+    the Bragg condition, it is scattered at an angle twotheta into a random angle
+    on the Debye-Scherrer cone. Phi focusing is implemented to improve simulation
+    performance.
+
+    WARNING: Neutron weights are NOT verified to be physically accurate for the
+    scattering from this component, however the lineshape is correct.
+
+    Parameters
+    ----------
+    d_spacing : float
+        Lattice spacing corresponding to the Bragg powder line in AA
+    pack : float in range [0, 1]
+        Packing fraction of the sample
+    vc : float
+        Volume of the sample unit cell in AA^3
+    sigma_abs : float
+        Absorption cross section of the sample at 2200 m/s in barns
+    multiplicity : int
+        Multiplicity of the powder line
+    DW : float in range [0, 1]
+        Debye-Waller factor
+    F2 : float
+        Structure factor of the powder line
+    d_phi : float in range [0.0, 180.0]
+        Max angle around Debye-Scherrer cone into which neutrons are scattered
+
+    Methods
+    -------
+    Data
+        None
+    Plot
+        None
+    Save
+        None
+
+    """
+
     def __init__(self, d_spacing=0.0, pack=0.0, vc=0.0, sigma_abs=0.0,
                  multiplicity=0, DW=0.0, F2=0.0, d_phi=180.0, idx=0, ctx=None,
                  **kwargs):

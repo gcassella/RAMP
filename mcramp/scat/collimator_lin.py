@@ -8,6 +8,33 @@ import os
 import re
 
 class SLinearCollimator(SPrim):
+    """
+    Scattering kernel for Linear Collimator component. Recreates the functionality
+    of the Collimator_linear component in McStas. Neutrons with divergence
+    exceeding that permitted by the collimator are terminated.
+
+    Parameters
+    ----------
+    length : float
+        Flight path length of the collimator
+    divergence_H : float
+        Maximum horizontal divergence accepted by the collimator
+    divergence_V : float
+        Maximum vertical divergence accepted by the collimator
+    transmission : float
+        Transmission coefficient of the collimator
+
+    Methods
+    -------
+    Data
+        None
+    Plot
+        None
+    Save
+        None
+
+    """
+
     def __init__(self, length=0.0, divergence_H=0.0, divergence_V=0.0, transmission=1.0, idx=0, ctx=0,
                 **kwargs):
         
