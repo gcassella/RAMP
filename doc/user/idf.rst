@@ -1,5 +1,15 @@
-Instrument definition file format
-=================================
+Instrument definition files
+===========================
+
+Instrument layouts are specified in RAMP using instrument definition files written \
+in Javascript Object Notation (JSON). JSON is a widely adopted format for describing \
+objects as a heirarchical list of key-value pairs, and there are a `number of readily \
+available learning resources <https://www.google.com/search?q=JSON+basics>`_ online \
+which describe the format better than I could here.
+
+The heirarchy of objects in the RAMP instrument definition file goes *execution block* \
+-> *component* -> *kernels* -> *attributes*, each of which are described in turn \
+below.
 
 Execution blocks
 ----------------
