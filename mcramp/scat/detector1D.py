@@ -8,17 +8,18 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-class EMon(SPrim):
+class SDetector1D(SPrim):
     """
-    Scattering kernel for energy monitor. Histograms neutron weights binned
-    according to energy.
+    Scattering kernel for a one axis monitor supporting a variety of axis variables.
 
     Parameters
     ----------
     binning : 3-tuple of floats
-        Lower bin edge, bin size, and upper bin edge for energy spectrum in meV
+        Lower bin edge, bin size, and upper bin edge for axis variable
     restore_neutron : Boolean
         If False, neutron is terminated upon intersection with this component
+    var : { "energy", "theta", "tof" }
+        Quantity which defines the axis along which neutron weights are histogrammed
     filename : str or None
         Name of the file to which spectrum will be saved. No file saved if
         filename is None
@@ -26,20 +27,24 @@ class EMon(SPrim):
     Methods
     -------
     Data
-        Returns a 2-tuple of numpy arrays, the first containing the generated energy\
+        Returns a 2-tuple of numpy arrays, the first containing the generated \
         binning axis and the second containing the histogrammed neutron weights in each\
-        energy bin.
+        bin.
     Plot
         Displays a plot of histogrammed neutron weights as a function of neutron\
         energy
     Save
-        Saves the energy axis and histogrammed neutron weights in each energy bin to\
+        Saves the histogram axis and histogrammed neutron weights in each energy bin to\
         numpy files "filename_X.dat" and "filename_Z.dat" if filename is not None.
 
     """
 
-    def __init__(self, binning=(0, 0, 0), restore_neutron=False, idx=0, ctx=None,
-                 filename=None, **kwargs):
+    def __init__(self, binning=(0, 0, 0), restore_neutron=False, idx=0, var="energy",
+                 ctx=None, filename=None, **kwargs):
+
+        var_dict = { "energy" : 0, "theta" : 1, "tof" : 2 }
+        self.var_label_dict = { 0 : "Energy [meV]", 1 : "Theta [deg]", 2 : "Time-of-flight [us]" }
+        self.var = np.uint32(var_dict[var])
         
         self.last_ran_datetime = datetime.datetime.now()
         self.last_copy_datetime = datetime.datetime.now()
@@ -60,7 +65,7 @@ class EMon(SPrim):
         self.axis = np.linspace(self.binning['s0'], self.binning['s2'], num=self.num_bins)
         self.Z = np.zeros(self.histo.shape)
 
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'e_mon.cl'), mode='r') as f:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'detector1D.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     def scatter_prg(self, queue, N, neutron_buf, intersection_buf, iidx_buf):
@@ -72,14 +77,19 @@ class EMon(SPrim):
                           np.uint32(self.idx),
                           self.histo_cl,
                           self.binning,
-                          self.restore)
+                          self.restore,
+                          self.var)
 
         self.last_ran_datetime = datetime.datetime.now()
 
     def plot(self, queue):
         self._cached_copy(queue)
+
         plt.figure()
         plt.plot(self.axis, self.histo)
+        plt.ylabel("Intensity")
+        plt.xlabel(self.var_label_dict[self.var])
+        plt.tight_layout()
 
     def save(self, queue):
         self._cached_copy(queue)

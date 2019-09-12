@@ -1,3 +1,5 @@
+#include "consts.h"
+
 void atomicAdd_g_f(volatile __global float *addr, float val)
 {
     union {
@@ -18,13 +20,13 @@ void atomicAdd_g_f(volatile __global float *addr, float val)
 __kernel void detector(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
                        uint const comp_idx, volatile __global float *histogram,
-                       float3 const binning, uint const restore_neutron)
+                       float3 const binning, uint const restore_neutron, uint const var)
 {
 
   uint global_addr = get_global_id(0);
   float16 neutron = neutrons[global_addr];
   float8 intersection = intersections[global_addr];
-  float ener_val, min_var, step_var, max_var;
+  float var_val, min_var, step_var, max_var;
 
   uint this_iidx, idx;
   this_iidx = iidx[global_addr];
@@ -43,10 +45,15 @@ __kernel void detector(__global float16 *neutrons,
   step_var = binning.s1;
   max_var = binning.s2;
 
-  ener_val = pow(length(neutron.s345) / 438.01f, 2.0f);
+  if (var == 0)
+    var_val = VS2E*pow(length(neutron.s345), 2.0f);
+  else if (var == 1)
+    var_val = degrees(atan2(intersection.s4, intersection.s6));
+  else if (var == 2)
+    var_val = (1.0e6f)*(neutron.sa + intersection.s7);
 
-  if(min_var<=ener_val && ener_val<=max_var) {    
-    idx = round((ener_val -  min_var) / step_var);
+  if(min_var<=var_val && var_val<=max_var) {    
+    idx = round((var_val -  min_var) / step_var);
     atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
   }
   

@@ -23,8 +23,9 @@
                 "height" : 0.1
             },
             "scat_kernel" : {
-                "name" : "EMon",
+                "name" : "SDetector1D",
                 "binning" : [1.1, 0.05, 9.0],
+                "var" : "energy",
                 "restore_neutron" : true
             }
         },
@@ -329,8 +330,9 @@
                 "height": 1.0
             },
             "scat_kernel" : {
-                "name" : "EMon",
+                "name" : "SDetector1D",
                 "binning": [0.0, 0.01, 10.0],
+                "var" : "energy",
                 "restore_neutron": true
             }
         },
@@ -343,10 +345,11 @@
                 "height": 0.1
             },
             "scat_kernel": {
-                "name": "PSD2d",
+                "name": "SDetector2D",
                 "axis1_binning": [-0.05, 0.001, 0.05],
                 "axis2_binning": [-3.0, 0.01, 3.0],
-                "shape": "divpos",
+                "axis1_var": "x",
+                "axis2_var": "divX",
                 "restore_neutron" : true
             }
         },
@@ -381,10 +384,11 @@
                 "maxtheta" : 80.0
             },
             "scat_kernel": {
-                "name": "PSD2d",
+                "name": "SDetector2D",
                 "axis1_binning": [-40.0, 1.0, 140.0],
-                "axis2_binning": [0.022, 5e-5, 0.05],
-                "shape": "thetatof",
+                "axis2_binning": [22000, 50, 50000],
+                "axis1_var": "theta",
+                "axis2_var": "tof",
                 "logscale" : true
             }
         }
