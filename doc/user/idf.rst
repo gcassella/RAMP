@@ -104,6 +104,16 @@ file demonstrating a basic monochromator setup using relative rotations::
     }
  }
 
+Another important component level attribute is the `restore_neutron` attribute. \
+In linear execution mode, if a neutron does not intersect with the geometry of a \
+given component during its execution step, the neutron is 'terminated', i.e. it \
+will no longer interact with later components in the instrument. The `restore_neutron` \
+flag prevents neutrons from being terminated in this case. This is useful in situations \
+where the path of neutrons through the instrument 'splits', for example if an energy \
+monitor is placed such that it monitors the transmitted beam through a monochromator. \
+When set to `true`, the `restore_neutron` flag will ensure that the reflected neutrons \
+are not terminated while the transmitted beam is being detected.
+
 Kernels
 -------
 
@@ -256,3 +266,406 @@ and in the Python script::
 `NOTE: once variables have been added to an instrument definition file it is no \
 longer a strictly valid JSON file, and many programs that interpret JSON files will \
 no longer properly load the instrument definition file.`
+
+Complete example
+----------------
+
+The following is a complete example of an instrument definition file modelling the \
+LET spectrometer at ISIS, incorporating all of the concepts discussed above::
+
+ {
+     "all" : {
+         "linear" : true,
+         "mod" : {
+             "source": true,
+             "position" : [0.0, 0.0, 0.0],
+             "moderator_kernel": {
+                 "name": "MISIS",
+                 "spec_file": "Let_Base.mcstas",
+                 "mod_dim": [0.04, 0.09],
+                 "target_dim": [0.04, 0.09],
+                 "target_dist": 1.7,
+                 "E_min": 1.1,
+                 "E_max": 9.0
+             }
+         },
+ 
+         "moderator_Emon" : {
+             "position" : [0.0, 0.0, 0.01],
+             "geom_kernel" : {
+                 "name" : "GPlane",
+                 "width" : 0.1,
+                 "height" : 0.1
+             },
+             "scat_kernel" : {
+                 "name" : "SDetector1D",
+                 "binning" : [1.1, 0.05, 9.0],
+                 "var" : "energy",
+                 "restore_neutron" : true
+             }
+         },
+ 
+         "guide1" : {
+             "position" : [0.0, 0.0, 1.680],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.04,
+                 "height": 0.09
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.04,
+                 "h1" : 0.09,
+                 "w2" : 0.04,
+                 "h2" : 0.09,
+                 "l" : 1.98,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 2,
+                 "W" : 0.003
+             }
+         },
+ 
+         "guide2" : {
+             "position" : [0.0, 0.0, 3.740],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.04,
+                 "height": 0.09
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.04,
+                 "h1" : 0.09,
+                 "w2" : 0.04,
+                 "h2" : 0.09,
+                 "l" : 2.50,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 2,
+                 "W" : 0.003
+             }
+         },
+ 
+         "guide3" : {
+             "position" : [0.0, 0.0, 6.30],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.04,
+                 "height": 0.09
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.04,
+                 "h1" : 0.09,
+                 "w2" : 0.04,
+                 "h2" : 0.09,
+                 "l" : 1.514,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 2,
+                 "W" : 0.003
+             }
+         },
+ 
+         "Res1" : {
+             "position" : [0.0, 0.0, 7.83],
+             "geom_kernel" : {
+                 "name" : "GPlane",
+                 "width" : 0.6,
+                 "height" : 0.6
+             },
+             "scat_kernel" : {
+                 "name" : "SChopper",
+                 "radius": 0.279,
+                 "freq" : 314.1,
+                 "n_slits" : 6,
+                 "jitter" : 7e-7,
+                 "slit_width" : 0.04,
+                 "phase" : $7.83 / v_foc + pha_offset$
+             }
+         },
+ 
+         "Res1_counter" : {
+             "position" : [0.0, 0.0, 7.830002],
+             "geom_kernel" : {
+                 "name" : "GPlane",
+                 "width" : 0.6,
+                 "height" : 0.6
+             },
+             "scat_kernel" : {
+                 "name" : "SChopper",
+                 "radius": 0.279,
+                 "freq" : -314.1,
+                 "n_slits" : 6,
+                 "jitter" : 7e-7,
+                 "slit_width" : 0.04,
+                 "phase" : -$7.83 / v_foc + pha_offset$
+             }
+         },
+ 
+         "guide4" : {
+             "position" : [0.0, 0.0, 7.852],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.04,
+                 "height": 0.09
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.04,
+                 "h1" : 0.09,
+                 "w2" : 0.04,
+                 "h2" : 0.09,
+                 "l" : 0.312,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 2,
+                 "W" : 0.003
+             }
+         },
+ 
+         "guide5" : {
+             "position" : [0.0, 0.0, 8.236],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.04,
+                 "height": 0.09
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.04,
+                 "h1" : 0.09,
+                 "w2" : 0.04,
+                 "h2" : 0.09,
+                 "l" : 3.499,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 2,
+                 "W" : 0.003
+             }
+         },
+ 
+         "PR" : {
+             "position" : [0.0, 0.0, 11.75],
+             "geom_kernel" : {
+                 "name" : "GPlane",
+                 "width" : 0.6,
+                 "height" : 0.6
+             },
+             "scat_kernel" : {
+                 "name" : "SChopper",
+                 "radius": 0.29,
+                 "freq" : 628.3,
+                 "n_slits" : 2,
+                 "jitter" : 7e-7,
+                 "slit_width" : 0.058,
+                 "phase" : $11.75 / v_foc + pha_offset$
+             }
+         },
+ 
+         "guide6" : {
+             "position" : [0.0, 0.0, 11.765],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.04,
+                 "height": 0.09
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.04,
+                 "h1" : 0.09,
+                 "w2" : 0.04,
+                 "h2" : 0.09,
+                 "l" : 3.886,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 2,
+                 "W" : 0.003
+             }
+         },
+ 
+         "CR" : {
+             "position" : [0.0, 0.0, 15.66],
+             "geom_kernel" : {
+                 "name" : "GPlane",
+                 "width" : 0.6,
+                 "height" : 0.6
+             },
+             "scat_kernel" : {
+                 "name" : "SChopper",
+                 "radius": 0.29,
+                 "freq" : 314.1,
+                 "n_slits" : 6,
+                 "jitter" : 7e-7,
+                 "slit_width" : 0.054,
+                 "phase" : $15.66 / v_foc + pha_offset$
+             }
+         },
+ 
+         "guide7" : {
+             "position" : [0.0, 0.0, 15.681],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.04,
+                 "height": 0.09
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.04,
+                 "h1" : 0.09,
+                 "w2" : 0.04,
+                 "h2" : 0.0639,
+                 "l" : 5.807,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 2,
+                 "W" : 0.003
+             }
+         },
+ 
+         "guide8" : {
+             "position" : [0.0, 0.0, 21.489],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.04,
+                 "height": 0.0639
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.04,
+                 "h1" : 0.0639,
+                 "w2" : 0.031,
+                 "h2" : 0.06,
+                 "l" : 0.7823,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 4,
+                 "W" : 0.003
+             }
+         },
+ 
+         "funnel" : {
+             "position" : [0.0, 0.0, 22.373],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.031,
+                 "height": 0.05711
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.031,
+                 "h1" : 0.05711,
+                 "w2" : 0.02,
+                 "h2" : 0.04868,
+                 "l" : 1.117,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 4,
+                 "W" : 0.003
+             }
+         },
+ 
+         "endguide" : {
+             "position" : [0.0, 0.0, 23.52],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 0.02,
+                 "height": 0.0484
+             },
+             "scat_kernel" : {
+                 "name" : "SGuide",
+                 "w1" : 0.02,
+                 "h1" : 0.0484,
+                 "w2" : 0.02,
+                 "h2" : 0.04,
+                 "l" : 1.1,
+                 "R0" : 1.0,
+                 "Qc" : 0.0218, 
+                 "alpha" : 4.38,
+                 "m" : 4,
+                 "W" : 0.003
+             }
+         },
+ 
+         "Emon" : {
+             "position" : [0.0, 0.0, 25.0],
+             "geom_kernel" : {
+                 "name": "GPlane",
+                 "width": 1.0,
+                 "height": 1.0
+             },
+             "scat_kernel" : {
+                 "name" : "SDetector1D",
+                 "binning": [0.0, 0.01, 10.0],
+                 "var" : "energy",
+                 "restore_neutron": true
+             }
+         },
+ 
+         "samplepos_divpos" : {
+             "position" : [0.0, 0.0, 25.0],
+             "geom_kernel": {
+                 "name": "GPlane",
+                 "width": 0.1,
+                 "height": 0.1
+             },
+             "scat_kernel": {
+                 "name": "SDetector2D",
+                 "axis1_binning": [-0.05, 0.001, 0.05],
+                 "axis2_binning": [-3.0, 0.01, 3.0],
+                 "axis1_var": "x",
+                 "axis2_var": "divX",
+                 "restore_neutron" : true
+             }
+         },
+ 
+         "sample" : {
+             "position" : [0.0, 0.0, 25.0],
+             "rotation" : [0.0, 0.0, 0.0],
+             "geom_kernel" : {
+                 "name": "GSphere",
+                 "radius": 0.03
+             },
+             "scat_kernel": {
+                 "name": "SPowder1",
+                 "d_spacing": 14.2,
+                 "pack": 1.0,
+                 "vc": 85.0,
+                 "sigma_abs": 0.0,
+                 "multiplicity": 1,
+                 "DW": 1.0,
+                 "F2": 60.0
+             }
+         },
+ 
+         "det" : {
+             "position" : [0.0, 0.0, 25.0],
+             "rotation" : [0.0, 0.0, 0.0],
+             "geom_kernel": {
+                 "name": "GBanana",
+                 "radius": 0.5,
+                 "height": 0.1,
+                 "mintheta" : -80.0,
+                 "maxtheta" : 80.0
+             },
+             "scat_kernel": {
+                 "name": "SDetector2D",
+                 "axis1_binning": [-40.0, 1.0, 140.0],
+                 "axis2_binning": [22000, 50, 50000],
+                 "axis1_var": "theta",
+                 "axis2_var": "tof",
+                 "logscale" : true
+             }
+         }
+     }
+ }
