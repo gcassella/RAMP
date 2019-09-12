@@ -8,6 +8,51 @@ import os
 import re
 
 class SGuide(SPrim):
+    """
+    Scattering kernel for tapered rectangular Guide. Recreates the functionality
+    of the Guide component in McStas. The path of the neutron through the guide
+    is numerically simulated and its weight adjusted according to the reflectivity
+    function of the guide walls.
+
+    Intersection is taken as the point at which the neutron enters the guide and
+    the guide geometry is taken to lie centered along the z axis.
+
+    Parameters
+    ----------
+    w1 : float
+        Width of the guide entrance in meters
+    h1 : float
+        Height of the guide entrance in meters
+    w2 : float
+        Width of the guide exit in meters
+    h2 : float
+        Height of the guide exit in meters
+    l : float
+        Length of the guide in meters
+    R0 : float
+        Low-angle reflectivity of the guide
+    Qc : float
+        Critical scattering vector of the guide
+    alpha : float
+        Slope of the reflectivity
+    m : float
+        m-value of the guide coating
+    W : float
+        Width of the guide supermirror cutoff
+    max_bounces : float
+        Cutoff to prevent infinite scattering due to numerical error in the kernel
+
+    Methods
+    -------
+    Data
+        None
+    Plot
+        None
+    Save
+        None
+
+    """
+
     def __init__(self, w1=0, h1=0, w2=0, h2=0, l=0, 
                  R0=0, Qc=0, alpha=0, m=1, W=0, idx=0, ctx=0, max_bounces=50,
                  **kwargs):

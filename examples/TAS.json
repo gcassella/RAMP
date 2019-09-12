@@ -106,7 +106,7 @@
                 "height": 0.1
             },
             "scat_kernel": {
-                "name": "PSD2d",
+                "name": "SDetector2D",
                 "axis1_binning": [-0.02, 1e-3, 0.02],
                 "axis2_binning": [-1.0, 1e-2, 1.0],
                 "shape": "divpos",

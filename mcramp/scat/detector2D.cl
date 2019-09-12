@@ -26,12 +26,15 @@ int find_idx(float val, float3 binning) {
     return idx;
 }
 
+
+
 __kernel void detector(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
                        uint const comp_idx, volatile __global float *histogram,
                        float3 const axis1_binning, float3 const axis2_binning, 
                        uint const axis1_numbins, uint const axis2_numbins,
-                       uint const shape, uint const restore_neutron)
+                       uint const axis1_var, uint const axis2_var,
+                       uint const restore_neutron)
 {
 
   uint global_addr = get_global_id(0);
@@ -39,6 +42,7 @@ __kernel void detector(__global float16 *neutrons,
   float8 intersection = intersections[global_addr];
 
   int this_iidx, axis1_idx, axis2_idx, flattened_idx;
+  float axis1_val, axis2_val;
   this_iidx = iidx[global_addr];
 
   /* Check we are scattering from the intersected component -------------- */
@@ -51,35 +55,67 @@ __kernel void detector(__global float16 *neutrons,
 
   /* Perform scattering here --------------------------------------------- */
 
-  // Find axis 1 bin
+  // This code snippet obviously violates DRY but any kind of solution that may
+  // be more elegant and non-repetitive will ultimately only act to obscure
+  // meaning, so I have chosen to stick with the naieve approach.
 
-  if (shape == 0 || shape == 4) { // Plane detector, axis1 is x
-    float x_val = intersection.s4;
-    axis1_idx = find_idx(x_val, axis1_binning);
-  } else if (shape == 1 || shape == 2) { // Banana detector, axis1 is 2theta
-    float3 sample_to_det = intersection.s456;
-    float theta_val = degrees(atan2(sample_to_det.s0, sample_to_det.s2));
-    axis1_idx = find_idx(theta_val, axis1_binning);
-  } else if (shape == 3) {
-    axis1_idx = find_idx(degrees(atan2(neutron.s3, neutron.s5)), axis2_binning);
+  // Find axis 1 bin
+  switch(axis1_var) {
+    case 0 :
+      axis1_val = intersection.s4;
+      break;
+    case 1 :
+      axis1_val = intersection.s5;
+      break;
+    case 2 :
+      axis1_val = degrees(atan2(intersection.s4, intersection.s6));
+      break;
+    case 3 :
+      axis1_val = degrees(atan2(intersection.s5, intersection.s6));
+      break;
+    case 4 :
+      axis1_val = (1.0e6f)*(neutron.sa + intersection.s7);
+      break;
+    case 5 :
+      axis1_val = degrees(atan2(neutron.s3, neutron.s5));
+      break;
+    case 6 :
+      axis1_val = degrees(atan2(neutron.s4, neutron.s5));
+      break;
+    default:
+      break;
   }
+
+  axis1_idx = find_idx(axis1_val, axis1_binning);
 
   // Find axis 2 bin
-
-  if (shape == 0) { // Plane detector, axis2 is y
-    float y_val = intersection.s5;
-    axis2_idx = find_idx(y_val, axis2_binning);
-  } else if (shape == 1) { // Banana detector, axis2 is alpha
-    float3 sample_to_det = intersection.s456;
-    float alpha_val = degrees(atan2(sample_to_det.s1, sample_to_det.s2));
-    axis2_idx = find_idx(alpha_val, axis2_binning);
-  } else if (shape == 2) {
-    axis2_idx = find_idx(neutron.sa+intersection.s7, axis2_binning);
-  } else if (shape == 3) {
-    axis2_idx = find_idx(degrees(atan2(neutron.s4, neutron.s5)), axis2_binning);
-  } else if (shape == 4) {
-    axis2_idx = find_idx(degrees(atan2(neutron.s3, neutron.s5)), axis2_binning);
+  switch(axis2_var) {
+    case 0 :
+      axis2_val = intersection.s4;
+      break;
+    case 1 :
+      axis2_val = intersection.s5;
+      break;
+    case 2 :
+      axis2_val = degrees(atan2(intersection.s4, intersection.s6));
+      break;
+    case 3 :
+      axis2_val = degrees(atan2(intersection.s5, intersection.s6));
+      break;
+    case 4 :
+      axis2_val = (1.0e6f)*(neutron.sa + intersection.s7);
+      break;
+    case 5 :
+      axis2_val = degrees(atan2(neutron.s3, neutron.s5));
+      break;
+    case 6 :
+      axis2_val = degrees(atan2(neutron.s4, neutron.s5));
+      break;
+    default:
+      break;
   }
+
+  axis2_idx = find_idx(axis2_val, axis2_binning);
 
 
   if (!((axis1_idx == -1) || (axis2_idx == -1))) {

@@ -1,5 +1,5 @@
-from .e_mon import EMon
-from .psd2d import PSD2d
+from .detector1D import SDetector1D
+from .detector2D import SDetector2D
 from .powder1 import SPowder1
 from .guide import SGuide
 from .chopper import SChopper

@@ -19,7 +19,7 @@ for dir_, _, files in os.walk(root_dir):
 # Run setup, OpenCL kernels are specified as additional data files
 
 setup(name="RAMP",
-      version="0.0",
+      version="0.0.1",
       packages=find_packages(),
       package_data={'': ['*.cl']},
       data_files=[('headers', list(file_set))],
@@ -28,5 +28,8 @@ setup(name="RAMP",
       install_requires=[
             'pyopencl',
             'numpy',
-            'matplotlib'
+            'matplotlib',
+            'nbsphinx',
+            'numpydoc',
+            'pandoc'
       ])
