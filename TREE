@@ -1,6 +1,0 @@
-/
-  /mcramp - Main module directory
-    /scat       - scattering kernels
-    /geom       - geometry kernels
-    /moderator  - moderator kernels
-    
