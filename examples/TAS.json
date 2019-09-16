@@ -29,7 +29,8 @@
                 "height": 0.1
             },
             "scat_kernel" : {
-                "name" : "EMon",
+                "name" : "SDetector1D",
+                "var" : "energy",
                 "binning": [4.0, 0.01, 6.0],
                 "restore_neutron": true
             }
@@ -90,7 +91,8 @@
                 "height": 0.1
             },
             "scat_kernel" : {
-                "name" : "EMon",
+                "name" : "SDetector1D",
+                "var" : "energy",
                 "binning": [4.0, 0.01, 6.0],
                 "restore_neutron": true
             }
