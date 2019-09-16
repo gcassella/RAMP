@@ -15,6 +15,7 @@ User guide
     user/installation
     user/hello
     user/idf
+    user/running
 
 Kernel list
 -----------
