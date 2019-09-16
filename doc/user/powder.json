@@ -56,10 +56,47 @@
                 "name": "SMonochromator",
                 "slab_width" : 0.1,
                 "slab_height" : 0.1,
-                "mosaic_horizontal" : 40,
-                "mosaic_vertical" : 40,
+                "mosaic_horizontal" : 10,
+                "mosaic_vertical" : 10,
                 "r0" : 1.0,
                 "d_spacing" : 3.355
+            }
+        },
+
+        "Sample" : {
+            "position" : [0.0, 0.0, 0.5],
+            "relative" : "Mono_out",
+            "geom_kernel" : {
+                "name" : "GSphere",
+                "radius": 0.01
+            },
+            "scat_kernel" : {
+                "name": "SPowder1",
+                "d_spacing" : 3.0,
+                "pack" : 1.0,
+                "vc" : 75.0,
+                "sigma_abs" : 0.0,
+                "multiplicity" : 1,
+                "DW" : 1.0,
+                "F2" : 500.0,
+                "d_phi" : 5.0
+            }
+        },
+
+        "Detector" : {
+            "position" : [0.0, 0.0, 0.0],
+            "relative" : "Sample",
+            "geom_kernel" : {
+                "name" : "GBanana",
+                "radius" : 1.0,
+                "height" : 0.2,
+                "mintheta" : -40.0,
+                "maxtheta" : 140.0
+            },
+            "scat_kernel" : {
+                "name" : "SDetector1D",
+                "var" : "theta",
+                "binning" : $detector_binning$
             }
         }
     }

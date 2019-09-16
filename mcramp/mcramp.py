@@ -182,7 +182,7 @@ class Instrument:
         self.queue = queue
         self.kernel_refs = []
 
-        self.blocks = self.fromJSON(fn, ctx, queue, **kwargs)
+        self.blocks = self._fromJSON(fn, ctx, queue, **kwargs)
 
         self.dev = self.ctx.devices[0]
 
@@ -211,7 +211,7 @@ class Instrument:
         for d in self.kernel_refs:
             self.blocks[d.block].components[d.comp].scat_kernel.save(self.queue)
 
-    def substitute_params(self, json_str, **kwargs):
+    def _substitute_params(self, json_str, **kwargs):
         # FIXME: if a token contains another as a substring things get effed up
         pattern = r"(?:\$)(.*?)(?:\$)"
         tokens = re.findall(pattern, json_str)
@@ -225,10 +225,10 @@ class Instrument:
 
         return json_str
 
-    def fromJSON(self, fn, ctx, queue, **kwargs):
+    def _fromJSON(self, fn, ctx, queue, **kwargs):
         with open(fn, 'r') as f:
             json_str = f.read()
-            json_str = self.substitute_params(json_str, **kwargs)
+            json_str = self._substitute_params(json_str, **kwargs)
 
         inst = json.loads(json_str)
 

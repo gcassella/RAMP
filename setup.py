@@ -32,4 +32,5 @@ setup(name="RAMP",
             'nbsphinx',
             'numpydoc',
             'pandoc'
-      ])
+      ]
+)
