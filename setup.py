@@ -31,6 +31,7 @@ setup(name="RAMP",
             'matplotlib',
             'nbsphinx',
             'numpydoc',
-            'pandoc'
+            'pandoc',
+            'ipython'
       ]
 )
