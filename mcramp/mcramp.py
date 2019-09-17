@@ -177,6 +177,22 @@ class ExecutionBlock:
                 events += 1
 
 class Instrument:
+    """
+    Core class which instantiates instrument definiton files, and provides public
+    methods for executing simulations, and plotting, saving, and analyzing results
+
+    Parameters
+    ----------
+    fn : str
+        Instrument definition file name
+    ctx : pyopencl.Context
+        OpenCL context within which the simulation is to be executed
+    queue : pyopencl.CommandQueue
+        OpenCL command queue for enqueueing simulation kernels
+    **kwargs
+        Values for variables contained in the instrument definition file
+    """
+
     def __init__(self, fn, ctx, queue, **kwargs):
         self.ctx = ctx
         self.queue = queue
@@ -187,7 +203,11 @@ class Instrument:
         self.dev = self.ctx.devices[0]
 
     def data(self):
-        # Returns a dictionary with the data provided by each scattering kernel
+        """
+        Returns a dictionary whose keys are the names of components in the instrument
+        definition file, and whose values are the data arrays returned by the respective
+        component
+        """
 
         data = {}
 
@@ -197,7 +217,9 @@ class Instrument:
         return data
 
     def plot(self):
-        # Runs the plotting function of each scattering kernel
+        """
+        Calls the plotting function of each component and displays the output
+        """
         
         from matplotlib.pyplot import show
 
@@ -207,7 +229,12 @@ class Instrument:
         show()
 
     def save(self):
-        # Runs the save function of each scattering kernel
+        """
+        Saves the data array returned by each component's `data()` function to a numpy
+        file "filename.npy", where filename is the value of the filename attribute in
+        the instrument definition file
+        """
+
         for d in self.kernel_refs:
             self.blocks[d.block].components[d.comp].scat_kernel.save(self.queue)
 
@@ -271,6 +298,14 @@ class Instrument:
                                  self.iidx.nbytes)
 
     def execute(self, N):
+        """
+        Executes the instrument simulation
+
+        Parameters
+        ----------
+        N : int
+            Number of neutron trajectories to simulate
+        """
         device = self.queue.get_info(cl.command_queue_info.DEVICE)
         max_mem_alloc_size = device.get_info(cl.device_info.MAX_MEM_ALLOC_SIZE)
         buf_max = int(max_mem_alloc_size / 8 / 26)
