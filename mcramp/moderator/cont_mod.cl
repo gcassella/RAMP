@@ -25,7 +25,7 @@ __kernel void generate_neutrons(__global float16* neutrons,
 
   // Clear old neutron data and seed
 
-  neutron = (float16){0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,(float)seed,0.0f,0.0f,0.0f,0.0f};
+  neutron = (float16){0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,(float)seed+neutron.sb,0.0f,0.0f,0.0f,0.0f};
 
   // Generate an energy val by linearly sampling the range, then weight
   // from a joint Maxwellian distribution according to T1/T2/T3

@@ -30,7 +30,7 @@ __kernel void generate_neutrons(__global float16* neutrons,
   
   // Clear old neutron data and seed
 
-  neutron = (float16){0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,(float)seed,0.0f,0.0f,0.0f,0.0f};
+  neutron = (float16){0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,(float)seed+neutron.sb,0.0f,0.0f,0.0f,0.0f};
 
   deviate = total * rand(&neutron, global_addr);
 
