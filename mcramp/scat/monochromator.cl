@@ -4,7 +4,7 @@
 
 #ifndef GAUSS
 #define GAUSS(x,mean,rms) \
-  (exp(-((x)-(mean))*((x)-(mean))/(2*(rms)*(rms)))/(sqrt(2.0f*M_PI)*(rms)))
+  (exp(-((x)-(mean))*((x)-(mean))/(2.0f*(rms)*(rms)))/(sqrt(2.0f*M_PI)*(rms)))
 #endif
 
 float randnorm(float16* neutron, uint global_addr) {
@@ -16,7 +16,7 @@ float randnorm(float16* neutron, uint global_addr) {
   u1 = rand(neutron, global_addr);
   u2 = rand(neutron, global_addr);
 
-  return sqrt(-2*log(u1))*cos(2.0f*M_PI*u2);
+  return sqrt(-2.0f*log(u1))*cos(2.0f*M_PI*u2);
 }
 
 __kernel void monochromator(__global float16* neutrons,
@@ -68,8 +68,8 @@ __kernel void monochromator(__global float16* neutrons,
       col = ceil((neutron.s2 - zmin)/(slab_width + gap));
       row = ceil((neutron.s1 - ymin)/(slab_height + gap));
 
-      tilt_horizontal = radius_horizontal ? asin((col - (float)(n_horizontal+1)/2.0f) * (slab_width + gap) / radius_horizontal) : 0.0f;
-      tilt_vertical = radius_vertical ? -asin((row - (float)(n_vertical+1)/2.0f)*(slab_height + gap) / radius_vertical) : 0.0f;
+      tilt_horizontal = radius_horizontal > 0.0f ? asin(((float)col - (float)(n_horizontal+1)/2.0f) * (slab_width + gap) / radius_horizontal) : 0.0f;
+      tilt_vertical = radius_vertical > 0.0f ? -asin(((float)row - (float)(n_vertical+1)/2.0f)*(slab_height + gap) / radius_vertical) : 0.0f;
 
       // Transform to slab frame MAKE SURE TO LEAVE SLAB FRAME WHEN WE'RE DONE
 
@@ -90,7 +90,7 @@ __kernel void monochromator(__global float16* neutrons,
         ratio = -2.0f*ki.s0 / Q;
         Q_order = floor(ratio + 0.5f);
 
-        if (Q_order == 0.0f) Q_order = ratio < 0 ? -1.0f : 1.0f;
+        if (Q_order == 0.0f) Q_order = ratio < 0.0f ? -1.0f : 1.0f;
         if (Q_order < 0.0f) Q_order = -Q_order;
 
         // Ensure scattering is possible
