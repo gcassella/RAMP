@@ -7,7 +7,7 @@ objects as a heirarchical list of key-value pairs, and there are a `number of re
 available learning resources <https://www.google.com/search?q=JSON+basics>`_ online \
 which describe the format better than I could here.
 
-The heirarchy of objects in the RAMP instrument definition file goes *execution block* \
+The hierarchy of objects in the RAMP instrument definition file goes *execution block* \
 -> *component* -> *kernels* -> *attributes*, each of which are described in turn \
 below.
 
@@ -59,8 +59,8 @@ The position and rotation of a component are specified using the `position` and 
 `rotation` attributes of the component object. Both attributes are specified as \
 an array of three floating point values. For `position` these are the Cartesian \
 coordinates of the component in meters and for `rotation` these are the rotation \
-angles about the Cartesian axes with the component at the origin, in the order \
-z, y, x.
+angles (in radians) about the Cartesian axes with the component at the origin, in \
+the order z, y, x.
 
 The position and rotation of a component can also be specified relative to a component \
 declared earlier in the instrument definition file using the `relative` attribute. \
