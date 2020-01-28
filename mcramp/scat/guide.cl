@@ -126,7 +126,8 @@ __kernel void guide_scatter(__global float16* neutrons,
         refl = reflectivity_func(q, R0, Qc, alpha, m, W);
         neutron.s9 *= refl;
 
-        if (fabs(neutron.s9) > 1e30)
+        // Delete extremely small reflections to avoid numerical issues
+        if (refl < 1e-12)
           neutron.s9 = 0.0f;
 
         i++;
