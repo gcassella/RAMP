@@ -1,7 +1,4 @@
-*shit*
-*pycache*
-*.pyc
-*inst.py*
-cloc-1.76.exe
-*.gitignore*
-*.dat
+*build*
+*dist*
+*egg*
+*.ipynb_checkpoints*

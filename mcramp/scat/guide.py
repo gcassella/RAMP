@@ -8,9 +8,54 @@ import os
 import re
 
 class SGuide(SPrim):
-    def __init__(self, g_pos=(0., 0., 0.), w1=0, h1=0, w2=0, h2=0, l=0, 
-                 R0=0, Qc=0, alpha=0, m=1, W=0, idx=0, ctx=0, max_bounces=5):
-        self.g_pos  = np.array((g_pos[0], g_pos[1], g_pos[2], 0. ), dtype=clarr.vec.float3)
+    """
+    Scattering kernel for tapered rectangular Guide. Recreates the functionality
+    of the Guide component in McStas. The path of the neutron through the guide
+    is numerically simulated and its weight adjusted according to the reflectivity
+    function of the guide walls.
+
+    Intersection is taken as the point at which the neutron enters the guide and
+    the guide geometry is taken to lie centered along the z axis.
+
+    Parameters
+    ----------
+    w1 : float
+        Width of the guide entrance in meters
+    h1 : float
+        Height of the guide entrance in meters
+    w2 : float
+        Width of the guide exit in meters
+    h2 : float
+        Height of the guide exit in meters
+    l : float
+        Length of the guide in meters
+    R0 : float
+        Low-angle reflectivity of the guide
+    Qc : float
+        Critical scattering vector of the guide
+    alpha : float
+        Slope of the reflectivity
+    m : float
+        m-value of the guide coating
+    W : float
+        Width of the guide supermirror cutoff
+    max_bounces : float
+        Cutoff to prevent infinite scattering due to numerical error in the kernel
+
+    Methods
+    -------
+    Data
+        None
+    Plot
+        None
+    Save
+        None
+
+    """
+
+    def __init__(self, w1=0, h1=0, w2=0, h2=0, l=0, 
+                 R0=0, Qc=0, alpha=0, m=1, W=0, idx=0, ctx=0, max_bounces=50,
+                 **kwargs):
         self.w1     = np.float32(w1)
         self.h1     = np.float32(h1)
         self.w2     = np.float32(w2)
@@ -35,7 +80,6 @@ class SGuide(SPrim):
                                 intersection_buf,
                                 iidx_buf,
                                 self.idx,
-                                self.g_pos,
                                 self.w1,
                                 self.h1,
                                 self.w2,
@@ -46,63 +90,4 @@ class SGuide(SPrim):
                                 self.alpha,
                                 self.m,
                                 self.W,
-                                self.max_bounces).wait()
-
-    def lines(self):
-        lines = []
-
-        fmt = 'k-'
-
-        y = np.linspace(-self.h1 / 2, self.h1 / 2) + self.g_pos['y']
-        x = self.w1 / 2 * np.ones(y.shape) + self.g_pos['x']
-        z = self.g_pos['z']
-        lines.append((x, y, z, fmt))
-
-        x = -self.w1 / 2 * np.ones(y.shape) + self.g_pos['x']
-        lines.append((x, y, z, fmt))
-
-        x = np.linspace(-self.w1 / 2, self.w1 / 2) + self.g_pos['x']
-        y = self.h1 / 2 * np.ones(x.shape) + self.g_pos['y']
-        z = self.g_pos['z']
-        lines.append((x, y, z, fmt))
-
-        y = -self.h1 / 2 * np.ones(x.shape) + self.g_pos['y']
-        lines.append((x, y, z, fmt))
-
-        y = np.linspace(-self.h2 / 2, self.h2 / 2) + self.g_pos['y']
-        x = self.w2 / 2 * np.ones(y.shape) + self.g_pos['x']
-        z = self.g_pos['z'] + self.l
-        lines.append((x, y, z, fmt))
-
-        x = -self.w2 / 2 * np.ones(y.shape) + self.g_pos['x']
-        lines.append((x, y, z, fmt))
-
-        x = np.linspace(-self.w2 / 2, self.w2 / 2) + self.g_pos['x']
-        y = self.h2 / 2 * np.ones(x.shape) + self.g_pos['y']
-        z = self.g_pos['z'] + self.l
-        lines.append((x, y, z, fmt))
-
-        y = -self.h2 / 2 * np.ones(x.shape) + self.g_pos['y']
-        lines.append((x, y, z, fmt))
-
-        z = np.linspace(0, self.l) + self.g_pos['z']
-        x = np.linspace(self.w1 / 2, self.w2 / 2) + self.g_pos['x']
-        y = np.linspace(self.h1 / 2, self.h2 / 2) + self.g_pos['y']
-        lines.append((x, y, z, fmt))
-
-        z = np.linspace(0, self.l) + self.g_pos['z']
-        x = np.linspace(-self.w1 / 2, -self.w2 / 2) + self.g_pos['x']
-        y = np.linspace(self.h1 / 2, self.h2 / 2) + self.g_pos['y']
-        lines.append((x, y, z, fmt))
-
-        z = np.linspace(0, self.l) + self.g_pos['z']
-        x = np.linspace(self.w1 / 2, self.w2 / 2) + self.g_pos['x']
-        y = np.linspace(-self.h1 / 2, -self.h2 / 2) + self.g_pos['y']
-        lines.append((x, y, z, fmt))
-
-        z = np.linspace(0, self.l) + self.g_pos['z']
-        x = np.linspace(-self.w1 / 2, -self.w2 / 2) + self.g_pos['x']
-        y = np.linspace(-self.h1 / 2, -self.h2 / 2) + self.g_pos['y']
-        lines.append((x, y, z, fmt))
-
-        return lines
+                                self.max_bounces)

@@ -7,8 +7,35 @@ import pyopencl.array as clarr
 import os
 
 class GPlane(GPrim):
-    def __init__(self, width=0, height=0, position=[0, 0, 0], idx=0, ctx=None):
-        self.position   = position
+    """
+    Geometry kernel for 'plane' geometry.
+
+    Parameters
+    ----------
+    width : float
+        The width of the plane
+    height : float
+        The height of the plane
+    orientation : {"xy", "yz"}
+        The orientation of the plane. "xy" gives a plane normal to the z axis,
+        "yz" gives a plane normal to the x axis.
+
+    Notes
+    -----
+    Intersection 1 :
+        Point of intersection with the plane
+    Intersection 2 :
+        Same as Intersection 1.
+
+    Methods
+    -------
+    None
+    """
+
+    def __init__(self, width=0, height=0, idx=0, orientation="xy", ctx=None):
+        orientations = {"xy": 0, "yz": 1}
+
+        self.orientation = np.uint32(orientations[orientation])
         self.width      = np.float32(width)
         self.height     = np.float32(height)
         self.idx        = np.uint32(idx)
@@ -24,6 +51,6 @@ class GPlane(GPrim):
                                  intersection_buf,
                                  iidx_buf,
                                  self.idx,
-                                 self.position,
                                  self.width,
-                                 self.height).wait()
+                                 self.height,
+                                 self.orientation)

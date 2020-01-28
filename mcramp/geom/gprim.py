@@ -4,17 +4,22 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 
 class GPrim():
-    __metaclass__ = ABCMeta
+    """
+    Primitive class from which all geometry kernels inherit.
 
-    @property
-    @abstractmethod
-    def position(self):
-        return self._position
-    
-    @position.setter
-    def position(self, val):
-        self._position = np.array((val[0], val[1], val[2], 0.),
-                                    dtype=clarr.vec.float3)
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    lines()
+        Returns a list of lines used for rendering the geometry of the kernel
+        in matplotlib - currently deprecated.
+
+    """
+
+    __metaclass__ = ABCMeta
 
     @abstractmethod
     def lines(self):
