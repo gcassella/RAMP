@@ -38,14 +38,14 @@ __kernel void guide_scatter(__global float16* neutrons,
 
     float3 pos, vel;
     float t1, t2, av, ah, bv, bh, cv1, cv2, ch1, ch2, d, ww, hh, whalf, hhalf;
-    float vdotn_v1, vdotn_v2, vdotn_h1, vdotn_h2, q, nlen2;
+    float vdotn_v1, vdotn_v2, vdotn_h1, vdotn_h2, q, nlen2, refl;
 
     uint i = 0;
 
     ww = 0.5f*(w2 - w1); hh = 0.5f*(h2 - h1);
     whalf = 0.5f*w1; hhalf = 0.5f*h1;
 
-    while(true) {
+    while(true && i < max_bounces) {
         pos = neutron.s012;
         vel = neutron.s345;
 
@@ -123,9 +123,17 @@ __kernel void guide_scatter(__global float16* neutrons,
             break;
         }
 
-        neutron.s9  *= reflectivity_func(q, R0, Qc, alpha, m, W);
+        refl = reflectivity_func(q, R0, Qc, alpha, m, W);
+        neutron.s9 *= refl;
+
+        if (fabs(neutron.s9) > 1e30)
+          neutron.s9 = 0.0f;
+
+        i++;
     }
 
+    if (i >= max_bounces)
+      neutron.sf = 1.0;
 
     /* ----------------------- */
 
