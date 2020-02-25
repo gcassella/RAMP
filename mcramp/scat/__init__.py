@@ -8,3 +8,5 @@ from .arm import SArm
 from .collimator_lin import SLinearCollimator
 from .counter import SCounter
 from .rescal import SRescal
+from .mcpl_out import SMCPLOut
+from .mcpl_in import SMCPLIn

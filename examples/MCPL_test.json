@@ -1,0 +1,192 @@
+{
+    "all" : {
+        "linear" : true,
+        "mod" : {
+            "source": true,
+            "position" : [0.0, 0.0, 0.0],
+            "moderator_kernel": {
+                "name": "MFlat",
+                "mod_dim": [0.04, 0.09],
+                "target_dim": [0.04, 0.09],
+                "target_dist": 1.7,
+                "E_min": 1.1,
+                "E_max": 9.0,
+                "toff_max" : 5e-5,
+                "flux" : 1e14
+            }
+        },
+
+
+        "guide1" : {
+            "position" : [0.0, 0.0, 1.680],
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.04,
+                "height": 0.09
+            },
+            "scat_kernel" : {
+                "name" : "SGuide",
+                "w1" : 0.04,
+                "h1" : 0.09,
+                "w2" : 0.04,
+                "h2" : 0.09,
+                "l" : 1.98,
+                "R0" : 1.0,
+                "Qc" : 0.0218, 
+                "alpha" : 4.38,
+                "m" : 2,
+                "W" : 0.003
+            }
+        },
+
+        "guide2" : {
+            "position" : [0.0, 0.0, 3.740],
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.04,
+                "height": 0.09
+            },
+            "scat_kernel" : {
+                "name" : "SGuide",
+                "w1" : 0.04,
+                "h1" : 0.09,
+                "w2" : 0.04,
+                "h2" : 0.09,
+                "l" : 2.50,
+                "R0" : 1.0,
+                "Qc" : 0.0218, 
+                "alpha" : 4.38,
+                "m" : 2,
+                "W" : 0.003
+            }
+        },
+
+        "guide3" : {
+            "position" : [0.0, 0.0, 6.30],
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.04,
+                "height": 0.09
+            },
+            "scat_kernel" : {
+                "name" : "SGuide",
+                "w1" : 0.04,
+                "h1" : 0.09,
+                "w2" : 0.04,
+                "h2" : 0.09,
+                "l" : 1.514,
+                "R0" : 1.0,
+                "Qc" : 0.0218, 
+                "alpha" : 4.38,
+                "m" : 2,
+                "W" : 0.003
+            }
+        },
+
+        "Res1" : {
+            "position" : [0.0, 0.0, 7.83],
+            "geom_kernel" : {
+                "name" : "GPlane",
+                "width" : 0.6,
+                "height" : 0.6
+            },
+            "scat_kernel" : {
+                "name" : "SChopper",
+                "radius": 0.279,
+                "freq" : 314.1,
+                "n_slits" : 6,
+                "jitter" : 7e-7,
+                "slit_width" : 0.04,
+                "phase" : $7.83 / v_foc + pha_offset$
+            }
+        },
+
+        "Res1_counter" : {
+            "position" : [0.0, 0.0, 7.830002],
+            "geom_kernel" : {
+                "name" : "GPlane",
+                "width" : 0.6,
+                "height" : 0.6
+            },
+            "scat_kernel" : {
+                "name" : "SChopper",
+                "radius": 0.279,
+                "freq" : -314.1,
+                "n_slits" : 6,
+                "jitter" : 7e-7,
+                "slit_width" : 0.04,
+                "phase" : -$7.83 / v_foc + pha_offset$
+            }
+        },
+
+        "guide4" : {
+            "position" : [0.0, 0.0, 7.852],
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.04,
+                "height": 0.09
+            },
+            "scat_kernel" : {
+                "name" : "SGuide",
+                "w1" : 0.04,
+                "h1" : 0.09,
+                "w2" : 0.04,
+                "h2" : 0.09,
+                "l" : 0.312,
+                "R0" : 1.0,
+                "Qc" : 0.0218, 
+                "alpha" : 4.38,
+                "m" : 2,
+                "W" : 0.003
+            }
+        },
+
+        "guide5" : {
+            "position" : [0.0, 0.0, 8.236],
+            "geom_kernel" : {
+                "name": "GPlane",
+                "width": 0.04,
+                "height": 0.09
+            },
+            "scat_kernel" : {
+                "name" : "SGuide",
+                "w1" : 0.04,
+                "h1" : 0.09,
+                "w2" : 0.04,
+                "h2" : 0.09,
+                "l" : 3.499,
+                "R0" : 1.0,
+                "Qc" : 0.0218, 
+                "alpha" : 4.38,
+                "m" : 2,
+                "W" : 0.003
+            }
+        },
+
+        "MCPL_out" : {
+            "position" : [0.0, 0.0, 0.0],
+            "restore_neutron" : true,
+            "geom_kernel" : {
+                "name" : "GArm"
+            },
+            "scat_kernel" : {
+                "name" : "SMCPLOut",
+                "filename" : "MCPLtest.mcpl"
+            }
+        },
+
+        "Emon" : {
+            "position" : [0.0, 0.0, 11.736],
+            "geom_kernel" : {
+                "name" : "GPlane",
+                "width" : 0.1,
+                "height" : 0.1
+            },
+            "scat_kernel" : {
+                "name" : "SDetector1D",
+                "var" : "energy",
+                "binning" : [0.0, 0.01, 10.0]
+            }
+        }
+    }
+}

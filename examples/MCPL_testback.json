@@ -1,0 +1,49 @@
+{
+    "all" : {
+        "linear" : true,
+        "mod" : {
+            "source": true,
+            "position" : [0.0, 0.0, 0.0],
+            "moderator_kernel": {
+                "name": "MCont",
+                "mod_dim": [0.04, 0.09],
+                "target_dim": [0.04, 0.09],
+                "target_dist": 1.7,
+                "E_min": 1.1,
+                "E_max": 9.0
+            }
+        },
+
+
+        "mcpl_in" : {
+            "position" : [0, 0, 0],
+            "geom_kernel" : {
+                "name" : "GArm"
+            },
+            "scat_kernel" : {
+                "name" : "SMCPLIn",
+                "filename" : "MCPLtestback.mcpl"
+            }
+        },
+
+        "det" : {
+            "position" : [0.0, 0.0, 0.0],
+            "rotation" : [0.0, 0.0, 0.0],
+            "geom_kernel": {
+                "name": "GBanana",
+                "radius": 0.5,
+                "height": 0.1,
+                "mintheta" : -80.0,
+                "maxtheta" : 80.0
+            },
+            "scat_kernel": {
+                "name": "SDetector2D",
+                "axis1_binning": [-40.0, 1.0, 140.0],
+                "axis2_binning": [22000, 50, 50000],
+                "axis1_var": "theta",
+                "axis2_var": "tof",
+                "logscale" : true
+            }
+        }
+    }
+}
