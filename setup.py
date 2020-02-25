@@ -31,6 +31,7 @@ setup(name="MCRAMP",
             'matplotlib',
             'nbsphinx',
             'numpydoc',
-            'pandoc'
+            'pandoc',
+            'mcpl'
       ]
 )
