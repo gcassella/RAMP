@@ -29,10 +29,6 @@ setup(name="MCRAMP",
             'pyopencl',
             'numpy',
             'matplotlib',
-            'nbsphinx>=0.6.0',
-            'numpydoc',
-            'pandoc',
-            'mcpl',
-            'pygments==2.4.1'
+            'mcpl'
       ]
 )

@@ -1,4 +1,6 @@
 ipython
 sphinx>=1.7.5
-nbsphinx
 pygments==2.4.1
+nbsphinx>=0.6.0
+numpydoc
+pandoc
