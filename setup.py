@@ -33,6 +33,6 @@ setup(name="MCRAMP",
             'numpydoc',
             'pandoc',
             'mcpl',
-            'pygments>=2.4.1'
+            'pygments==2.4.1'
       ]
 )
