@@ -32,6 +32,7 @@ setup(name="MCRAMP",
             'nbsphinx',
             'numpydoc',
             'pandoc',
-            'mcpl'
+            'mcpl',
+            'pygments>=2.4.1'
       ]
 )
