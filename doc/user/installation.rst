@@ -43,9 +43,12 @@ detector image plots, everything is installed correctly!
 
 Jupyter notebooks
 -----------------
+
 Some of the instructional examples for RAMP are presented as `Jupyter <https://jupyter.org/>`_ \
 notebooks. These are interactive Python environments that allow code to be presented, edited, \
-and ran alongside relevant text and graphical outputs.
+and ran alongside relevant text and graphical outputs. The easiest way to get up and running \
+with RAMP notebooks is via Google Colab, see :ref:`google-colab`, however if you wish to run the notebooks locally \
+follow the instructions here.
 
 To install Jupyter (assuming you followed the instructions above and have a functional \
 Python installation) run::
