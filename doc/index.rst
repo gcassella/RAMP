@@ -35,6 +35,18 @@ User guide
     user/hello
     user/idf
     user/running
+    user/kernels
+
+Writing kernels
+---------------
+
+.. toctree::
+    :maxdepth: 2
+
+    writing/primer
+    writing/buffers
+    writing/scatter
+    writing/modes
 
 Kernel list
 -----------

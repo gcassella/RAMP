@@ -2,11 +2,17 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as clarr
 
-import os, json, importlib, re
+import os, json, importlib, re, sys
 
 from time import time
 
 DETECTOR_KERNELS = ["PSD2d", "EMon"]
+
+def build_kernel(filename, ctx):
+    with open(filename, mode='r') as f:
+            prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(__file__)))
+
+    return prg
 
 class KernelRef:
     # Keeps track of the execution block and component that a detector kernel
@@ -66,12 +72,20 @@ class ExecutionBlock:
                     pos = np.add(pos, [rcomp_pos['s0'], rcomp_pos['s1'], rcomp_pos['s2']])
                     rot = np.add(rot, [rcomp_rot['s0'], rcomp_rot['s1'], rcomp_rot['s2']])
 
-                gk = getattr(importlib.import_module("mcramp"), comp['geom_kernel']['name'])
+                try:
+                    gk = getattr(importlib.import_module("mcramp"), comp['geom_kernel']['name'])
+                except AttributeError:
+                    gk = getattr(importlib.import_module(comp['geom_kernel']['name']), comp['geom_kernel']['name'])
+                
                 gargs = {k: v for (k, v) in comp['geom_kernel'].items() if not k == 'name'}
                 gargs['idx'] = i
                 gargs['ctx'] = parent.ctx
 
-                sk = getattr(importlib.import_module("mcramp"), comp['scat_kernel']['name'])
+                try:
+                    sk = getattr(importlib.import_module("mcramp"), comp['scat_kernel']['name'])
+                except AttributeError:
+                    sk = getattr(importlib.import_module(comp['scat_kernel']['name']), comp['scat_kernel']['name'])
+                
                 sargs = {k: v for (k, v) in comp['scat_kernel'].items() if not k == 'name'}
                 sargs['idx'] = i
                 sargs['ctx'] = parent.ctx
@@ -88,7 +102,7 @@ class ExecutionBlock:
 
         return ex_block
 
-    def execute(self, N):
+    def execute(self, N, debug=0):
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                       'scat/terminator.cl'), mode='r') as f:
                 self.term_prg = cl.Program(self.parent.ctx,
@@ -116,7 +130,13 @@ class ExecutionBlock:
                 self.term_prg.terminate(self.parent.queue, (N,), None,
                                         self.parent.neutrons_cl,
                                         self.parent.intersections_cl,
-                                        getattr(comp, 'restore_neutron', np.uint32(0)))           
+                                        getattr(comp, 'restore_neutron', np.uint32(0)))
+
+                if debug == 1:
+                    cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
+                    self.parent.queue.finish()
+
+                    print(self.parent.intersections)
 
                 comp.scat_kernel.scatter_prg(self.parent.queue,
                                              N,
@@ -129,10 +149,11 @@ class ExecutionBlock:
                                            comp.pos,
                                            comp.rot)
 
-                #cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
-                #self.parent.queue.finish()
+                if debug == 1:
+                    cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
+                    self.parent.queue.finish()
 
-                #print(self.parent.neutrons)
+                    print(self.parent.neutrons)
 
             self.parent.queue.finish()
 
@@ -297,7 +318,7 @@ class Instrument:
                                  mf.WRITE_ONLY,
                                  self.iidx.nbytes)
 
-    def execute(self, N):
+    def execute(self, N, debug=0):
         """
         Executes the instrument simulation
 
@@ -331,7 +352,7 @@ class Instrument:
                                     self.intersections_cl)
 
             for block in self.blocks:
-                block.execute(torun)
+                block.execute(torun, debug)
 
             for d in self.kernel_refs:
                 self.blocks[d.block].components[d.comp].scat_kernel.data_reduce(self.queue)
