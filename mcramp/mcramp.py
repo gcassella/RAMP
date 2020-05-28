@@ -15,11 +15,15 @@ def build_kernel(filename, ctx):
     return prg
 
 class KernelRef:
-    # Keeps track of the execution block and component that a detector kernel
+    # Keeps track of the execution block and component that a kernel
     # belongs to in order to retrieve it's histogram at the end of execution
-    def __init__(self, block, comp):
+    #
+    # Also tracks position and rotation for visualisation purposes
+    def __init__(self, block, comp, pos, rot):
         self.block = block
         self.comp = comp
+        self.pos = pos
+        self.rot = rot
 
 class Component:
     def __init__(self, geom_kernel, scat_kernel, restore_neutron, pos, rot=[0, 0, 0]):
@@ -94,7 +98,7 @@ class ExecutionBlock:
 
                 comps[name] = Component(gk(**gargs), sk(**sargs), restore_neutron, pos, rot)
 
-                parent.kernel_refs.append(KernelRef(idx, name))
+                parent.kernel_refs.append(KernelRef(idx, name, pos, rot))
             
             i += 1
 
@@ -258,6 +262,55 @@ class Instrument:
 
         for d in self.kernel_refs:
             self.blocks[d.block].components[d.comp].scat_kernel.save(self.queue)
+
+    def visualise(self, index=-1):
+        """
+        Opens a matplotlib window containing orthogonal projections of the instrument
+        geometry, centered on component index.
+        """
+
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
+
+        fig = plt.figure()
+        ax_xz = fig.add_subplot(2, 2, 1)
+        ax_yz = fig.add_subplot(2, 2, 2)
+        ax_xy = fig.add_subplot(2, 2, 3)
+        ax_or = fig.add_subplot(2, 2, 4, projection='3d')
+
+        for d in self.kernel_refs:
+            s_lines = self.blocks[d.block].components[d.comp].scat_kernel.lines()
+            g_lines = self.blocks[d.block].components[d.comp].geom_kernel.lines()
+
+            g_lines_xz = [
+                np.add(g_lines[0], d.pos[0]),
+                np.add(g_lines[2], d.pos[2])
+            ]
+            ax_xz.plot(g_lines_xz[0], g_lines_xz[1])
+
+            g_lines_yz = [
+                np.add(g_lines[1], d.pos[1]),
+                np.add(g_lines[2], d.pos[2])
+            ]
+            ax_yz.plot(g_lines_yz[0], g_lines_yz[1])
+
+            g_lines_xy = [
+                np.add(g_lines[0], d.pos[0]),
+                np.add(g_lines[1], d.pos[1])
+            ]
+            ax_xy.plot(g_lines_xy[0], g_lines_xy[1])
+
+            g_lines_xyz = [
+                np.add(g_lines[0], d.pos[0]),
+                np.add(g_lines[1], d.pos[1]),
+                np.add(g_lines[2], d.pos[2])
+            ]
+            ax_or.plot(g_lines_xyz[0],
+                       g_lines_xyz[2],
+                       g_lines_xyz[1])
+
+        plt.show()
+
 
     def _substitute_params(self, json_str, **kwargs):
         # FIXME: if a token contains another as a substring things get effed up

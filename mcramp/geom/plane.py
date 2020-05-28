@@ -54,3 +54,19 @@ class GPlane(GPrim):
                                  self.width,
                                  self.height,
                                  self.orientation)
+
+    def lines(self):
+        x_arr = [-self.width / 2.0, 
+                 self.width / 2.0, 
+                 self.width / 2.0,
+                 -self.width / 2.0,
+                 -self.width / 2.0]
+
+        y_arr = [self.height / 2.0, 
+                 self.height / 2.0, 
+                 -self.height / 2.0,
+                 -self.height / 2.0,
+                 self.height / 2.0]
+
+        z_arr = [0.0, 0.0, 0.0, 0.0, 0.0]
+        return [x_arr, y_arr, z_arr]
