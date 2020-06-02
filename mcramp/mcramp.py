@@ -271,149 +271,17 @@ class Instrument:
         geometry, centered on component index.
         """
 
-        import matplotlib as mpl
-        import matplotlib.pyplot as plt
-        import matplotlib.widgets as wid
-        from mpl_toolkits.mplot3d import Axes3D
+        from .visualisation import Visualisation
 
-        mpl.rcParams['toolbar'] = 'None'
-        plt.style.use('dark_background')
-
-        fig = plt.figure()
-        ax_zx = fig.add_subplot(2, 2, 1)
-        ax_zx.set_xlabel('z [m]')
-        ax_zx.set_ylabel('x [m]')
-
-        ax_zy = fig.add_subplot(2, 2, 2)
-        ax_zy.set_xlabel('z [m]')
-        ax_zy.set_ylabel('y [m]')
-
-        ax_xy = fig.add_subplot(2, 2, 3)
-        ax_xy.set_xlabel('x [m]')
-        ax_xy.set_ylabel('y [m]')
-
-        ax_or = fig.add_subplot(2, 2, 4, projection='3d')
-        ax_or.set_xlabel('x [m]')
-        ax_or.set_ylabel('z [m]')
-        ax_or.set_zlabel('y [m]')
+        vis = Visualisation(self, controls=False)
 
         for d in self.kernel_refs:
             if not d.vis:
                 continue
 
-            s_lines = self.blocks[d.block].components[d.comp].scat_kernel.lines()
-            g_lines = self.blocks[d.block].components[d.comp].geom_kernel.lines()
+            vis.plot_component(d)
 
-            g_lines_xz = [
-                np.add(g_lines[2], d.pos[2]),
-                np.add(g_lines[0], d.pos[0])
-            ]
-            ax_zx.plot(g_lines_xz[0], g_lines_xz[1])
-
-            g_lines_zy = [
-                np.add(g_lines[2], d.pos[2]),
-                np.add(g_lines[1], d.pos[1])
-            ]
-            ax_zy.plot(g_lines_zy[0], g_lines_zy[1])
-
-            g_lines_xy = [
-                np.add(s_lines[0], d.pos[0]),
-                np.add(s_lines[1], d.pos[1])
-            ]
-            ax_xy.plot(g_lines_xy[0], g_lines_xy[1])
-
-            g_lines_xyz = [
-                np.add(g_lines[0], d.pos[0]),
-                np.add(g_lines[1], d.pos[1]),
-                np.add(g_lines[2], d.pos[2])
-            ]
-            ax_or.plot(g_lines_xyz[0],
-                       g_lines_xyz[2],
-                       g_lines_xyz[1])
-
-            s_lines_xz = [
-                np.add(s_lines[2], d.pos[2]),
-                np.add(s_lines[0], d.pos[0])
-            ]
-            ax_zx.plot(s_lines_xz[0], s_lines_xz[1])
-
-            s_lines_zy = [
-                np.add(s_lines[2], d.pos[2]),
-                np.add(s_lines[1], d.pos[1])
-            ]
-            ax_zy.plot(s_lines_zy[0], s_lines_zy[1])
-
-            s_lines_xy = [
-                np.add(s_lines[0], d.pos[0]),
-                np.add(s_lines[1], d.pos[1])
-            ]
-            ax_xy.plot(s_lines_xy[0], s_lines_xy[1])
-
-            s_lines_xyz = [
-                np.add(s_lines[0], d.pos[0]),
-                np.add(s_lines[1], d.pos[1]),
-                np.add(s_lines[2], d.pos[2])
-            ]
-            ax_or.plot(s_lines_xyz[0],
-                       s_lines_xyz[2],
-                       s_lines_xyz[1])
-
-        plt.subplots_adjust(left=0.05, right=0.7)
-
-        def_xlim = ax_zx.get_ylim()
-        xlim_range = def_xlim[1] - def_xlim[0]
-
-        def_ylim = ax_xy.get_ylim()
-        ylim_range = def_ylim[1] - def_ylim[0]
-
-        def_zlim = ax_zx.get_xlim()
-        zlim_range = def_zlim[1] - def_zlim[0]
-
-        def xlim_change(vmin, vmax):
-            if not vmin == vmax:
-                ax_zx.set_ylim(vmin, vmax, emit=False, auto=False)
-                ax_xy.set_xlim(vmin, vmax, emit=False, auto=False)
-                ax_or.set_xlim(vmin, vmax, emit=False, auto=False)
-
-        def ylim_change(vmin, vmax):
-            if not vmin == vmax:
-                ax_zy.set_ylim(vmin, vmax, emit=False, auto=False)
-                ax_xy.set_ylim(vmin, vmax, emit=False, auto=False)
-                ax_or.set_zlim(vmin, vmax, emit=False, auto=False)
-
-        def zlim_change(vmin, vmax):
-            if not vmin == vmax:
-                ax_zx.set_xlim(vmin, vmax, emit=False, auto=False)
-                ax_zy.set_xlim(vmin, vmax, emit=False, auto=False)
-                ax_or.set_ylim(vmin, vmax, emit=False, auto=False)
-
-        def text_ax(text, position):
-            text_axes = plt.axes(position)
-            text_axes.text(0, 0, text)
-            text_axes.axis('off')
-            return text_axes
-
-        rectprops = dict(facecolor='blue', alpha=0.5)
-        xlim_span_ax = plt.axes([0.72, 0.3, 0.25, 0.03])
-        xlim_span_ax.set_xlim([def_xlim[0]-0.5*xlim_range, def_xlim[1]+0.5*xlim_range])
-        xlim_span_ax.set_yticks([])
-        xlim_span = wid.SpanSelector(xlim_span_ax, xlim_change, 'horizontal', rectprops=rectprops)
-        xlim_span_label = text_ax("xlim", [0.72, 0.35, 0.25, 0.03])
-
-        ylim_span_ax = plt.axes([0.72, 0.2, 0.25, 0.03])
-        ylim_span_ax.set_xlim([def_ylim[0]-0.5*ylim_range, def_ylim[1]+0.5*ylim_range])
-        ylim_span_ax.set_yticks([])
-        ylim_span = wid.SpanSelector(ylim_span_ax, ylim_change, 'horizontal', rectprops=rectprops)
-        ylim_span_label = text_ax("ylim", [0.72, 0.25, 0.25, 0.03])
-
-        zlim_span_ax = plt.axes([0.72, 0.1, 0.25, 0.03])
-        zlim_span_ax.set_xlim([def_zlim[0]-0.5*zlim_range, def_zlim[1]+0.5*zlim_range])
-        zlim_span_ax.set_yticks([])
-        zlim_span = wid.SpanSelector(zlim_span_ax, zlim_change, 'horizontal', rectprops=rectprops)
-        zlim_span_label = text_ax("zlim", [0.72, 0.15, 0.25, 0.03])
-
-        plt.show()
-
+        vis.show()
 
     def _substitute_params(self, json_str, **kwargs):
         # FIXME: if a token contains another as a substring things get effed up
