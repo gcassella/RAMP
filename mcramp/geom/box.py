@@ -54,3 +54,29 @@ class GBox(GPrim):
                                   self.width,
                                   self.height,
                                   self.depth)
+
+    def lines(self):
+        w_2 = self.width / 2.0
+        h_2 = self.height / 2.0
+        d_2 = self.depth / 2.0
+        vertices = [[-w_2, h_2, -d_2],
+                    [w_2, h_2, -d_2],
+                    [w_2, -h_2, -d_2],
+                    [-w_2, -h_2, -d_2],
+                    [-w_2, h_2, d_2],
+                    [w_2, h_2, d_2],
+                    [w_2, -h_2, d_2],
+                    [-w_2, -h_2, d_2]]
+
+        winding = [0,1,2,3,0,4,5,1,2,6,5,6,7,4,0,3,7]
+        
+        x = []
+        y = []
+        z = []
+
+        for w in winding:
+            x.append(vertices[w][0])
+            y.append(vertices[w][1])
+            z.append(vertices[w][2])
+
+        return [x, y, z]

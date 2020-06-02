@@ -265,7 +265,7 @@ class Instrument:
         for d in self.kernel_refs:
             self.blocks[d.block].components[d.comp].scat_kernel.save(self.queue)
 
-    def visualise(self, index=-1):
+    def visualise(self, controls=True):
         """
         Opens a matplotlib window containing orthogonal projections of the instrument
         geometry, centered on component index.
@@ -273,7 +273,7 @@ class Instrument:
 
         from .visualisation import Visualisation
 
-        vis = Visualisation(self, controls=False)
+        vis = Visualisation(self, controls=controls)
 
         for d in self.kernel_refs:
             if not d.vis:

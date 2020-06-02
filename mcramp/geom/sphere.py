@@ -45,3 +45,39 @@ class GSphere(GPrim):
                                   iidx_buf,
                                   np.uint32(self.idx),
                                   self.radius)
+
+    def lines(self):
+        x = []
+        y = []
+        z = []
+
+        angles = np.linspace(0, 2*np.pi)
+        for ang in angles:
+            x.append(0)
+            y.append(self.radius*np.cos(ang))
+            z.append(self.radius*np.sin(ang))
+
+        x.append(x[0])
+        y.append(y[0])
+        z.append(z[0])
+
+        for ang in angles:
+            x.append(self.radius*np.sin(ang))
+            y.append(self.radius*np.cos(ang))
+            z.append(0)
+
+        x.append(x[0])
+        y.append(y[0])
+        z.append(z[0])
+
+        for ang in np.linspace(0, np.pi / 2):
+            x.append(self.radius*np.sin(ang))
+            y.append(self.radius*np.cos(ang))
+            z.append(0)
+
+        for ang in angles:
+            x.append(self.radius*np.cos(ang))
+            y.append(0)
+            z.append(self.radius*np.sin(ang))
+
+        return [x, y, z]
