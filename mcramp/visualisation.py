@@ -8,14 +8,14 @@ import numpy as np
 mpl.rcParams['toolbar'] = 'None'
 
 class Visualisation():
-    def __init__(self, inst, controls=True, style='dark_background'):
+    def __init__(self, inst, controls=True, focus=None, style='dark_background', **kwargs):
         plt.style.use(style)
 
         self.inst = inst
         self.controls = controls
         self._populate_offset_dict()
 
-        self.fig = plt.figure()
+        self.fig = plt.figure(**kwargs)
         self.ax_zx = self.fig.add_subplot(2, 2, 1)
         self.ax_zy = self.fig.add_subplot(2, 2, 2)
         self.ax_xy = self.fig.add_subplot(2, 2, 3)
@@ -48,7 +48,10 @@ class Visualisation():
             self.comp_focus_buttons.on_clicked(self._inst_comp_focus)
             #self.comp_focus_textbox = wid.TextBox(self.comp_focus_textbox_ax, "", color='.1', hovercolor='.15')
             #self.comp_focus_textbox.on_text_change(self._inst_comp_focus)
-            #comp_focus_label = self._create_text("Focussed component", [0.72, 0.45, 0.25, 0.03])
+            #comp_focus_label = self._create_text("Focussed component", [0.72, 0.45, 0.25, 0.03]
+
+        if focus:
+            self._inst_comp_focus(focus)
 
     def _populate_offset_dict(self):
         self.offset_dict = {}
@@ -67,17 +70,16 @@ class Visualisation():
         self.ax_or.set_zlabel('y [m]')
 
     def _update_limits(self):
+        def_xlim = self.ax_zx.get_ylim()
+        self.xlim_range = def_xlim[1] - def_xlim[0]
+        def_zlim = self.ax_zx.get_xlim()
+        self.zlim_range = def_zlim[1] - def_zlim[0]
+        def_ylim = self.ax_xy.get_ylim()
+        self.ylim_range = def_ylim[1] - def_ylim[0]
+
         if self.controls:
-            def_xlim = self.ax_zx.get_ylim()
-            self.xlim_range = def_xlim[1] - def_xlim[0]
             self.xlim_span_ax.set_xlim([(def_xlim[0]-0.5*self.xlim_range), (def_xlim[1]+0.5*self.xlim_range)])
-
-            def_ylim = self.ax_xy.get_ylim()
-            self.ylim_range = def_ylim[1] - def_ylim[0]
             self.ylim_span_ax.set_xlim([(def_ylim[0]-0.5*self.ylim_range), (def_ylim[1]+0.5*self.ylim_range)])
-
-            def_zlim = self.ax_zx.get_xlim()
-            self.zlim_range = def_zlim[1] - def_zlim[0]
             self.zlim_span_ax.set_xlim([(def_zlim[0]-0.5*self.zlim_range), (def_zlim[1]+0.5*self.zlim_range)])
 
     def _update_offset(self, offset):
