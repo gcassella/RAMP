@@ -35,6 +35,7 @@ class GPlane(GPrim):
     def __init__(self, width=0, height=0, idx=0, orientation="xy", ctx=None):
         orientations = {"xy": 0, "yz": 1}
 
+        self.orientation_str = orientation
         self.orientation = np.uint32(orientations[orientation])
         self.width      = np.float32(width)
         self.height     = np.float32(height)
@@ -69,4 +70,8 @@ class GPlane(GPrim):
                  self.height / 2.0]
 
         z_arr = [0.0, 0.0, 0.0, 0.0, 0.0]
-        return [x_arr, y_arr, z_arr]
+
+        if self.orientation_str == 'xy':
+            return [x_arr, y_arr, z_arr]
+        elif self.orientation_str == 'yz':
+            return [z_arr, y_arr, x_arr]

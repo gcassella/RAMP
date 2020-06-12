@@ -14,6 +14,8 @@ def build_kernel(filename, ctx):
 
     return prg
 
+# FIXME: KernelRef and Component should really just be dictionaries (basically what they are already)
+
 class KernelRef:
     # Keeps track of the execution block and component that a kernel
     # belongs to in order to retrieve it's histogram at the end of execution
@@ -25,17 +27,8 @@ class KernelRef:
         self.pos = pos
         self.rot = rot
         self.vis = vis
-
-class Component:
-    def __init__(self, geom_kernel, scat_kernel, restore_neutron, pos, rot=[0, 0, 0]):
-        self.geom_kernel = geom_kernel
-        self.scat_kernel = scat_kernel
-
-        # Should neutron be terminated if it doesn't hit this component?
-        self.restore_neutron = np.uint32(1) if restore_neutron else np.uint32(0)
-
-        self.pos = np.array((pos[0], pos[1], pos[2], 0.), dtype=clarr.vec.float3)
-        self.rot = np.array((rot[0], rot[1], rot[2], 0.), dtype=clarr.vec.float3)
+        
+        self.comp_name = self.comp["name"]
 
 class ExecutionBlock:
     def __init__(self, source, components, parent, linear, max_events):
@@ -70,8 +63,8 @@ class ExecutionBlock:
                 
                 if 'relative' in comp:
                     rcomp_name = comp['relative']
-                    rcomp_pos = comps[rcomp_name].pos
-                    rcomp_rot = comps[rcomp_name].rot
+                    rcomp_pos = comps[rcomp_name]["pos"]
+                    rcomp_rot = comps[rcomp_name]["rot"]
 
                     pos = frame_rotate(pos, [rcomp_rot['s0'], rcomp_rot['s1'], rcomp_rot['s2']])
 
@@ -98,9 +91,16 @@ class ExecutionBlock:
                 sargs['inst'] = parent
                 sargs['block'] = idx
 
-                comps[name] = Component(gk(**gargs), sk(**sargs), restore_neutron, pos, rot)
+                comps[name] = {
+                    "name" : name,
+                    "geom_kernel": gk(**gargs),
+                    "scat_kernel": sk(**sargs),
+                    "restore_neutron": np.uint32(1) if restore_neutron else np.uint32(0),
+                    "pos": np.array((pos[0], pos[1], pos[2], 0.), dtype=clarr.vec.float3),
+                    "rot": np.array((rot[0], rot[1], rot[2], 0.), dtype=clarr.vec.float3)
+                }
 
-                parent.kernel_refs.append(KernelRef(idx, name, pos, rot, vis))
+                parent.kernel_refs.append(KernelRef(idx, comps[name], pos, rot, vis))
             
             i += 1
 
@@ -124,10 +124,10 @@ class ExecutionBlock:
             for (_, comp) in self.components.items():
                 self.trans_prg.transform(self.parent.queue, (N,), None,
                                          self.parent.neutrons_cl,
-                                         comp.pos,
-                                         comp.rot)
+                                         comp["pos"],
+                                         comp["rot"])
 
-                comp.geom_kernel.intersect_prg(self.parent.queue,
+                comp["geom_kernel"].intersect_prg(self.parent.queue,
                                                N,
                                                self.parent.neutrons_cl,
                                                self.parent.intersections_cl,
@@ -136,7 +136,7 @@ class ExecutionBlock:
                 self.term_prg.terminate(self.parent.queue, (N,), None,
                                         self.parent.neutrons_cl,
                                         self.parent.intersections_cl,
-                                        getattr(comp, 'restore_neutron', np.uint32(0)))
+                                        comp["restore_neutron"])
 
                 if debug == 1:
                     cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
@@ -144,7 +144,7 @@ class ExecutionBlock:
 
                     print(self.parent.intersections)
 
-                comp.scat_kernel.scatter_prg(self.parent.queue,
+                comp["scat_kernel"].scatter_prg(self.parent.queue,
                                              N,
                                              self.parent.neutrons_cl,
                                              self.parent.intersections_cl,
@@ -152,8 +152,8 @@ class ExecutionBlock:
 
                 self.trans_prg.untransform(self.parent.queue, (N,), None,
                                            self.parent.neutrons_cl,
-                                           comp.pos,
-                                           comp.rot)
+                                           comp["pos"],
+                                           comp["rot"])
 
                 if debug == 1:
                     cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
@@ -170,17 +170,17 @@ class ExecutionBlock:
                 for (idx, comp) in self.components.items():
                     self.trans_prg.transform(self.parent.queue, (N,), None,
                                          self.parent.neutrons_cl,
-                                         comp.pos,
-                                         comp.rot)
-                    comp.geom_kernel.intersect_prg(self.parent.queue,
+                                         comp["pos"],
+                                         comp["rot"])
+                    comp["geom_kernel"].intersect_prg(self.parent.queue,
                                                    N,
                                                    self.parent.neutrons_cl,
                                                    self.parent.intersections_cl,
                                                    self.parent.iidx_cl)
                     self.trans_prg.untransform(self.parent.queue, (N,), None,
                                            self.parent.neutrons_cl,
-                                           comp.pos,
-                                           comp.rot)
+                                           comp["pos"],
+                                           comp["rot"])
 
                 self.term_prg.terminate(self.parent.queue, (N,), None,
                                         self.parent.neutrons_cl,
@@ -189,17 +189,17 @@ class ExecutionBlock:
                 for (idx, comp) in self.components.items():
                     self.trans_prg.transform(self.parent.queue, (N,), None,
                                          self.parent.neutrons_cl,
-                                         comp.pos,
-                                         comp.rot)
-                    comp.scat_kernel.scatter_prg(self.parent.queue,
+                                         comp["pos"],
+                                         comp["rot"])
+                    comp["scat_kernel"].scatter_prg(self.parent.queue,
                                                  N,
                                                  self.parent.neutrons_cl,
                                                  self.parent.intersections_cl,
                                                  self.parent.iidx_cl)
                     self.trans_prg.untransform(self.parent.queue, (N,), None,
                                            self.parent.neutrons_cl,
-                                           comp.pos,
-                                           comp.rot)
+                                           comp["pos"],
+                                           comp["rot"])
 
                 events += 1
 
@@ -239,7 +239,7 @@ class Instrument:
         data = {}
 
         for d in self.kernel_refs:
-            data[d.comp] = self.blocks[d.block].components[d.comp].scat_kernel.data(self.queue)
+            data[d.comp_name] = self.blocks[d.block].components[d.comp_name]["scat_kernel"].data(self.queue)
 
         return data
 
@@ -251,7 +251,7 @@ class Instrument:
         from matplotlib.pyplot import show
 
         for d in self.kernel_refs:
-            self.blocks[d.block].components[d.comp].scat_kernel.plot(self.queue)
+            self.blocks[d.block].components[d.comp_name]["scat_kernel"].plot(self.queue)
 
         show()
 
@@ -263,24 +263,17 @@ class Instrument:
         """
 
         for d in self.kernel_refs:
-            self.blocks[d.block].components[d.comp].scat_kernel.save(self.queue)
+            self.blocks[d.block].components[d.comp]["scat_kernel"].save(self.queue)
 
-    def visualise(self, controls=True):
+    def visualise(self, controls=True, **kwargs):
         """
-        Opens a matplotlib window containing orthogonal projections of the instrument
-        geometry, centered on component index.
+        Opens a plotting window containing orthogonal projections of the instrument
+        geometry.
         """
 
         from .visualisation import Visualisation
 
-        vis = Visualisation(self, controls=controls)
-
-        for d in self.kernel_refs:
-            if not d.vis:
-                continue
-
-            vis.plot_component(d)
-
+        vis = Visualisation(self, controls=controls, **kwargs)
         vis.show()
 
     def _substitute_params(self, json_str, **kwargs):
@@ -379,7 +372,7 @@ class Instrument:
                 block.execute(torun, debug)
 
             for d in self.kernel_refs:
-                self.blocks[d.block].components[d.comp].scat_kernel.data_reduce(self.queue)
+                self.blocks[d.block].components[d.comp_name]["scat_kernel"].data_reduce(self.queue)
 
         self.queue.finish()
 
