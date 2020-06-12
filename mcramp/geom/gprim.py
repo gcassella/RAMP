@@ -15,7 +15,7 @@ class GPrim():
     -------
     lines()
         Returns a list of lines used for rendering the geometry of the kernel
-        in matplotlib - currently deprecated.
+        in matplotlib.
 
     """
 
@@ -23,4 +23,6 @@ class GPrim():
 
     @abstractmethod
     def lines(self):
-        return []
+        return [[0],
+                [0],
+                [0]]

@@ -91,3 +91,19 @@ class SGuide(SPrim):
                                 self.m,
                                 self.W,
                                 self.max_bounces)
+
+    def lines(self):
+        w1_2 = self.w1 / 2
+        h1_2 = self.h1 / 2
+        w2_2 = self.w2 / 2
+        h2_2 = self.h2 / 2
+        l = self.l
+
+        x_arr = [-w1_2, -w2_2, w2_2, w1_2, -w1_2, -w1_2, w1_2, w1_2, w2_2, w2_2, w1_2, -w1_2, -w2_2, w2_2, -w2_2, -w2_2]
+
+        y_arr = [h1_2, h2_2, h2_2, h1_2, h1_2, -h1_2, -h1_2, h1_2, h2_2, -h2_2, -h1_2, -h1_2, -h2_2, -h2_2, -h2_2, h2_2]
+        
+        z_arr = [0, l, l, 0, 0, 0, 0, 0, l, l, 0, 0, l, l, l, l]
+
+        return [x_arr, y_arr, z_arr]
+

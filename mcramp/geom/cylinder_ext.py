@@ -53,3 +53,45 @@ class GCylinderExt(GPrim):
                            np.uint32(self.idx),
                            self.radius,
                            self.height)
+
+    def lines(self):
+        angles = np.linspace(0, np.pi)
+        h_2 = self.height / 2.0
+
+        x = []
+        y = []
+        z = []
+
+        for ang in angles:
+            x.append(self.radius*np.sin(ang))
+            y.append(h_2)
+            z.append(self.radius*np.cos(ang))
+
+        for ang in reversed(angles):
+            x.append(self.radius*np.sin(ang))
+            y.append(-h_2)
+            z.append(self.radius*np.cos(ang))
+
+        x.append(x[0])
+        y.append(y[0])
+        z.append(z[0])
+
+        angles = np.linspace(0, -np.pi)
+
+        for ang in angles:
+            x.append(self.radius*np.sin(ang))
+            y.append(h_2)
+            z.append(self.radius*np.cos(ang))
+
+        for ang in reversed(angles):
+            x.append(self.radius*np.sin(ang))
+            y.append(-h_2)
+            z.append(self.radius*np.cos(ang))
+
+        x.append(x[0])
+        y.append(y[0])
+        z.append(z[0])
+
+        return [x, y, z]
+
+        

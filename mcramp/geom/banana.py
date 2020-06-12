@@ -61,3 +61,27 @@ class GBanana(GPrim):
                                   self.height,
                                   self.mintheta,
                                   self.maxtheta)
+
+    def lines(self):
+        radial_intervals = 50
+        mintheta_r = np.radians(self.mintheta)
+        maxtheta_r = np.radians(self.maxtheta)
+        a_step = (maxtheta_r - mintheta_r) / float(radial_intervals)
+        x = []
+        y = []
+        z = []
+        for i in reversed(range(radial_intervals)):
+            y.append(self.height / 2.0)
+            x.append(self.radius*np.sin(mintheta_r + i*a_step))
+            z.append(self.radius*np.cos(mintheta_r + i*a_step))
+
+        for i in range(radial_intervals):
+            y.append(-self.height / 2.0)
+            x.append(self.radius*np.sin(mintheta_r + i*a_step))
+            z.append(self.radius*np.cos(mintheta_r + i*a_step))
+
+        x.append(x[0])
+        y.append(y[0])
+        z.append(z[0])
+
+        return [x, y, z]

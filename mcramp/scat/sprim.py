@@ -15,7 +15,7 @@ class SPrim():
     -------
     lines()
         Returns a list of lines used for rendering the geometry of the kernel
-        in matplotlib - currently deprecated.
+        in matplotlib.
     data_reduce(queue)
         Called every time the scattering kernel executes - used to reduce
         component data between execution of buffer chunks.
@@ -32,7 +32,9 @@ class SPrim():
 
     @abstractmethod
     def lines(self):
-        return []
+        return [[0],
+                [0],
+                [0]]
 
     @abstractmethod
     def data_reduce(self, queue):
