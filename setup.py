@@ -19,7 +19,7 @@ for dir_, _, files in os.walk(root_dir):
 # Run setup, OpenCL kernels are specified as additional data files
 
 setup(name="MCRAMP",
-      version="0.0.1a4.post1",
+      version="0.0.1a4.post2",
       packages=find_packages(),
       package_data={'': ['*.cl']},
       data_files=[('headers', list(file_set))],
