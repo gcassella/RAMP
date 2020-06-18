@@ -8,8 +8,8 @@ import numpy as np
 mpl.rcParams['toolbar'] = 'None'
 
 class Visualisation():
-    def __init__(self, inst, xlim=None, ylim=None, zlim=None,
-                 controls=True, focus=None, style='dark_background',
+    def __init__(self, inst, controls=True, xlim=None, ylim=None,
+                 zlim=None, focus=None, style='dark_background',
                  **kwargs):
         plt.style.use(style)
 
