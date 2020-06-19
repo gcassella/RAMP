@@ -1,5 +1,5 @@
-#include "consts.h"
 #include "rand.h"
+#include "consts.h"
 
 __kernel void chopper(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
