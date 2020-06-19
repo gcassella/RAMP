@@ -8,7 +8,9 @@ import numpy as np
 mpl.rcParams['toolbar'] = 'None'
 
 class Visualisation():
-    def __init__(self, inst, controls=True, focus=None, style='dark_background', **kwargs):
+    def __init__(self, inst, controls=True, xlim=None, ylim=None,
+                 zlim=None, focus=None, style='dark_background',
+                 **kwargs):
         plt.style.use(style)
 
         self.inst = inst
@@ -52,6 +54,15 @@ class Visualisation():
 
         if focus:
             self._inst_comp_focus(focus)
+
+        if xlim:
+            self._inst_xlim_change(xlim[0], xlim[1])
+
+        if ylim:
+            self._inst_ylim_change(ylim[0], ylim[1])
+        
+        if zlim:
+            self._inst_zlim_change(zlim[0], zlim[1])
 
     def _populate_offset_dict(self):
         self.offset_dict = {}
