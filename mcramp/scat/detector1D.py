@@ -94,8 +94,8 @@ class SDetector1D(SPrim):
     def save(self, queue):
         self._cached_copy(queue)
         if self.filename:
-            np.save(self.filename + 'X.dat', self.axis)
-            np.save(self.filename + 'Z.dat', self.histo)
+            np.save(self.filename + 'X', self.axis)
+            np.save(self.filename + 'Z', self.histo)
 
     def data(self, queue):
         self._cached_copy(queue)
