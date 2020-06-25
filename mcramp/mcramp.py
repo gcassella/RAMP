@@ -253,7 +253,7 @@ class Instrument:
         """
 
         for d in self.kernel_refs:
-            self.blocks[d.block].components[d.comp]["scat_kernel"].save(self.queue)
+            self.blocks[d.block].components[d.comp_name]["scat_kernel"].save(self.queue)
 
     def visualise(self, controls=True, xlim=None, ylim=None, zlim=None, **kwargs):
         """
