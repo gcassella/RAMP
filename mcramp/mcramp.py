@@ -109,20 +109,10 @@ class ExecutionBlock:
         return ex_block
 
     def execute(self, N, debug=0):
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                      'scat/terminator.cl'), mode='r') as f:
-                self.term_prg = cl.Program(self.parent.ctx,
-                                           f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
-
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                      'scat/frametransform.cl'), mode='r') as f:
-                self.trans_prg = cl.Program(self.parent.ctx,
-                                           f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
-
         if self.linear:
 
             for (_, comp) in self.components.items():
-                self.trans_prg.transform(self.parent.queue, (N,), None,
+                self.parent.trans_prg.transform(self.parent.queue, (N,), None,
                                          self.parent.neutrons_cl,
                                          comp["pos"],
                                          comp["rot"])
@@ -133,7 +123,7 @@ class ExecutionBlock:
                                                self.parent.intersections_cl,
                                                self.parent.iidx_cl)
 
-                self.term_prg.terminate(self.parent.queue, (N,), None,
+                self.parent.term_prg.terminate(self.parent.queue, (N,), None,
                                         self.parent.neutrons_cl,
                                         self.parent.intersections_cl,
                                         comp["restore_neutron"])
@@ -150,7 +140,7 @@ class ExecutionBlock:
                                              self.parent.intersections_cl,
                                              self.parent.iidx_cl)
 
-                self.trans_prg.untransform(self.parent.queue, (N,), None,
+                self.parent.trans_prg.untransform(self.parent.queue, (N,), None,
                                            self.parent.neutrons_cl,
                                            comp["pos"],
                                            comp["rot"])
@@ -168,7 +158,7 @@ class ExecutionBlock:
 
             while events < self.max_events:
                 for (idx, comp) in self.components.items():
-                    self.trans_prg.transform(self.parent.queue, (N,), None,
+                    self.parent.trans_prg.transform(self.parent.queue, (N,), None,
                                          self.parent.neutrons_cl,
                                          comp["pos"],
                                          comp["rot"])
@@ -177,17 +167,17 @@ class ExecutionBlock:
                                                    self.parent.neutrons_cl,
                                                    self.parent.intersections_cl,
                                                    self.parent.iidx_cl)
-                    self.trans_prg.untransform(self.parent.queue, (N,), None,
+                    self.parent.trans_prg.untransform(self.parent.queue, (N,), None,
                                            self.parent.neutrons_cl,
                                            comp["pos"],
                                            comp["rot"])
 
-                self.term_prg.terminate(self.parent.queue, (N,), None,
+                self.parent.term_prg.terminate(self.parent.queue, (N,), None,
                                         self.parent.neutrons_cl,
                                         self.parent.intersections_cl)
 
                 for (idx, comp) in self.components.items():
-                    self.trans_prg.transform(self.parent.queue, (N,), None,
+                    self.parent.trans_prg.transform(self.parent.queue, (N,), None,
                                          self.parent.neutrons_cl,
                                          comp["pos"],
                                          comp["rot"])
@@ -196,7 +186,7 @@ class ExecutionBlock:
                                                  self.parent.neutrons_cl,
                                                  self.parent.intersections_cl,
                                                  self.parent.iidx_cl)
-                    self.trans_prg.untransform(self.parent.queue, (N,), None,
+                    self.parent.trans_prg.untransform(self.parent.queue, (N,), None,
                                            self.parent.neutrons_cl,
                                            comp["pos"],
                                            comp["rot"])
@@ -346,7 +336,7 @@ class Instrument:
         """
         device = self.queue.get_info(cl.command_queue_info.DEVICE)
         max_mem_alloc_size = device.get_info(cl.device_info.MAX_MEM_ALLOC_SIZE)
-        buf_max = int(max_mem_alloc_size / 8 / 26)
+        buf_max = int(max_mem_alloc_size / 8 / 32)
 
         i = 0
         for block in self.blocks:
@@ -356,6 +346,16 @@ class Instrument:
 
             i += 1
         
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      'scat/terminator.cl'), mode='r') as f:
+                self.term_prg = cl.Program(self.ctx,
+                                           f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
+
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      'scat/frametransform.cl'), mode='r') as f:
+                self.trans_prg = cl.Program(self.ctx,
+                                           f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.abspath(__file__))))
+
         self._initialize_buffers(buf_max if N > buf_max else N)
 
         remaining = N
@@ -374,7 +374,7 @@ class Instrument:
             for d in self.kernel_refs:
                 self.blocks[d.block].components[d.comp_name]["scat_kernel"].data_reduce(self.queue)
 
-        self.queue.finish()
+            self.queue.finish()
 
 def frame_rotate(vec, rot):
     x_a = rot[0]

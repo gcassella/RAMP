@@ -53,7 +53,7 @@ __kernel void detector(__global float16 *neutrons,
     var_val = (1.0e6f)*(neutron.sa + intersection.s7);
 
   if(min_var<=var_val && var_val<=max_var) {    
-    idx = round((var_val -  min_var) / step_var);
+    idx = floor((var_val -  min_var) / step_var);
     atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
   }
   
