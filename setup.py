@@ -26,7 +26,7 @@ setup(name="MCRAMP",
       include_package_data=True,
       
       install_requires=[
-            'pyopencl',
+            'pyopencl==2019.1.2',
             'numpy',
             'matplotlib',
             'mcpl'
