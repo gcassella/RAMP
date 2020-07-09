@@ -31,7 +31,7 @@ OpenCL drivers for your device can be found \
 `here  <https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility__table-toolkit-driver`_.
 
 Installing PyOpenCL via `pip` requires some manual handling of prerequisites, however \
-this can be avoided by installing via `conda` instead by invoking
+this can be avoided by installing via `conda` instead by invoking::
 
  $ conda config --add channels conda-forge
  $ conda install pyopencl=2019.1.2
@@ -90,27 +90,27 @@ An example installation
 The following sequence of commands resulted in a correctly configured installation \
 on Windows Subsystem for Linux (Ubuntu 20.04) using an NVIDIA 1060 GPU.
 
-Install Miniconda:
+Install Miniconda::
 
  $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
  $ chmod +x ./Miniconda3-latest-Linux-x86_64.sh
  $ ./Miniconda3-latest-Linux-x86_64.sh
  
-Update gcc, required for PyOpenCL installation:
+Update gcc, required for PyOpenCL installation::
 
  $ sudo apt update
  $ sudo apt install gcc
 
-Installed CUDA toolkit, required version determined as suggested above:
+Installed CUDA toolkit, required version determined as suggested above::
 
  $ wget http://developer.download.nvidia.com/compute/cuda/11.0.2/local_installers/cuda_11.0.2_450.51.05_linux.run
  $ sudo sh cuda_11.0.2_450.51.05_linux.run
 
-Installed PyOpenCL via conda:
+Installed PyOpenCL via conda::
 
  $ conda config --add channels conda-forge
  $ conda install pyopencl=2019.1.2
 
-Installed RAMP via pip:
+Installed RAMP via pip::
 
  $ pip install mcramp
