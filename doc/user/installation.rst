@@ -4,9 +4,8 @@ Installation
 Prerequisites
 -------------
 Running RAMP requires a working Python 3 installation. If you are unfamiliar with \
-Python, this can be easily obtianed from the `Python website <https://www.python.org/>`_ \
-or as part of the `Anaconda package <https://www.anaconda.com/>`_  which comes \
-preloaded with many useful libraries.
+Python, this can be easily obtianed as part of the `Anaconda package <https://www.anaconda.com/>`_ \
+which comes preloaded with many useful libraries.
 
 In addition to Python 3, RAMP is parallelized using the OpenCL API. To install the \
 Python port of the OpenCL bindings and compile the OpenCL kernels used by RAMP, it \
@@ -17,17 +16,39 @@ you intend to run RAMP on. At the time of writing, these SDKs can be obtained fr
     - `NVIDIA CUDA Toolkit <https://developer.nvidia.com/cuda-downloads/>`_
     - `AMD GPUOpen SDK <https://gpuopen.com/compute-product/opencl-sdk/>`_
 
-If during the installation or execution of RAMP you are recieving errors relating to \
-the header file 'CL\\cl.h' it is likely your OpenCL SDK is incorrectly installed.
+Please note: **you only need to install the SDK corresponding to the manufacturer of \
+the device you wish to execute OpenCL code on**.
+
+Installing PyOpenCL
+-------------------
+
+As OpenCL implementations are platform dependant, there is no one simple path to \
+installing PyOpenCL for your specific combination of platform and device. The following \
+are some broad pointers from experience that make the process easier.
+
+For NVIDIA device users: The version of the CUDA toolkit required to obtain the correct \
+OpenCL drivers for your device can be found \
+`here  <https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility__table-toolkit-driver`_.
+
+Installing PyOpenCL via `pip` requires some manual handling of prerequisites, however \
+this can be avoided by installing via `conda` instead by invoking
+
+ $ conda config --add channels conda-forge
+ $ conda install pyopencl=2019.1.2
 
 Obtaining RAMP
 --------------
-RAMP is most easily obtained by cloning the public GitHub repository::
+
+RAMP is most easily obtained from the Python Package Index via `pip`,
+
+ $ pip install mcramp
+
+RAMP can also obtained by cloning the public GitHub repository to get the most up to date, \
+but potentially unstable, features::
 
  $ git clone https://github.com/gcassella/RAMP.git
 
-Otherwise the package can be downloaded from the `GitHub page <https://github.com/gcassella/RAMP>`_ \
-in a .zip archive. The package can then be installed via::
+The package can then be installed via::
 
  $ cd RAMP
  $ python setup.py install
@@ -57,8 +78,39 @@ Python installation) run::
 
 Jupyter can then be run via::
 
- $ cd %your_ramp_directory_here%/examples/%example_you_want_to_run%
+ $ cd %your_ramp_directory_here%/notebooks/%example_you_want_to_run%
  $ jupyter notebook
 
 This will open a page in your default web browser from which you can select the \
 example notebook and run the interactive Python therein.
+
+An example installation
+-----------------------
+
+The following sequence of commands resulted in a correctly configured installation \
+on Windows Subsystem for Linux (Ubuntu 20.04) using an NVIDIA 1060 GPU.
+
+Install Miniconda:
+
+ $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+ $ chmod +x ./Miniconda3-latest-Linux-x86_64.sh
+ $ ./Miniconda3-latest-Linux-x86_64.sh
+ 
+Update gcc, required for PyOpenCL installation:
+
+ $ sudo apt update
+ $ sudo apt install gcc
+
+Installed CUDA toolkit, required version determined as suggested above:
+
+ $ wget http://developer.download.nvidia.com/compute/cuda/11.0.2/local_installers/cuda_11.0.2_450.51.05_linux.run
+ $ sudo sh cuda_11.0.2_450.51.05_linux.run
+
+Installed PyOpenCL via conda:
+
+ $ conda config --add channels conda-forge
+ $ conda install pyopencl=2019.1.2
+
+Installed RAMP via pip:
+
+ $ pip install mcramp
