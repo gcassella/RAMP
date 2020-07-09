@@ -28,7 +28,7 @@ are some broad pointers from experience that make the process easier.
 
 For NVIDIA device users: The version of the CUDA toolkit required to obtain the correct \
 OpenCL drivers for your device can be found \
-`here  <https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility__table-toolkit-driver`_.
+`here  <https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility__table-toolkit-driver>`_.
 
 Installing PyOpenCL via `pip` requires some manual handling of prerequisites, however \
 this can be avoided by installing via `conda` instead by invoking::
