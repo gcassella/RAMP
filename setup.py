@@ -19,14 +19,14 @@ for dir_, _, files in os.walk(root_dir):
 # Run setup, OpenCL kernels are specified as additional data files
 
 setup(name="MCRAMP",
-      version="0.0.1a4.post3",
+      version="0.0.1a4.post4",
       packages=find_packages(),
       package_data={'': ['*.cl']},
       data_files=[('headers', list(file_set))],
       include_package_data=True,
       
       install_requires=[
-            'pyopencl',
+            'pyopencl==2019.1.2',
             'numpy',
             'matplotlib',
             'mcpl'
