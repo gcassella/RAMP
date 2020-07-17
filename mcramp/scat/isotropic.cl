@@ -2,14 +2,14 @@
 #include "geom.h"
 #include "consts.h"
 
-float2 sample_distn(float16* neutron, float global_addr, float* q, float* w, float* pw_cdf, 
-  float* pq_cdf, uint const qsamples, uint const wsamples) {
+float2 sample_distn(float16* neutron, uint global_addr, __global float* q, __global float* w, __global float* pw_cdf, 
+  __global float* pq_cdf, uint const qsamples, uint const wsamples) {
     
   float mindiff, u, v, omega, Q;
   uint w_index;
   
-  u = rand(&neutron, global_addr);
-  v = rand(&neutron, global_addr);
+  u = rand(neutron, global_addr);
+  v = rand(neutron, global_addr);
   mindiff=1.;
 
   for(uint i=0;i<wsamples;i++) {
@@ -19,7 +19,7 @@ float2 sample_distn(float16* neutron, float global_addr, float* q, float* w, flo
 
     if (fabs(pw_cdf[i] - v) < mindiff) {
       mindiff = fabs(pw_cdf[i] - v);
-      omega = w[i] + (rand(&neutron, global_addr) - 0.5f)*(w[i+1] - w[i]);
+      omega = w[i] + (rand(neutron, global_addr) - 0.5f)*(w[i+1] - w[i]);
       w_index = i;
     } 
   }
@@ -33,11 +33,11 @@ float2 sample_distn(float16* neutron, float global_addr, float* q, float* w, flo
 
     if (fabs(pq_cdf[w_index*qsamples + i] - u) < mindiff) {
       mindiff = fabs(pq_cdf[w_index*qsamples + i] - u);
-      Q = q[i] + (rand(&neutron, global_addr) - 0.5f)*(q[i+1] - q[i]);
+      Q = q[i] + (rand(neutron, global_addr) - 0.5f)*(q[i+1] - q[i]);
     } 
   }
 
-  return (float2){ omega, Q }
+  return (float2){ omega, Q };
 }
 
 __kernel void isotropic_scatter(__global float16* neutrons,
@@ -85,11 +85,11 @@ __kernel void isotropic_scatter(__global float16* neutrons,
 
   normvel = normalize(neutron.s345);
 
-  sigma_s = sigma_scat / (2.*ki*ki);
-  sigma_a = sigma_abs * 2200. / length(neutron.s345);
+  sigma_s = coh_sigma_scat / (2.*ki*ki);
+  sigma_a = coh_sigma_abs * 2200. / length(neutron.s345);
   sigma_tot = sigma_a + sigma_s;
 
-  mu = rho*sigma_tot*100.;
+  mu = coh_rho*sigma_tot*100.;
 
 
   // Monte carlo choice to see if our neutron scatters
@@ -122,35 +122,19 @@ __kernel void isotropic_scatter(__global float16* neutrons,
   // cumulative distribution functions using inverse
   // transform sampling
 
-  u = rand(&neutron, global_addr);
-  v = rand(&neutron, global_addr);
+  float2 sample = sample_distn(
+    &neutron, 
+    global_addr, 
+    coh_q, 
+    coh_w, 
+    coh_pw_cdf, 
+    coh_pq_cdf, 
+    coh_qsamples, 
+    coh_wsamples
+  );
 
-  mindiff=1.;
-
-  for(uint i=0;i<wsamples;i++) {
-    if (pw_cdf[i] == 1.) {
-      break;
-    }
-
-    if (fabs(pw_cdf[i] - v) < mindiff) {
-      mindiff = fabs(pw_cdf[i] - v);
-      omega = w[i] + (rand(&neutron, global_addr) - 0.5f)*(w[i+1] - w[i]);
-      w_index = i;
-    } 
-  }
-
-  mindiff=1.;
-
-  for(uint i=0;i<qsamples;i++) {
-    if (pq_cdf[w_index*qsamples + i] == 1.) {
-      break;
-    }
-
-    if (fabs(pq_cdf[w_index*qsamples + i] - u) < mindiff) {
-      mindiff = fabs(pq_cdf[w_index*qsamples + i] - u);
-      Q = q[i] + (rand(&neutron, global_addr) - 0.5f)*(q[i+1] - q[i]);
-    } 
-  }
+  omega = sample.s0;
+  Q = sample.s1;
 
   // Test conservation laws can be satisfied
 
