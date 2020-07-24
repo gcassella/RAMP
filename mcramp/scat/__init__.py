@@ -10,3 +10,4 @@ from .counter import SCounter
 from .rescal import SRescal
 from .mcpl_out import SMCPLOut
 from .mcpl_in import SMCPLIn
+from .isotropic import SIsotropic
