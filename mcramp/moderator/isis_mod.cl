@@ -22,7 +22,7 @@ __kernel void generate_neutrons(__global float16* neutrons,
 
   int global_addr, idx, Epnt, Tpnt, interpol_start, interpol_end;
   float deviate, time_val, time_range, time_spread, R, ener_val, ener_spread, 
-  accumulator, Pj, vel, Dx, Dy;
+  accumulator, Pj, vel, Dx, Dy, theta, phi;
   float16 neutron;
   
   global_addr = get_global_id(0);
@@ -83,9 +83,14 @@ __kernel void generate_neutrons(__global float16* neutrons,
   
   neutron.s345 = vel*normalize((float3)( Dx, Dy, target_dist ));
 
+  // Randomly intiialize polarization on unit sphere
+  theta = 2*M_PI*rand(&neutron, global_addr);
+  phi = acos(1 - 2*rand(&neutron, global_addr));
+  neutron.s6 = sin(phi)*cos(theta);
+  neutron.s7 = sin(phi)*sin(theta);
+  neutron.s8 = cos(phi);
+
   // Initialize weight
-  // TODO: with buffer chunking this will exaggerate the intensity by the number
-  // of buffer chunks (assuming equally sized chunks). Must find a way to fix!
   neutron.s9 = str_area*total*6.2415093e+12f / num_sim;
 
   // Initialize time
