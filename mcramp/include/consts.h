@@ -27,3 +27,11 @@
 #ifndef SE2V
 #define SE2V     437.393377f        /* Convert sqrt(E)[meV] to v[m/s] */
 #endif
+
+#ifndef E2KS
+#define E2KS     (1/2.072)
+#endif
+
+#ifndef kB
+#define kB       8.6173*10e-2f
+#endif
