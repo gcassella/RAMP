@@ -113,6 +113,7 @@ __kernel void isotropic_scatter(
     neutron.s9 *= 1.0 - sigma_s / sigma_tot;
     neutron.s012 = (intersection.s456+0.01f*normalize(path));
     neutron.sa += intersection.s7;
+    neutron.sf = 1.0f;
 
     neutron.sc = comp_idx;
     iidx[global_addr] = 0;
@@ -265,6 +266,7 @@ __kernel void isotropic_scatter(
   } else if (flag == 3) {
     // Magnetic, model directional polarisation
     // according to halpern-johnson eqn
+    
     neutron.s678 = q_norm*dot(neutron.s678, q_norm);
   }
 

@@ -33,7 +33,7 @@ class SIsotropic(SPrim):
     def __init__(self, fn_coh='', fn_inc='', fn_mag='', temperature=0, idx=0, ctx=None, **kwargs):
         self.temperature = np.float32(temperature)
 
-        if fn_coh == '' and fn_inc == '':
+        if fn_coh == '' and fn_inc == '' and fn_mag == '':
             raise ValueError("Invalid filename combination")
 
         self.idx = np.uint32(idx)
