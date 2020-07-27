@@ -60,9 +60,10 @@ class SDetector2D(SPrim):
             "y" : 1,
             "theta" : 2,
             "alpha" : 3,
-            "tof" : 4,
-            "divX" : 5,
-            "divY" : 6
+            "phi" : 4,
+            "tof" : 5,
+            "divX" : 6,
+            "divY" : 7
         }
 
         self.var_label_dict = {
@@ -70,9 +71,10 @@ class SDetector2D(SPrim):
             1 : "y [m]",
             2 : "Theta [deg]",
             3 : "Alpha [deg]",
-            4 : "Time-of-flight [us]",
-            5 : "Horizontal divergence [deg]",
-            6 : "Vertical divergence [deg]"
+            4 : "Phi [deg]",
+            5 : "Time-of-flight [us]",
+            6 : "Horizontal divergence [deg]",
+            7 : "Vertical divergence [deg]"
         }
         
         self.last_ran_datetime = datetime.datetime.now()

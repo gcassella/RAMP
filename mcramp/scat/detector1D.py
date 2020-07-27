@@ -39,7 +39,7 @@ class SDetector1D(SPrim):
 
     """
 
-    def __init__(self, binning=(0, 0, 0), restore_neutron=False, idx=0, var="energy",
+    def __init__(self, binning=(0, 0, 0), logscale = False, restore_neutron=False, idx=0, var="energy",
                  ctx=None, filename=None, **kwargs):
 
         var_dict = { "energy" : 0, "theta" : 1, "tof" : 2 }
@@ -51,6 +51,8 @@ class SDetector1D(SPrim):
         
         self.binning     = binning
         self.idx         = idx
+
+        self.logscale = logscale
 
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
         self.histo = np.zeros((self.num_bins,), dtype=np.float32)
@@ -86,7 +88,7 @@ class SDetector1D(SPrim):
         self._cached_copy(queue)
 
         plt.figure()
-        plt.plot(self.axis, self.histo)
+        plt.plot(self.axis, np.log(self.histo + 1e-7) if self.logscale else self.histo)
         plt.ylabel("Intensity")
         plt.xlabel(self.var_label_dict[self.var])
         plt.tight_layout()

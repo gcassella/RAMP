@@ -68,18 +68,30 @@ __kernel void detector(__global float16 *neutrons,
       axis1_val = intersection.s5;
       break;
     case 2 :
-      axis1_val = degrees(atan2(intersection.s4, intersection.s6));
+      axis1_val = degrees(atan2(
+        intersection.s4,
+        intersection.s6
+      ));
       break;
     case 3 :
-      axis1_val = degrees(atan2(intersection.s5, intersection.s6));
+      axis1_val = degrees(atan2(
+        intersection.s5, 
+        sqrt(intersection.s4*intersection.s4 + intersection.s6*intersection.s6)
+      ));
       break;
     case 4 :
-      axis1_val = (1.0e6f)*(neutron.sa + intersection.s7);
+      axis1_val = sign(intersection.s5)*degrees(acos(
+        intersection.s4/
+        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5)
+      ));
       break;
     case 5 :
-      axis1_val = degrees(atan2(neutron.s3, neutron.s5));
+      axis1_val = (1.0e6f)*(neutron.sa + intersection.s7);
       break;
     case 6 :
+      axis1_val = degrees(atan2(neutron.s3, neutron.s5));
+      break;
+    case 7 :
       axis1_val = degrees(atan2(neutron.s4, neutron.s5));
       break;
     default:
@@ -97,18 +109,30 @@ __kernel void detector(__global float16 *neutrons,
       axis2_val = intersection.s5;
       break;
     case 2 :
-      axis2_val = degrees(atan2(intersection.s4, intersection.s6));
+      axis2_val = degrees(atan2(
+        intersection.s4,
+        intersection.s6
+      ));
       break;
     case 3 :
-      axis2_val = degrees(atan2(intersection.s5, intersection.s6));
+      axis2_val = degrees(atan2(
+        intersection.s5, 
+        sqrt(intersection.s4*intersection.s4 + intersection.s6*intersection.s6)
+      ));
       break;
     case 4 :
-      axis2_val = (1.0e6f)*(neutron.sa + intersection.s7);
+      axis2_val = sign(intersection.s5)*degrees(acos(
+        intersection.s4/
+        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5)
+      ));
       break;
     case 5 :
-      axis2_val = degrees(atan2(neutron.s3, neutron.s5));
+      axis2_val = (1.0e6f)*(neutron.sa + intersection.s7);
       break;
     case 6 :
+      axis2_val = degrees(atan2(neutron.s3, neutron.s5));
+      break;
+    case 7 :
       axis2_val = degrees(atan2(neutron.s4, neutron.s5));
       break;
     default:
