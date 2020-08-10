@@ -16,6 +16,7 @@ __kernel void transform(__global float16* neutrons,
 
     neutron.s012 = frame_derotate(neutron.s012, rot);
     neutron.s345 = frame_derotate(neutron.s345, rot);
+    neutron.s678 = frame_derotate(neutron.s678, rot);
 
     neutrons[global_addr] = neutron;
 }
@@ -35,6 +36,7 @@ __kernel void untransform(__global float16* neutrons,
     neutron.s012 = frame_rotate(neutron.s012, rot);
     neutron.s012 += pos;
     neutron.s345 = frame_rotate(neutron.s345, rot);
+    neutron.s678 = frame_rotate(neutron.s678, rot);
 
     neutrons[global_addr] = neutron;
 }
