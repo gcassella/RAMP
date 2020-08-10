@@ -1,31 +1,31 @@
 /* Scientific constants */
 
 #ifndef k_B
-#define k_B (1.38066e-23f)
+#define k_B (1.38066e-23)
 #endif
 
 #ifndef M_PI
-#define M_PI (3.14159265f)
+#define M_PI (3.14159265)
 #endif
 
 #ifndef V2K
-#define V2K (1.58825361e-3f)
+#define V2K (1.58825361e-3)
 #endif
 
 #ifndef K2V
-#define K2V (629.622368f)
+#define K2V (629.622368)
 #endif
 
 #ifndef MIN2RAD
-#define MIN2RAD (M_PI/(180.0f*60.0f))
+#define MIN2RAD (M_PI/(180.0*60.0))
 #endif
 
 #ifndef VS2E
-#define VS2E     5.22703725e-6f     /* Convert (v[m/s])**2 to E[meV] */
+#define VS2E     5.22703725e-6     /* Convert (v[m/s])**2 to E[meV] */
 #endif
 
 #ifndef SE2V
-#define SE2V     437.393377f        /* Convert sqrt(E)[meV] to v[m/s] */
+#define SE2V     437.393377        /* Convert sqrt(E)[meV] to v[m/s] */
 #endif
 
 #ifndef E2KS
@@ -33,7 +33,7 @@
 #endif
 
 #ifndef kB
-#define kB       8.6173*10e-2f
+#define kB       8.6173*10e-2
 #endif
 
 
@@ -85,5 +85,37 @@ typedef float16 real16_t;
 #define convert_real4_t(X)   convert_float4(X)
 #define convert_real8_t(X)   convert_float8(X)
 #define convert_real16_t(X)   convert_float16(X)
+
+#endif
+
+#ifndef NEUTRON_MACROS
+
+#define NEUTRON_MACROS
+#define NEUTRON_X   neutron.s0
+#define NEUTRON_Y   neutron.s1
+#define NEUTRON_Z   neutron.s2
+#define NEUTRON_POS neutron.s012
+#define NEUTRON_VX  neutron.s3
+#define NEUTRON_VY  neutron.s4
+#define NEUTRON_VZ  neutron.s5
+#define NEUTRON_VEL neutron.s345
+#define NEUTRON_PX  neutron.s6
+#define NEUTRON_PY  neutron.s7
+#define NEUTRON_PZ  neutron.s8
+#define NEUTRON_POL neutron.s678
+#define NEUTRON_P   neutron.s9
+#define NEUTRON_TOF neutron.sa
+#define NEUTRON_DIE neutron.sf
+
+#define INTERSECTION_X1     intersection.s0
+#define INTERSECTION_Y1     intersection.s1
+#define INTERSECTION_Z1     intersection.s2
+#define INTERSECTION_T1     intersection.s3
+#define INTERSECTION_X2     intersection.s4
+#define INTERSECTION_Y2     intersection.s5
+#define INTERSECTION_Z2     intersection.s6
+#define INTERSECTION_T2     intersection.s7
+#define INTERSECTION_POS1   intersection.s012
+#define INTERSECTION_POS2   intersection.s456
 
 #endif
