@@ -9,14 +9,15 @@
 __kernel void guide_scatter(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
     uint const comp_idx,
-    float const w1, float const h1,
-    float const w2, float const h2, float const l,
-    float const R0, float const Qc, float const alpha,
-    float const m, float const W, uint const max_bounces) {
+    real_t const w1, real_t const h1,
+    real_t const w2, real_t const h2, real_t const l,
+    real_t const R0, real_t const Qc, real_t const alpha,
+    real_t const m, real_t const W, uint const max_bounces) {
 
     uint global_addr        = get_global_id(0);
-    float16 neutron         = neutrons[global_addr];
-    float8 intersection = intersections[global_addr];
+    real16_t neutron         = convert_real16_t(neutrons[global_addr]);
+    real8_t intersection = convert_real8_t(intersections[global_addr]);
+    
     uint this_iidx          = iidx[global_addr];
 
     /* Check we are scattering from the intersected component */
@@ -36,9 +37,9 @@ __kernel void guide_scatter(__global float16* neutrons,
     neutron.s012 = intersection.s456;
     neutron.sa += intersection.s7;
 
-    float3 pos, vel;
-    float t1, t2, av, ah, bv, bh, cv1, cv2, ch1, ch2, d, ww, hh, whalf, hhalf;
-    float vdotn_v1, vdotn_v2, vdotn_h1, vdotn_h2, q, nlen2, refl;
+    real3_t pos, vel;
+    real_t t1, t2, av, ah, bv, bh, cv1, cv2, ch1, ch2, d, ww, hh, whalf, hhalf;
+    real_t vdotn_v1, vdotn_v2, vdotn_h1, vdotn_h2, q, nlen2, refl;
 
     uint i = 0;
 
@@ -142,7 +143,7 @@ __kernel void guide_scatter(__global float16* neutrons,
     iidx[global_addr] = 0;
     neutron.sc = comp_idx;
 
-    neutrons[global_addr]      = neutron;
+    neutrons[global_addr]      = convert_float16(neutron);
     intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                          0.0f, 0.0f, 0.0f, 100000.0f );
 

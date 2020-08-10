@@ -1,12 +1,14 @@
-float reflectivity_func(float q, float R0,
-    float Qc, float alpha, float m,
-    float W) {
+#include "consts.h"
+
+real_t reflectivity_func(real_t q, real_t R0,
+    real_t Qc, real_t alpha, real_t m,
+    real_t W) {
 
     /* Simpler parametrization from Henrik Jacobsen uses these values that depend on m only.
-       float m_value=m*0.9853+0.1978;
-       float W=-0.0002*m_value+0.0022;
-       float alpha=0.2304*m_value+5.0944;
-       float beta=-7.6251*m_value+68.1137; 
+       real_t m_value=m*0.9853+0.1978;
+       real_t W=-0.0002*m_value+0.0022;
+       real_t alpha=0.2304*m_value+5.0944;
+       real_t beta=-7.6251*m_value+68.1137; 
        If W and alpha are set to 0, use Henrik's approach for estimating these parameters
        and apply the formulation:
        arg = R0*0.5*(1-tanh(arg))*(1-alpha*(q-Qc)+beta*(q-Qc)*(q-Qc));
@@ -14,7 +16,7 @@ float reflectivity_func(float q, float R0,
        Above lifted from the mcstas reflectivity implementation
     */  
 
-    float beta, arg, R = 0.;
+    real_t beta, arg, R = 0.;
 
     if (W==0. && alpha==0.) {
         m     = m*0.9853+0.1978;
