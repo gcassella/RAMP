@@ -93,18 +93,26 @@ class SDetector2D(SPrim):
         self.axis2_num_bins = np.uint32(np.ceil((axis2_binning[2] - axis2_binning[0]) / axis2_binning[1]))
         self.num_bins = np.uint32(self.axis1_num_bins * self.axis2_num_bins)
         self.histo = np.zeros((self.num_bins,), dtype=np.float32)
-        self.histo2d = np.zeros((self.axis1_num_bins, self.axis2_num_bins))
+        self.histo_err = np.zeros((self.num_bins,), dtype=np.float32)
+        self.histo_num = np.zeros((self.num_bins,), dtype=np.uint32)
 
         mf               = cl.mem_flags
         self.histo_cl    = cl.Buffer(ctx,
                                      mf.READ_WRITE | mf.COPY_HOST_PTR,
                                      hostbuf=self.histo)
+        self.histo_err_cl = cl.Buffer(ctx,
+                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                     hostbuf=self.histo_err)
+        self.histo_num_cl = cl.Buffer(ctx,
+                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                     hostbuf=self.histo_num)                        
         
         x = np.linspace(self.axis1_binning['s0'], self.axis1_binning['s2'], num=self.axis1_num_bins)
         y = np.linspace(self.axis2_binning['s0'], self.axis2_binning['s2'], num=self.axis2_num_bins)
 
         self.X, self.Y = np.meshgrid(x, y)
-        self.Z = np.zeros(self.histo2d.T.shape)
+        self.Z = np.zeros((self.axis2_num_bins, self.axis1_num_bins))
+        self.E = np.zeros((self.axis2_num_bins, self.axis1_num_bins))
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'detector2D.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -117,6 +125,8 @@ class SDetector2D(SPrim):
                           iidx_buf,
                           self.idx,
                           self.histo_cl,
+                          self.histo_err_cl,
+                          self.histo_num_cl,
                           self.axis1_binning,
                           self.axis2_binning,
                           self.axis1_num_bins,
@@ -143,16 +153,17 @@ class SDetector2D(SPrim):
         self._cached_copy(queue)
 
         if self.filename:
-            np.save(self.filename + 'X.dat', self.X)
-            np.save(self.filename + 'Y.dat', self.Y)
-            np.save(self.filename + 'Z.dat', self.Z)
+            np.save(self.filename + 'X', self.X)
+            np.save(self.filename + 'Y', self.Y)
+            np.save(self.filename + 'Z', self.Z)
+            np.save(self.filename + 'E', self.E)
 
     def data(self, queue):
         self._cached_copy(queue)
-        return (self.X, self.Y, self.Z)
+        return (self.X, self.Y, self.Z, self.E)
 
     def get_histo(self):
-        return (self.X, self.Y, self.Z)
+        return (self.X, self.Y, self.Z, self.E)
 
     def sum_histo(self):
         self.Z += self.histo2d.T
@@ -186,7 +197,17 @@ class SDetector2D(SPrim):
 
     def _cached_copy(self, queue):        
         if self.last_ran_datetime > self.last_copy_datetime:
-            cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
+            cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()          
+            cl.enqueue_copy(queue, self.histo_err, self.histo_err_cl).wait()
+            cl.enqueue_copy(queue, self.histo_num, self.histo_num_cl).wait()
             self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
+            with np.errstate(invalid='ignore'):
+                E_flat = np.divide(
+                    self.histo_err,
+                    self.histo_num
+                )
+                E_flat[self.histo_num == 0] = 0
+                self.E = E_flat.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
+                self.E[np.isnan(self.E)] = 0.0
         
         self.last_copy_datetime = datetime.datetime.now()

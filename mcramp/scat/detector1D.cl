@@ -19,7 +19,8 @@ void atomicAdd_g_f(volatile __global float *addr, float val)
 
 __kernel void detector(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
-                       uint const comp_idx, volatile __global float *histogram,
+                       uint const comp_idx, volatile __global float *histogram, 
+                       volatile __global float *histogram_err, __global uint *num,
                        float3 const binning, uint const restore_neutron, uint const var)
 {
 
@@ -54,7 +55,9 @@ __kernel void detector(__global float16 *neutrons,
 
   if(min_var<=var_val && var_val<=max_var) {    
     idx = floor((var_val -  min_var) / step_var);
+    atomic_add(&num[idx], 1);
     atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
+    atomicAdd_g_f(&histogram_err[idx], (float)neutron.s9*neutron.s9);
   }
   
   

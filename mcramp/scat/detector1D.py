@@ -55,14 +55,22 @@ class SDetector1D(SPrim):
         self.logscale = logscale
 
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
+        self.num = np.zeros((self.num_bins, ), dtype=np.uint32)
         self.histo = np.zeros((self.num_bins,), dtype=np.float32)
+        self.histo_err = np.zeros((self.num_bins,), dtype=np.float32)
         self.restore = np.uint32(1 if restore_neutron else 0)
         self.filename = filename
 
         mf               = cl.mem_flags
+        self.num_cl = cl.Buffer(ctx, 
+                                mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                hostbuf=self.num)
         self.histo_cl    = cl.Buffer(ctx,
                                      mf.READ_WRITE | mf.COPY_HOST_PTR,
                                      hostbuf=self.histo)
+        self.histo_err_cl = cl.Buffer(ctx,
+                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                     hostbuf=self.histo_err)
 
         self.axis = np.linspace(self.binning['s0'], self.binning['s2'], num=self.num_bins)
         self.Z = np.zeros(self.histo.shape)
@@ -78,6 +86,8 @@ class SDetector1D(SPrim):
                           iidx_buf,
                           np.uint32(self.idx),
                           self.histo_cl,
+                          self.histo_err_cl,
+                          self.num_cl,
                           self.binning,
                           self.restore,
                           self.var)
@@ -88,7 +98,12 @@ class SDetector1D(SPrim):
         self._cached_copy(queue)
 
         plt.figure()
-        plt.plot(self.axis, np.log(self.histo + 1e-7) if self.logscale else self.histo)
+        plt.errorbar(
+            self.axis, 
+            np.log(self.histo + 1e-7) if self.logscale else self.histo, 
+            0.434*self.histo_err/np.log(self.histo + 1e-7) if self.logscale else self.histo_err,
+            capsize=8
+        )
         plt.ylabel("Intensity")
         plt.xlabel(self.var_label_dict[self.var])
         plt.tight_layout()
@@ -97,14 +112,15 @@ class SDetector1D(SPrim):
         self._cached_copy(queue)
         if self.filename:
             np.save(self.filename + 'X', self.axis)
-            np.save(self.filename + 'Z', self.histo)
+            np.save(self.filename + 'Y', self.histo)
+            np.save(self.filename + 'E', self.histo_err)
 
     def data(self, queue):
         self._cached_copy(queue)
-        return (self.axis, self.histo)
+        return (self.axis, self.histo, self.histo_err)
 
     def get_histo(self):
-        return (self.axis, self.histo)
+        return (self.axis, self.histo, self.histo_err)
 
     @property
     def binning(self):
@@ -118,5 +134,11 @@ class SDetector1D(SPrim):
     def _cached_copy(self, queue):        
         if self.last_ran_datetime > self.last_copy_datetime:
             cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
+            cl.enqueue_copy(queue, self.histo_err, self.histo_err_cl).wait()
+            cl.enqueue_copy(queue, self.num, self.num_cl).wait()
+
+            with np.errstate(invalid='ignore'):
+                self.histo_err /= self.num
+                self.histo_err[self.num == 0] = 0.0
         
         self.last_copy_datetime = datetime.datetime.now()
