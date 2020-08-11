@@ -55,16 +55,12 @@ class SDetector1D(SPrim):
         self.logscale = logscale
 
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
-        self.num = np.zeros((self.num_bins, ), dtype=np.uint32)
         self.histo = np.zeros((self.num_bins,), dtype=np.float32)
         self.histo_err = np.zeros((self.num_bins,), dtype=np.float32)
         self.restore = np.uint32(1 if restore_neutron else 0)
         self.filename = filename
 
         mf               = cl.mem_flags
-        self.num_cl = cl.Buffer(ctx, 
-                                mf.READ_WRITE | mf.COPY_HOST_PTR,
-                                hostbuf=self.num)
         self.histo_cl    = cl.Buffer(ctx,
                                      mf.READ_WRITE | mf.COPY_HOST_PTR,
                                      hostbuf=self.histo)
@@ -87,7 +83,6 @@ class SDetector1D(SPrim):
                           np.uint32(self.idx),
                           self.histo_cl,
                           self.histo_err_cl,
-                          self.num_cl,
                           self.binning,
                           self.restore,
                           self.var)
@@ -135,10 +130,5 @@ class SDetector1D(SPrim):
         if self.last_ran_datetime > self.last_copy_datetime:
             cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
             cl.enqueue_copy(queue, self.histo_err, self.histo_err_cl).wait()
-            cl.enqueue_copy(queue, self.num, self.num_cl).wait()
-
-            with np.errstate(invalid='ignore'):
-                self.histo_err /= self.num
-                self.histo_err[self.num == 0] = 0.0
         
         self.last_copy_datetime = datetime.datetime.now()

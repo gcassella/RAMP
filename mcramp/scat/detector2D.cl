@@ -31,7 +31,7 @@ int find_idx(float val, float3 binning) {
 __kernel void detector(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
                        uint const comp_idx, volatile __global float *histogram,
-                       volatile __global float *histogram_err, __global uint *histogram_num,
+                       volatile __global float *histogram_err,
                        float3 const axis1_binning, float3 const axis2_binning, 
                        uint const axis1_numbins, uint const axis2_numbins,
                        uint const axis1_var, uint const axis2_var,
@@ -147,7 +147,6 @@ __kernel void detector(__global float16 *neutrons,
     flattened_idx = axis1_idx * axis2_numbins + axis2_idx;
     atomicAdd_g_f(&histogram[flattened_idx], (float)neutron.s9);
     atomicAdd_g_f(&histogram_err[flattened_idx], (float)neutron.s9*neutron.s9);
-    atomic_add(&histogram_num[flattened_idx], 1);
   }
 
   if (restore_neutron == 0) {

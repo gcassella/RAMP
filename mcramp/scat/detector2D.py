@@ -94,7 +94,6 @@ class SDetector2D(SPrim):
         self.num_bins = np.uint32(self.axis1_num_bins * self.axis2_num_bins)
         self.histo = np.zeros((self.num_bins,), dtype=np.float32)
         self.histo_err = np.zeros((self.num_bins,), dtype=np.float32)
-        self.histo_num = np.zeros((self.num_bins,), dtype=np.uint32)
 
         mf               = cl.mem_flags
         self.histo_cl    = cl.Buffer(ctx,
@@ -102,10 +101,7 @@ class SDetector2D(SPrim):
                                      hostbuf=self.histo)
         self.histo_err_cl = cl.Buffer(ctx,
                                      mf.READ_WRITE | mf.COPY_HOST_PTR,
-                                     hostbuf=self.histo_err)
-        self.histo_num_cl = cl.Buffer(ctx,
-                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
-                                     hostbuf=self.histo_num)                        
+                                     hostbuf=self.histo_err)                 
         
         x = np.linspace(self.axis1_binning['s0'], self.axis1_binning['s2'], num=self.axis1_num_bins)
         y = np.linspace(self.axis2_binning['s0'], self.axis2_binning['s2'], num=self.axis2_num_bins)
@@ -126,7 +122,6 @@ class SDetector2D(SPrim):
                           self.idx,
                           self.histo_cl,
                           self.histo_err_cl,
-                          self.histo_num_cl,
                           self.axis1_binning,
                           self.axis2_binning,
                           self.axis1_num_bins,
@@ -199,15 +194,7 @@ class SDetector2D(SPrim):
         if self.last_ran_datetime > self.last_copy_datetime:
             cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()          
             cl.enqueue_copy(queue, self.histo_err, self.histo_err_cl).wait()
-            cl.enqueue_copy(queue, self.histo_num, self.histo_num_cl).wait()
             self.Z = self.histo.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
-            with np.errstate(invalid='ignore'):
-                E_flat = np.divide(
-                    self.histo_err,
-                    self.histo_num
-                )
-                E_flat[self.histo_num == 0] = 0
-                self.E = E_flat.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
-                self.E[np.isnan(self.E)] = 0.0
+            self.E = self.histo_err.reshape((self.axis1_num_bins, self.axis2_num_bins)).T
         
         self.last_copy_datetime = datetime.datetime.now()
