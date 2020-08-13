@@ -19,7 +19,7 @@ float2 sample_distn(float16* neutron, uint global_addr, __global float* q, __glo
 
     if (fabs(pw_cdf[i] - v) < mindiff) {
       mindiff = fabs(pw_cdf[i] - v);
-      omega = w[i] + (rand(neutron, global_addr) - 0.5f)*(w[i+1] - w[i]);
+      omega = (i > 0 ? w[i-1] : 0.0f) + (rand(neutron, global_addr))*(w[i] - (i > 0 ? w[i-1] : 0.0f));
       w_index = i;
     } 
   }
@@ -33,7 +33,7 @@ float2 sample_distn(float16* neutron, uint global_addr, __global float* q, __glo
 
     if (fabs(pq_cdf[w_index*qsamples + i] - u) < mindiff) {
       mindiff = fabs(pq_cdf[w_index*qsamples + i] - u);
-      Q = q[i] + (rand(neutron, global_addr) - 0.5f)*(q[i+1] - q[i]);
+      Q = (i > 0 ? q[i-1] : 0.0f) + (rand(neutron, global_addr))*(q[i] - (i > 0 ? q[i-1] : 0.0f));
     } 
   }
 
@@ -267,7 +267,7 @@ __kernel void isotropic_scatter(
     // Magnetic, model directional polarisation
     // according to halpern-johnson eqn
     
-    neutron.s678 = q_norm*dot(neutron.s678, q_norm);
+    neutron.s678 = -q_norm*dot(neutron.s678, q_norm);
   }
 
   neutron.sc = comp_idx;

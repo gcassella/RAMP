@@ -188,13 +188,15 @@ class SIsotropic(SPrim):
         rho = np.float32(header["V_rho"])
 
         sigma_scat = sigma_coh
-        pw = simps(sqw.T, axis=1, x=q) / np.linalg.norm(sqw)
-        pw_cdf = np.array([simps(pw[:i], x=w[:i]) for i in range(1,len(w)+1)], dtype=np.float32)
-        pw_cdf = pw_cdf / np.max(pw_cdf)
+        pw = simps(q*sqw.T, axis=1, x=q)
+        pw /= simps(pw, x=w)
+        pq = np.array([q*sqw[:,i] / simps(sqw.T, axis=0, x=w) for i in range(0,len(w))])
 
-        pq = np.array([sqw[:,i] / np.linalg.norm(sqw[:,i]) for i in range(0,len(w))])
-        pq_cdf = np.array(
-            [[simps(pq[j,:i], x=q[:i]) / simps(pq[j,:len(q)+1], x=q[:len(q)+1]) \
-            for i in range(1,len(q)+1)] for j in range(0,len(w))], dtype=np.float32)
 
+        pw_cdf = cdf_from_pd(w, pw)
+        pq_cdf = np.array([cdf_from_pd(q, pq[j,:]) for j in range(0,len(w))], dtype=np.float32)
         return (q, w, rho, sigma_abs, sigma_scat, pw_cdf, pq_cdf, sqw)
+
+def cdf_from_pd(x, pd):
+    unnormed = np.array([simps(pd[:i], x=x[:i]) for i in range(1,len(x)+1)], dtype=np.float32)
+    return unnormed / unnormed[-1]
