@@ -34,8 +34,9 @@ class SDetector1D(SPrim):
         Displays a plot of histogrammed neutron weights as a function of neutron\
         energy
     Save
-        Saves the histogram axis and histogrammed neutron weights in each energy bin to\
-        numpy files "filename_X.dat" and "filename_Z.dat" if filename is not None.
+        Saves the histogram axis, histogrammed neutron weights, and error assosciated with\
+        those weights (calculated as the sum of the squared weights) in each bin to\
+        numpy files "filename_X", "filename_Y" and "filename_E" if filename is not None.
 
     """
 
@@ -96,7 +97,7 @@ class SDetector1D(SPrim):
         plt.errorbar(
             self.axis, 
             np.log(self.histo + 1e-7) if self.logscale else self.histo, 
-            0.434*self.histo_err/np.log(self.histo + 1e-7) if self.logscale else self.histo_err,
+            0.434*np.sqrt(self.histo_err)/np.log(self.histo + 1e-7) if self.logscale else np.sqrt(self.histo_err),
             capsize=8
         )
         plt.ylabel("Intensity")
@@ -130,5 +131,8 @@ class SDetector1D(SPrim):
         if self.last_ran_datetime > self.last_copy_datetime:
             cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
             cl.enqueue_copy(queue, self.histo_err, self.histo_err_cl).wait()
+
+            self.histo[np.isnan(self.histo)] = 0
+            self.histo_err[np.isnan(self.histo_err)] = 0
         
         self.last_copy_datetime = datetime.datetime.now()

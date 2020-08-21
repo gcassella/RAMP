@@ -1,6 +1,6 @@
 #include "consts.h"
 
-void atomicAdd_g_f(volatile __global float *addr, float val)
+inline void atomicAdd_g_f(volatile __global float *addr, float val)
 {
     union {
         unsigned int u32;
@@ -55,6 +55,7 @@ __kernel void detector(__global float16 *neutrons,
 
   if(min_var<=var_val && var_val<=max_var) {    
     idx = floor((var_val -  min_var) / step_var);
+    barrier(CLK_GLOBAL_MEM_FENCE);
     atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
     atomicAdd_g_f(&histogram_err[idx], (float)neutron.s9*neutron.s9);
   }
