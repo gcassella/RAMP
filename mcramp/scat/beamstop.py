@@ -7,10 +7,11 @@ import os
 
 class SBeamstop(SPrim):
     """
-    
+    Scattering kernel for the beamstop component. Absorbs neutrons.
 
     Parameters
     ----------
+        None
     
 
     Methods

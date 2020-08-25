@@ -8,8 +8,8 @@ import os
 
 class GSphereInt(GPrim):
     """
-    Geometry kernel for 'sphere' geometry. Intersects with the exterior of the
-    sphere, i.e. first intersection time must be positive for scattering to
+    Geometry kernel for 'sphere' geometry. Intersects with the interior of the
+    sphere, i.e. first intersection time must be negative for scattering to
     occur.
 
     Parameters
@@ -19,9 +19,7 @@ class GSphereInt(GPrim):
 
     Notes
     -----
-    Intersection 1 :
-        First point of intersection with the sphere geometry - 'entering' sphere.
-    Intersection 2 :
+    Intersection 1 & 2 :
         Second point of intersection with the sphere geometry - 'exiting' sphere.
 
     Methods

@@ -7,10 +7,13 @@ import os
 
 class SPolariser(SPrim):
     """
-    
+    Scattering kernel for ideal polariser component. Sets neutron
+    polarisation to value of polarisation parameter.
 
     Parameters
     ----------
+    polarisation : 3-tuple of floats
+        Value to set neutron polarisation to
     
 
     Methods

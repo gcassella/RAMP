@@ -7,10 +7,14 @@ import os
 
 class SAnalyser(SPrim):
     """
-    
+    Scattering kernel for ideal analyser component. Adjusts neutron weight
+    based on dot product between neutron polarisation and polarisation
+    parameter, and sets neutron polarisation to the analysed direction.
 
     Parameters
     ----------
+    polarisation : 3-tuple of floats
+        Vector against which neutron polarisation should be analysed
     
 
     Methods
