@@ -52,10 +52,11 @@ __kernel void detector(__global float16 *neutrons,
     var_val = degrees(atan2(intersection.s4, intersection.s6));
   else if (var == 2)
     var_val = (1.0e6f)*(neutron.sa + intersection.s7);
+  else if (var == 3)
+    var_val = 2*M_PI / (V2K*length(neutron.s345));
 
   if(min_var<=var_val && var_val<=max_var) {    
     idx = floor((var_val -  min_var) / step_var);
-    barrier(CLK_GLOBAL_MEM_FENCE);
     atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
     atomicAdd_g_f(&histogram_err[idx], (float)neutron.s9*neutron.s9);
   }

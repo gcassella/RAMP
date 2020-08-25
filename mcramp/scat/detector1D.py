@@ -43,8 +43,8 @@ class SDetector1D(SPrim):
     def __init__(self, binning=(0, 0, 0), logscale = False, restore_neutron=False, idx=0, var="energy",
                  ctx=None, filename=None, **kwargs):
 
-        var_dict = { "energy" : 0, "theta" : 1, "tof" : 2 }
-        self.var_label_dict = { 0 : "Energy [meV]", 1 : "Theta [deg]", 2 : "Time-of-flight [us]" }
+        var_dict = { "energy" : 0, "theta" : 1, "tof" : 2, "wavelength" : 3 }
+        self.var_label_dict = { 0 : "Energy [meV]", 1 : "Theta [deg]", 2 : "Time-of-flight [us]", 3 : "Wavelength [Ang]" }
         self.var = np.uint32(var_dict[var])
         
         self.last_ran_datetime = datetime.datetime.now()

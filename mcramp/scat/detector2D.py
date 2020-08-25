@@ -46,9 +46,10 @@ class SDetector2D(SPrim):
         Displays a plot of the two dimensional histogram of neutron weights along\
         the chosen axes.
     Save
-        Saves the binning along axes 1 and 2 and the histogrammed neutron weights\
-        for each bin as filename_X, filename_Y, and filename_Z, respectively, if\
-        filename is not None.
+        Saves the binning along axes 1 and 2, the histogrammed neutron weights
+        and assosciated error (calculated as the sum of the squared neutron weights)\
+        for each bin as filename_X, filename_Y, filename_Z, and filename_E\
+        respectively, if filename is not None.
 
     """
 
@@ -63,7 +64,9 @@ class SDetector2D(SPrim):
             "phi" : 4,
             "tof" : 5,
             "divX" : 6,
-            "divY" : 7
+            "divY" : 7,
+            "wavelength" : 8,
+            "energy" : 9
         }
 
         self.var_label_dict = {
@@ -74,7 +77,9 @@ class SDetector2D(SPrim):
             4 : "Phi [deg]",
             5 : "Time-of-flight [us]",
             6 : "Horizontal divergence [deg]",
-            7 : "Vertical divergence [deg]"
+            7 : "Vertical divergence [deg]",
+            8 : "Wavelength [Ang]",
+            9 : "Energy [meV]"
         }
         
         self.last_ran_datetime = datetime.datetime.now()

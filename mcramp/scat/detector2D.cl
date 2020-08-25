@@ -95,6 +95,12 @@ __kernel void detector(__global float16 *neutrons,
     case 7 :
       axis1_val = degrees(atan2(neutron.s4, neutron.s5));
       break;
+    case 8 :
+      axis1_val = 2*M_PI / (V2K*length(neutron.s345));
+      break;
+    case 9 :
+      axis1_val = VS2E*pow(length(neutron.s345), 2.0f);
+      break;
     default:
       break;
   }
@@ -135,6 +141,12 @@ __kernel void detector(__global float16 *neutrons,
       break;
     case 7 :
       axis2_val = degrees(atan2(neutron.s4, neutron.s5));
+      break;
+    case 8 :
+      axis2_val = 2*M_PI / (V2K*length(neutron.s345));
+      break;
+    case 9 :
+      axis2_val = VS2E*pow(length(neutron.s345), 2.0f);
       break;
     default:
       break;
