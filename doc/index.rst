@@ -35,7 +35,6 @@ User guide
     user/hello
     user/idf
     user/running
-    user/kernels
 
 Writing kernels
 ---------------
@@ -46,7 +45,6 @@ Writing kernels
     writing/primer
     writing/buffers
     writing/scatter
-    writing/modes
 
 Kernel list
 -----------
