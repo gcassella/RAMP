@@ -48,6 +48,9 @@ class ExecutionBlock:
         for (name, comp) in block.items():
             if name == "linear" or name == "multi":
                 continue
+
+            if "disable" in comp and comp["disable"]:
+                continue
             
             if "source" in comp:
                 mk = getattr(importlib.import_module("mcramp"), comp['moderator_kernel']['name'])
@@ -282,11 +285,12 @@ class Instrument:
 
         split_str = json_str.split("\n")
 
-        # Remove lines with comments
+        # Remove comments
 
         for line_num, line in enumerate(split_str):
             if '//' in line:
-                split_str[line_num] = ''
+                comment_split = line.split("//", 1)
+                split_str[line_num] = comment_split[0]
 
         # Merge and return
 
