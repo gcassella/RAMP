@@ -255,7 +255,7 @@ class Instrument:
         for d in self.kernel_refs:
             self.blocks[d.block].components[d.comp_name]["scat_kernel"].save(self.queue)
 
-    def visualise(self, controls=True, xlim=None, ylim=None, zlim=None, **kwargs):
+    def visualise(self, controls=True, xlim=None, ylim=None, zlim=None, focus=None, **kwargs):
         """
         Opens a plotting window containing orthogonal projections of the instrument
         geometry.
@@ -263,7 +263,7 @@ class Instrument:
 
         from .visualisation import Visualisation
 
-        vis = Visualisation(self, controls=controls, xlim=xlim, ylim=ylim, zlim=zlim, **kwargs)
+        vis = Visualisation(self, controls=controls, xlim=xlim, ylim=ylim, zlim=zlim, focus=focus, **kwargs)
         vis.show()
 
     def _substitute_params(self, json_str, **kwargs):
@@ -278,12 +278,27 @@ class Instrument:
 
             json_str = json_str.replace("${}$".format(t), str(eval(subbed_t)))
 
+        # Split on all newlines
+
+        split_str = json_str.split("\n")
+
+        # Remove lines with comments
+
+        for line_num, line in enumerate(split_str):
+            if '//' in line:
+                split_str[line_num] = ''
+
+        # Merge and return
+
+        json_str = '\n'.join(split_str)
+
         return json_str
 
     def _fromJSON(self, fn, ctx, queue, **kwargs):
         with open(fn, 'r') as f:
             json_str = f.read()
             json_str = self._substitute_params(json_str, **kwargs)
+
 
         inst = json.loads(json_str)
 
