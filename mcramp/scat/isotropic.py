@@ -17,9 +17,17 @@ class SIsotropic(SPrim):
 
     Parameters
     ----------
-    fn : str
-        Filename of S(Q, w) file
-    
+    fn_coh : str
+        Filename of S(Q, w) file specifying coherent scattering (no polarisation effect)
+    fn_inc : str
+        Filename of S(Q, w) file specifying incoherent scattering (2/3rd spin flip)
+    fn_mag : str
+        Filename of S(Q, w) file specifying magnetic scattering (Halpern-Johnson pol rule)
+    temperature : float
+        Temperature of scattering sample for detailed balance
+    transmit : int
+        Flag which specifies if transmitted beam should be retained (0 = off, 1 = on)
+
     Methods
     -------
     Data
@@ -30,8 +38,9 @@ class SIsotropic(SPrim):
         None
     """
 
-    def __init__(self, fn_coh='', fn_inc='', fn_mag='', temperature=0, idx=0, ctx=None, **kwargs):
+    def __init__(self, fn_coh='', fn_inc='', fn_mag='', temperature=0, transmit=1, idx=0, ctx=None, **kwargs):
         self.temperature = np.float32(temperature)
+        self.transmit = np.uint32(transmit)
 
         if fn_coh == '' and fn_inc == '' and fn_mag == '':
             raise ValueError("Invalid filename combination")
@@ -156,7 +165,8 @@ class SIsotropic(SPrim):
                                    *self.coh_args,
                                    *self.inc_args,
                                    *self.mag_args,
-                                   self.temperature)
+                                   self.temperature,
+                                   self.transmit)
 
     def _LoadSQW(self, fn):
         header = {}

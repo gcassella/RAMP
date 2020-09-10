@@ -72,7 +72,8 @@ __kernel void isotropic_scatter(
   float const mag_rho, 
   float const mag_sigma_abs,
   float const mag_sigma_scat, 
-  float const temperature) {
+  float const temperature,
+  uint const transmit) {
 
   uint global_addr    = get_global_id(0);
   uint w_index;
@@ -89,14 +90,18 @@ __kernel void isotropic_scatter(
   }
 
   float3 path, perp, normvel;
-  float sigma_tot, path_length, ki, sigma_s, sigma_a,
+  float sigma_tot, path_length, ki, sigma_s, sigma_a, p_trans,
         mu, eta, u, v, Q, omega, kf, arg, theta, x, y, z, alpha,
         Rxx, Rxy, Rxz, Ryx, Ryy, Ryz, Rzx, Rzy, Rzz, mindiff, TOF;
 
   uint flag = 0;
 
-  path = intersection.s456 - intersection.s012;
-  ki = 1.583*pow(10.,-3.)*length(neutron.s345);
+  if (all(intersection.s012 == intersection.s456))
+    path = INTERSECTION_POS2 - NEUTRON_POS;
+  else
+    path = INTERSECTION_POS2 - INTERSECTION_POS1;
+
+  ki = V2K*length(neutron.s345);
 
   normvel = normalize(neutron.s345);
 
@@ -107,13 +112,16 @@ __kernel void isotropic_scatter(
   mu = (coh_rho + inc_rho + mag_rho)*sigma_tot*100.;
 
   // Monte carlo choice to see if our neutron scatters
-  if (rand(&neutron, global_addr) < exp(-mu*length(path.s012))) {
+  p_trans = exp(-mu*length(path.s012));
+  if (rand(&neutron, global_addr) < p_trans) {
     // Transmitted, return without modifying
     // neutron state, but multiply by weight factor
-    neutron.s9 *= 1.0 - sigma_s / sigma_tot;
+    neutron.s9 *= p_trans;
     neutron.s012 = (intersection.s456+0.01f*normalize(path));
     neutron.sa += intersection.s7;
-    neutron.sf = 1.0f;
+
+    if (transmit == 0)
+      neutron.sf = 1.0f;
 
     neutron.sc = comp_idx;
     iidx[global_addr] = 0;
@@ -124,7 +132,7 @@ __kernel void isotropic_scatter(
   } else {
     // Scattered, multiply by weight factor
     // to model absorption
-    neutron.s9 *= sigma_s / sigma_tot;
+    neutron.s9 *= (1 - p_trans) * sigma_s / sigma_tot;
   }
 
   // Monte carlo choice to find scattering point along
