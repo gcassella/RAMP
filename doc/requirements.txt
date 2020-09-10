@@ -1,4 +1,7 @@
 ipython
+scipy
+numpy
+matplotlib
 sphinx>=1.7.5
 pygments==2.4.1
 nbsphinx>=0.6.0
