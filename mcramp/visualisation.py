@@ -140,6 +140,38 @@ class Visualisation():
     def _update_plots(self):
         self.ax_zx.clear()
 
+    def _plot_trace(self):
+        trace_lines = []
+        for block in self.inst.blocks:
+            trace_lines += block.trace_lines
+
+        for line in trace_lines:
+            self.ax_or.plot(
+                np.add(line[0], self.offset[0]),
+                np.add(line[2], self.offset[2]),
+                np.add(line[1], self.offset[1]),
+                'r-',
+                linewidth=1
+            )
+            self.ax_zx.plot(
+                np.add(line[2], self.offset[2]),
+                np.add(line[0], self.offset[0]),
+                'r-',
+                linewidth=1
+            )
+            self.ax_zy.plot(
+                np.add(line[2], self.offset[2]),
+                np.add(line[1], self.offset[1]),
+                'r-',
+                linewidth=1
+            )
+            self.ax_xy.plot(
+                np.add(line[0], self.offset[0]),
+                np.add(line[1], self.offset[1]),
+                'r-',
+                linewidth=1
+            )
+
     def _plot_kernel(self, kernel):
         s_lines = self.inst.blocks[kernel.block].components[kernel.comp_name]["scat_kernel"].lines()
         g_lines = self.inst.blocks[kernel.block].components[kernel.comp_name]["geom_kernel"].lines()
@@ -210,6 +242,8 @@ class Visualisation():
                 continue
 
             self._plot_kernel(d)
+
+        self._plot_trace()
 
     def show(self):
         self._plot_inst()
