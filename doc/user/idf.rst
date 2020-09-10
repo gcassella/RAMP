@@ -277,6 +277,45 @@ and in the Python script::
 longer a strictly valid JSON file, and many programs that interpret JSON files will \
 no longer properly load the instrument definition file.`
 
+Comments
+--------
+
+RAMP supports C-style single line comments in instrument definition files. Any text on \
+a line following two forward slashes (`//`) will be ignored. For example, the following::
+
+ "mod" : {
+     "source": true,
+     // This is a comment!
+     "position" : [0.0, 0.0, 0.0],
+     "moderator_kernel": {
+         "name": "MISIS", // This is another comment!
+         "spec_file": "Let_Base.mcstas",
+         "mod_dim": [0.04, 0.09],
+         "target_dim": [0.04, 0.09],
+         "target_dist": 1.7,
+         "E_min": $emin$,
+         "E_max": $emax$
+     }
+ },
+
+is equivalent to::
+
+ "mod" : {
+     "source": true,
+     "position" : [0.0, 0.0, 0.0],
+     "moderator_kernel": {
+         "name": "MISIS",
+         "spec_file": "Let_Base.mcstas",
+         "mod_dim": [0.04, 0.09],
+         "target_dim": [0.04, 0.09],
+         "target_dist": 1.7,
+         "E_min": $emin$,
+         "E_max": $emax$
+     }
+ },
+
+
+
 Complete example
 ----------------
 

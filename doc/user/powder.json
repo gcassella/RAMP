@@ -23,6 +23,7 @@
         "Mono_arm" : {
             "position" : [0.0, 0.0, 1.0],
             "rotation" : [0.0, $Mono_angle$, 0.0],
+            "visualise" : false,
             "geom_kernel": {
                 "name": "GArm"
             },
@@ -34,6 +35,7 @@
         "Mono_out" : {
             "position" : [0.0, 0.0, 1.0],
             "rotation" : [0.0, $2*Mono_angle$, 0.0],
+            "visualise" : false,
             "geom_kernel": {
                 "name": "GArm"
             },
@@ -79,7 +81,7 @@
                 "multiplicity" : 1,
                 "DW" : 1.0,
                 "F2" : 500.0,
-                "d_phi" : 5.0
+                "d_phi" : 30.0
             }
         },
 
@@ -89,14 +91,15 @@
             "geom_kernel" : {
                 "name" : "GBanana",
                 "radius" : 1.0,
-                "height" : 0.2,
+                "height" : 0.5,
                 "mintheta" : -40.0,
                 "maxtheta" : 140.0
             },
             "scat_kernel" : {
                 "name" : "SDetector1D",
                 "var" : "theta",
-                "binning" : $detector_binning$
+                "binning" : $detector_binning$,
+                "restore_neutron" : true
             }
         }
     }

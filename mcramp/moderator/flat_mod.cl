@@ -18,7 +18,7 @@ __kernel void generate_neutrons(__global float16* neutrons,
 
   neutron = (float16){0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,(float)seed+neutron.sb,0.0f,0.0f,0.0f,0.0f};
 
-  float E_range, E_val, vel, Dx, Dy;
+  float E_range, E_val, vel, Dx, Dy, theta, phi;
 
   E_range = (E_max - E_min);
   E_val = E_min + E_range*rand(&neutron, global_addr);
@@ -34,6 +34,13 @@ __kernel void generate_neutrons(__global float16* neutrons,
   Dy = target_dim.y*(0.5f - rand(&neutron, global_addr)) - neutron.s1;
   
   neutron.s345 = vel*normalize((float3)( Dx, Dy, target_dist ));
+
+  // Randomly intiialize polarization on unit sphere
+  theta = 2*M_PI*rand(&neutron, global_addr);
+  phi = acos(1 - 2*rand(&neutron, global_addr));
+  neutron.s6 = sin(phi)*cos(theta);
+  neutron.s7 = sin(phi)*sin(theta);
+  neutron.s8 = cos(phi);
 
   // Revive terminated neutrons
   neutron.sf = 0.f;

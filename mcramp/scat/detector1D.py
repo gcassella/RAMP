@@ -34,16 +34,17 @@ class SDetector1D(SPrim):
         Displays a plot of histogrammed neutron weights as a function of neutron\
         energy
     Save
-        Saves the histogram axis and histogrammed neutron weights in each energy bin to\
-        numpy files "filename_X.dat" and "filename_Z.dat" if filename is not None.
+        Saves the histogram axis, histogrammed neutron weights, and error assosciated with\
+        those weights (calculated as the sum of the squared weights) in each bin to\
+        numpy files "filename_X", "filename_Y" and "filename_E" if filename is not None.
 
     """
 
-    def __init__(self, binning=(0, 0, 0), restore_neutron=False, idx=0, var="energy",
+    def __init__(self, binning=(0, 0, 0), logscale = False, restore_neutron=False, idx=0, var="energy",
                  ctx=None, filename=None, **kwargs):
 
-        var_dict = { "energy" : 0, "theta" : 1, "tof" : 2 }
-        self.var_label_dict = { 0 : "Energy [meV]", 1 : "Theta [deg]", 2 : "Time-of-flight [us]" }
+        var_dict = { "energy" : 0, "theta" : 1, "tof" : 2, "wavelength" : 3 }
+        self.var_label_dict = { 0 : "Energy [meV]", 1 : "Theta [deg]", 2 : "Time-of-flight [us]", 3 : "Wavelength [Ang]" }
         self.var = np.uint32(var_dict[var])
         
         self.last_ran_datetime = datetime.datetime.now()
@@ -52,8 +53,11 @@ class SDetector1D(SPrim):
         self.binning     = binning
         self.idx         = idx
 
+        self.logscale = logscale
+
         self.num_bins    = np.ceil((binning[2] - binning[0])/binning[1]).astype(np.uint32)
         self.histo = np.zeros((self.num_bins,), dtype=np.float32)
+        self.histo_err = np.zeros((self.num_bins,), dtype=np.float32)
         self.restore = np.uint32(1 if restore_neutron else 0)
         self.filename = filename
 
@@ -61,6 +65,9 @@ class SDetector1D(SPrim):
         self.histo_cl    = cl.Buffer(ctx,
                                      mf.READ_WRITE | mf.COPY_HOST_PTR,
                                      hostbuf=self.histo)
+        self.histo_err_cl = cl.Buffer(ctx,
+                                     mf.READ_WRITE | mf.COPY_HOST_PTR,
+                                     hostbuf=self.histo_err)
 
         self.axis = np.linspace(self.binning['s0'], self.binning['s2'], num=self.num_bins)
         self.Z = np.zeros(self.histo.shape)
@@ -76,6 +83,7 @@ class SDetector1D(SPrim):
                           iidx_buf,
                           np.uint32(self.idx),
                           self.histo_cl,
+                          self.histo_err_cl,
                           self.binning,
                           self.restore,
                           self.var)
@@ -86,7 +94,12 @@ class SDetector1D(SPrim):
         self._cached_copy(queue)
 
         plt.figure()
-        plt.plot(self.axis, self.histo)
+        plt.errorbar(
+            self.axis, 
+            np.log(self.histo + 1e-7) if self.logscale else self.histo, 
+            0.434*np.sqrt(self.histo_err)/np.log(self.histo + 1e-7) if self.logscale else np.sqrt(self.histo_err),
+            capsize=8
+        )
         plt.ylabel("Intensity")
         plt.xlabel(self.var_label_dict[self.var])
         plt.tight_layout()
@@ -95,14 +108,15 @@ class SDetector1D(SPrim):
         self._cached_copy(queue)
         if self.filename:
             np.save(self.filename + 'X', self.axis)
-            np.save(self.filename + 'Z', self.histo)
+            np.save(self.filename + 'Y', self.histo)
+            np.save(self.filename + 'E', self.histo_err)
 
     def data(self, queue):
         self._cached_copy(queue)
-        return (self.axis, self.histo)
+        return (self.axis, self.histo, self.histo_err)
 
     def get_histo(self):
-        return (self.axis, self.histo)
+        return (self.axis, self.histo, self.histo_err)
 
     @property
     def binning(self):
@@ -116,5 +130,9 @@ class SDetector1D(SPrim):
     def _cached_copy(self, queue):        
         if self.last_ran_datetime > self.last_copy_datetime:
             cl.enqueue_copy(queue, self.histo, self.histo_cl).wait()
+            cl.enqueue_copy(queue, self.histo_err, self.histo_err_cl).wait()
+
+            self.histo[np.isnan(self.histo)] = 0
+            self.histo_err[np.isnan(self.histo_err)] = 0
         
         self.last_copy_datetime = datetime.datetime.now()

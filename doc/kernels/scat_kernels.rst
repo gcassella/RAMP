@@ -36,6 +36,17 @@ Linear collimator (`SLinearCollimator`)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: mcramp.scat.SLinearCollimator
 
+Polarisation
+------------
+
+Polariser (`SPolariser`)
+~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: mcramp.scat.SPolariser
+
+Analyser (`SAnalyser`)
+~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: mcramp.scat.SAnalyser
+
 Samples
 -------
 
@@ -47,9 +58,17 @@ TAS resolution sample (`SRescal`)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: mcramp.scat.SRescal
 
+Isotropic powder (`SIsotropic`)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: mcramp.scat.SIsotropic
+
 Others
 ------
 
 Arm (`SArm`)
 ~~~~~~~~~~~~
 .. autoclass:: mcramp.scat.SArm
+
+Beamstop (`SBeamstop`)
+~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: mcramp.scat.SBeamstop

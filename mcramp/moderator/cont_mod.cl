@@ -56,6 +56,14 @@ __kernel void generate_neutrons(__global float16* neutrons,
   
   neutron.s345 = vel*normalize((float3)( Dx, Dy, target_dist ));
 
+  // Randomly intiialize polarization on unit sphere
+  float theta, phi;
+  theta = 2*M_PI*rand(&neutron, global_addr);
+  phi = acos(1 - 2*rand(&neutron, global_addr));
+  neutron.s6 = sin(phi)*cos(theta);
+  neutron.s7 = sin(phi)*sin(theta);
+  neutron.s8 = cos(phi);
+
   // Revive terminated neutrons
   neutron.sf = 0.f;
 

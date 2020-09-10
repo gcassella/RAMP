@@ -31,6 +31,7 @@ int find_idx(float val, float3 binning) {
 __kernel void detector(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
                        uint const comp_idx, volatile __global float *histogram,
+                       volatile __global float *histogram_err,
                        float3 const axis1_binning, float3 const axis2_binning, 
                        uint const axis1_numbins, uint const axis2_numbins,
                        uint const axis1_var, uint const axis2_var,
@@ -68,19 +69,37 @@ __kernel void detector(__global float16 *neutrons,
       axis1_val = intersection.s5;
       break;
     case 2 :
-      axis1_val = degrees(atan2(intersection.s4, intersection.s6));
+      axis1_val = degrees(atan2(
+        intersection.s4,
+        intersection.s6
+      ));
       break;
     case 3 :
-      axis1_val = degrees(atan2(intersection.s5, intersection.s6));
+      axis1_val = degrees(atan2(
+        intersection.s5, 
+        sqrt(intersection.s4*intersection.s4 + intersection.s6*intersection.s6)
+      ));
       break;
     case 4 :
-      axis1_val = (1.0e6f)*(neutron.sa + intersection.s7);
+      axis1_val = sign(intersection.s5)*degrees(acos(
+        intersection.s4/
+        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5)
+      ));
       break;
     case 5 :
-      axis1_val = degrees(atan2(neutron.s3, neutron.s5));
+      axis1_val = (1.0e6f)*(neutron.sa + intersection.s7);
       break;
     case 6 :
+      axis1_val = degrees(atan2(neutron.s3, neutron.s5));
+      break;
+    case 7 :
       axis1_val = degrees(atan2(neutron.s4, neutron.s5));
+      break;
+    case 8 :
+      axis1_val = 2*M_PI / (V2K*length(neutron.s345));
+      break;
+    case 9 :
+      axis1_val = VS2E*pow(length(neutron.s345), 2.0f);
       break;
     default:
       break;
@@ -97,19 +116,37 @@ __kernel void detector(__global float16 *neutrons,
       axis2_val = intersection.s5;
       break;
     case 2 :
-      axis2_val = degrees(atan2(intersection.s4, intersection.s6));
+      axis2_val = degrees(atan2(
+        intersection.s4,
+        intersection.s6
+      ));
       break;
     case 3 :
-      axis2_val = degrees(atan2(intersection.s5, intersection.s6));
+      axis2_val = degrees(atan2(
+        intersection.s5, 
+        sqrt(intersection.s4*intersection.s4 + intersection.s6*intersection.s6)
+      ));
       break;
     case 4 :
-      axis2_val = (1.0e6f)*(neutron.sa + intersection.s7);
+      axis2_val = sign(intersection.s5)*degrees(acos(
+        intersection.s4/
+        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5)
+      ));
       break;
     case 5 :
-      axis2_val = degrees(atan2(neutron.s3, neutron.s5));
+      axis2_val = (1.0e6f)*(neutron.sa + intersection.s7);
       break;
     case 6 :
+      axis2_val = degrees(atan2(neutron.s3, neutron.s5));
+      break;
+    case 7 :
       axis2_val = degrees(atan2(neutron.s4, neutron.s5));
+      break;
+    case 8 :
+      axis2_val = 2*M_PI / (V2K*length(neutron.s345));
+      break;
+    case 9 :
+      axis2_val = VS2E*pow(length(neutron.s345), 2.0f);
       break;
     default:
       break;
@@ -121,6 +158,7 @@ __kernel void detector(__global float16 *neutrons,
   if (!((axis1_idx == -1) || (axis2_idx == -1))) {
     flattened_idx = axis1_idx * axis2_numbins + axis2_idx;
     atomicAdd_g_f(&histogram[flattened_idx], (float)neutron.s9);
+    atomicAdd_g_f(&histogram_err[flattened_idx], (float)neutron.s9*neutron.s9);
   }
 
   if (restore_neutron == 0) {

@@ -38,6 +38,8 @@ class ExecutionBlock:
         self.components = components
         self.parent = parent
 
+        self.trace_lines = []
+
     @staticmethod
     def fromJSON(block, parent, linear, events, idx):
         comps = {}
@@ -47,6 +49,9 @@ class ExecutionBlock:
 
         for (name, comp) in block.items():
             if name == "linear" or name == "multi":
+                continue
+
+            if "disable" in comp and comp["disable"]:
                 continue
             
             if "source" in comp:
@@ -97,7 +102,8 @@ class ExecutionBlock:
                     "scat_kernel": sk(**sargs),
                     "restore_neutron": np.uint32(1) if restore_neutron else np.uint32(0),
                     "pos": np.array((pos[0], pos[1], pos[2], 0.), dtype=clarr.vec.float3),
-                    "rot": np.array((rot[0], rot[1], rot[2], 0.), dtype=clarr.vec.float3)
+                    "rot": np.array((rot[0], rot[1], rot[2], 0.), dtype=clarr.vec.float3),
+                    "vis": vis
                 }
 
                 parent.kernel_refs.append(KernelRef(idx, comps[name], pos, rot, vis))
@@ -108,8 +114,11 @@ class ExecutionBlock:
 
         return ex_block
 
-    def execute(self, N, debug=0):
+    def execute(self, N, debug=False, trace=False):
         if self.linear:
+
+            if trace:
+                self.prev_locs = np.zeros(self.parent.neutrons.shape, dtype=np.dtype((np.float32, (3,))))
 
             for (_, comp) in self.components.items():
                 self.parent.trans_prg.transform(self.parent.queue, (N,), None,
@@ -128,10 +137,9 @@ class ExecutionBlock:
                                         self.parent.intersections_cl,
                                         comp["restore_neutron"])
 
-                if debug == 1:
+                if debug or (trace and comp["vis"]):
                     cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
-                    self.parent.queue.finish()
-
+                if debug:
                     print(self.parent.intersections)
 
                 comp["scat_kernel"].scatter_prg(self.parent.queue,
@@ -144,14 +152,12 @@ class ExecutionBlock:
                                            self.parent.neutrons_cl,
                                            comp["pos"],
                                            comp["rot"])
-
-                if debug == 1:
+                
+                if debug or (trace and comp["vis"]):
                     cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
-                    self.parent.queue.finish()
-
+                    self._get_trace_lines(offset=comp["pos"], rot=comp["rot"])
+                if debug:
                     print(self.parent.neutrons)
-
-            self.parent.queue.finish()
 
         else:
             events = 0
@@ -192,6 +198,38 @@ class ExecutionBlock:
                                            comp["rot"])
 
                 events += 1
+
+    def _get_trace_lines(self, offset, rot):
+        self.parent.queue.finish()
+        non_terminated = np.transpose(np.where(self.parent.neutrons["s15"] == 0)).flatten()
+        for idx in non_terminated:
+            labframe_intersection = frame_rotate(
+                [
+                    self.parent.intersections["s0"][idx],
+                    self.parent.intersections["s1"][idx],
+                    self.parent.intersections["s2"][idx]
+                ],
+                [
+                    rot["s0"],
+                    rot["s1"],
+                    rot["s2"]
+                ]
+            )
+
+            coords = [
+                [self.prev_locs[idx][0], labframe_intersection[0] + offset["s0"]],
+                [self.prev_locs[idx][1], labframe_intersection[1] + offset["s1"]],
+                [self.prev_locs[idx][2], labframe_intersection[2] + offset["s2"]]
+            ]
+
+            self.trace_lines.append(coords)
+        
+            self.prev_locs[idx] = [
+                labframe_intersection[0] + offset["s0"],
+                labframe_intersection[1] + offset["s1"],
+                labframe_intersection[2] + offset["s2"]
+            ]
+
 
 class Instrument:
     """
@@ -255,7 +293,7 @@ class Instrument:
         for d in self.kernel_refs:
             self.blocks[d.block].components[d.comp_name]["scat_kernel"].save(self.queue)
 
-    def visualise(self, controls=True, xlim=None, ylim=None, zlim=None, **kwargs):
+    def visualise(self, controls=True, xlim=None, ylim=None, zlim=None, focus=None, **kwargs):
         """
         Opens a plotting window containing orthogonal projections of the instrument
         geometry.
@@ -263,7 +301,7 @@ class Instrument:
 
         from .visualisation import Visualisation
 
-        vis = Visualisation(self, controls=controls, xlim=xlim, ylim=ylim, zlim=zlim, **kwargs)
+        vis = Visualisation(self, controls=controls, xlim=xlim, ylim=ylim, zlim=zlim, focus=focus, **kwargs)
         vis.show()
 
     def _substitute_params(self, json_str, **kwargs):
@@ -278,12 +316,28 @@ class Instrument:
 
             json_str = json_str.replace("${}$".format(t), str(eval(subbed_t)))
 
+        # Split on all newlines
+
+        split_str = json_str.split("\n")
+
+        # Remove comments
+
+        for line_num, line in enumerate(split_str):
+            if '//' in line:
+                comment_split = line.split("//", 1)
+                split_str[line_num] = comment_split[0]
+
+        # Merge and return
+
+        json_str = '\n'.join(split_str)
+
         return json_str
 
     def _fromJSON(self, fn, ctx, queue, **kwargs):
         with open(fn, 'r') as f:
             json_str = f.read()
             json_str = self._substitute_params(json_str, **kwargs)
+
 
         inst = json.loads(json_str)
 
@@ -325,7 +379,7 @@ class Instrument:
                                  mf.WRITE_ONLY,
                                  self.iidx.nbytes)
 
-    def execute(self, N, debug=0):
+    def execute(self, N, debug=False, trace=False):
         """
         Executes the instrument simulation
 
@@ -369,7 +423,7 @@ class Instrument:
                                     self.intersections_cl)
 
             for block in self.blocks:
-                block.execute(torun, debug)
+                block.execute(torun, debug, trace)
 
             for d in self.kernel_refs:
                 self.blocks[d.block].components[d.comp_name]["scat_kernel"].data_reduce(self.queue)

@@ -1,6 +1,6 @@
 #include "consts.h"
 
-void atomicAdd_g_f(volatile __global float *addr, float val)
+inline void atomicAdd_g_f(volatile __global float *addr, float val)
 {
     union {
         unsigned int u32;
@@ -19,7 +19,8 @@ void atomicAdd_g_f(volatile __global float *addr, float val)
 
 __kernel void detector(__global float16 *neutrons,
                        __global float8 *intersections, __global uint *iidx,
-                       uint const comp_idx, volatile __global float *histogram,
+                       uint const comp_idx, volatile __global float *histogram, 
+                       volatile __global float *histogram_err,
                        float3 const binning, uint const restore_neutron, uint const var)
 {
 
@@ -51,10 +52,13 @@ __kernel void detector(__global float16 *neutrons,
     var_val = degrees(atan2(intersection.s4, intersection.s6));
   else if (var == 2)
     var_val = (1.0e6f)*(neutron.sa + intersection.s7);
+  else if (var == 3)
+    var_val = 2*M_PI / (V2K*length(neutron.s345));
 
   if(min_var<=var_val && var_val<=max_var) {    
     idx = floor((var_val -  min_var) / step_var);
     atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
+    atomicAdd_g_f(&histogram_err[idx], (float)neutron.s9*neutron.s9);
   }
   
   
