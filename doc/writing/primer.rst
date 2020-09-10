@@ -15,7 +15,7 @@ In addition to this, there are some important keywords to bear in mind when decl
 Buffers
 -------
 
-Data which is to be operated on in a parallel fashion (i.e. a kernel invocation for each entry in an array) is stored in a buffer. A good example of how buffers are instantiated from the host device can be found in the `Detector1D scattering kernel <>`_.
+Data which is to be operated on in a parallel fashion (i.e. a kernel invocation for each entry in an array) is stored in a buffer.
 
 Vectors and swizzling
 ---------------------

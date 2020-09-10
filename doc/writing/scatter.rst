@@ -11,7 +11,11 @@ can be used in RAMP is outlined here.
 Template
 --------
 
-The basic template for a scattering kernel ``mykernel.cl`` is::
+The basic template for a scattering kernel ``mykernel.cl`` is
+
+.. code-block:: C
+
+    #include "consts.h"
 
     __kernel void myprog(__global float16* neutrons,
         __global float8* intersections, __global uint* iidx,
@@ -28,7 +32,7 @@ The basic template for a scattering kernel ``mykernel.cl`` is::
       }
 
       /* Check termination flag */
-      if (neutron.sf > 0.f)  {
+      if (NEUTRON_DIE > 0.f)  {
           return;
       }
 

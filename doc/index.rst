@@ -35,6 +35,7 @@ User guide
     user/hello
     user/idf
     user/running
+    user/visualisation
 
 Writing kernels
 ---------------
