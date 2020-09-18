@@ -137,7 +137,7 @@ class ExecutionBlock:
                                         self.parent.intersections_cl,
                                         comp["restore_neutron"])
 
-                if debug or (trace and comp["vis"]):
+                if (trace and comp["vis"]):
                     cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
                 if debug:
                     print(self.parent.intersections)
@@ -153,7 +153,7 @@ class ExecutionBlock:
                                            comp["pos"],
                                            comp["rot"])
                 
-                if debug or (trace and comp["vis"]):
+                if (trace and comp["vis"]):
                     cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
                     self._get_trace_lines(offset=comp["pos"], rot=comp["rot"])
                 if debug:
