@@ -7,15 +7,22 @@ __kernel void arm(__global float16* neutrons,
     float16 neutron = neutrons[global_addr];
     float8 intersection = intersections[global_addr];
 
+    uint this_iidx;
+    this_iidx = iidx[global_addr];
+
+    if (!(this_iidx == comp_idx))
+    {
+        return;
+    }
+    
     /* Already terminated? */
     if (neutron.sf > 0.f) {
         return;
     }
 
-    // Have to add some intersection to avoid neutron termination
-    intersection.s456 = (float3){ 0.0f, 0.0f, 0.0f };
     iidx[global_addr] = comp_idx;
 
-    intersections[global_addr] = intersection;
+    intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
+                                         0.0f, 0.0f, 0.0f, 100000.0f );
     neutrons[global_addr] = neutron;
 }
