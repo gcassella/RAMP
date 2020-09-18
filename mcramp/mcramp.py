@@ -140,6 +140,7 @@ class ExecutionBlock:
                 if (trace and comp["vis"]):
                     cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
                 if debug:
+                    cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
                     print(self.parent.intersections)
 
                 comp["scat_kernel"].scatter_prg(self.parent.queue,
