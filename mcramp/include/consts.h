@@ -1,39 +1,39 @@
 /* Scientific constants */
 
 #ifndef k_B
-#define k_B (1.38066e-23)
+#define k_B (1.38066e-23f)
 #endif
 
 #ifndef M_PI
-#define M_PI (3.14159265)
+#define M_PI (3.14159265f)
 #endif
 
 #ifndef V2K
-#define V2K (1.58825361e-3)
+#define V2K (1.58825361e-3f)
 #endif
 
 #ifndef K2V
-#define K2V (629.622368)
+#define K2V (629.622368f)
 #endif
 
 #ifndef MIN2RAD
-#define MIN2RAD (M_PI/(180.0*60.0))
+#define MIN2RAD (M_PI/(180.0f*60.0f))
 #endif
 
 #ifndef VS2E
-#define VS2E     5.22703725e-6     /* Convert (v[m/s])**2 to E[meV] */
+#define VS2E     5.22703725e-6f     /* Convert (v[m/s])**2 to E[meV] */
 #endif
 
 #ifndef SE2V
-#define SE2V     437.393377        /* Convert sqrt(E)[meV] to v[m/s] */
+#define SE2V     437.393377f        /* Convert sqrt(E)[meV] to v[m/s] */
 #endif
 
 #ifndef E2KS
-#define E2KS     (1/2.072)
+#define E2KS     (1.0f/2.072f)
 #endif
 
 #ifndef kB
-#define kB       8.6173*10e-2
+#define kB       8.6173*10e-2f
 #endif
 
 
