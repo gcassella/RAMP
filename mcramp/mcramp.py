@@ -4,6 +4,8 @@ import pyopencl.array as clarr
 
 import os, json, importlib, re, sys
 
+from collections import OrderedDict
+
 from time import time
 
 DETECTOR_KERNELS = ["PSD2d", "EMon"]
@@ -42,8 +44,7 @@ class ExecutionBlock:
 
     @staticmethod
     def fromJSON(block, parent, linear, events, idx):
-        comps = {}
-        i = 1
+        comps = OrderedDict()
 
         source = None
 
@@ -82,7 +83,7 @@ class ExecutionBlock:
                     gk = getattr(importlib.import_module(comp['geom_kernel']['name']), comp['geom_kernel']['name'])
                 
                 gargs = {k: v for (k, v) in comp['geom_kernel'].items() if not k == 'name'}
-                gargs['idx'] = i
+                gargs['idx'] = parent.idx
                 gargs['ctx'] = parent.ctx
 
                 try:
@@ -91,7 +92,7 @@ class ExecutionBlock:
                     sk = getattr(importlib.import_module(comp['scat_kernel']['name']), comp['scat_kernel']['name'])
                 
                 sargs = {k: v for (k, v) in comp['scat_kernel'].items() if not k == 'name'}
-                sargs['idx'] = i
+                sargs['idx'] = parent.idx
                 sargs['ctx'] = parent.ctx
                 sargs['inst'] = parent
                 sargs['block'] = idx
@@ -108,7 +109,7 @@ class ExecutionBlock:
 
                 parent.kernel_refs.append(KernelRef(idx, comps[name], pos, rot, vis))
             
-            i += 1
+            parent.idx += 1
 
         ex_block = ExecutionBlock(source, comps, parent, linear, events)
 
@@ -140,8 +141,9 @@ class ExecutionBlock:
                 if (trace and comp["vis"]):
                     cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
                 if debug:
-                    cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
-                    print(self.parent.intersections)
+                    print("Intersection output for {}".format(comp["name"]))
+                    cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl).wait()
+                    print(self.parent.intersections[np.where(self.parent.neutrons['s15'] == 0.)])
 
                 comp["scat_kernel"].scatter_prg(self.parent.queue,
                                              N,
@@ -155,10 +157,12 @@ class ExecutionBlock:
                                            comp["rot"])
                 
                 if (trace and comp["vis"]):
-                    cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
+                    cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl).wait()
                     self._get_trace_lines(offset=comp["pos"], rot=comp["rot"])
                 if debug:
-                    print(self.parent.neutrons)
+                    print("Neutron output for {}".format(comp["name"]))
+                    cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl).wait()
+                    print(self.parent.neutrons[np.where(self.parent.neutrons['s15'] == 0.)])
 
         else:
             events = 0
@@ -179,9 +183,12 @@ class ExecutionBlock:
                                            comp["pos"],
                                            comp["rot"])
 
-                self.parent.term_prg.terminate(self.parent.queue, (N,), None,
-                                        self.parent.neutrons_cl,
-                                        self.parent.intersections_cl)
+                if (trace and comp["vis"]):
+                    cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
+                if debug:
+                    print("Intersection output for {}".format(comp["name"]))
+                    cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl).wait()
+                    print(self.parent.intersections[np.where(self.parent.neutrons['s15'] == 0.)])
 
                 for (idx, comp) in self.components.items():
                     self.parent.trans_prg.transform(self.parent.queue, (N,), None,
@@ -197,6 +204,14 @@ class ExecutionBlock:
                                            self.parent.neutrons_cl,
                                            comp["pos"],
                                            comp["rot"])
+
+                if (trace and comp["vis"]):
+                    cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
+                    self._get_trace_lines(offset=comp["pos"], rot=comp["rot"])
+                if debug:
+                    print("Neutron output for {}".format(comp["name"]))
+                    cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl).wait()
+                    print(self.parent.neutrons[np.where(self.parent.neutrons['s15'] == 0.)])
 
                 events += 1
 
@@ -253,6 +268,7 @@ class Instrument:
         self.ctx = ctx
         self.queue = queue
         self.kernel_refs = []
+        self.idx = 1
 
         self.blocks = self._fromJSON(fn, ctx, queue, **kwargs)
 
@@ -350,7 +366,7 @@ class Instrument:
             if "linear" in block:
                 linear = block["linear"]
 
-                if not linear:
+                if not linear and "multi" in block:
                     events = block["multi"]
                 else:
                     events = 1
@@ -425,9 +441,6 @@ class Instrument:
 
             for block in self.blocks:
                 block.execute(torun, debug, trace)
-
-            for d in self.kernel_refs:
-                self.blocks[d.block].components[d.comp_name]["scat_kernel"].data_reduce(self.queue)
 
             self.queue.finish()
 
