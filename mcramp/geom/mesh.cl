@@ -5,7 +5,7 @@ __kernel void intersect(__global float16* neutrons,
     uint const comp_idx, __global float* points,
     uint const num_tri, float const x1, float const x2,
     float const y1, float const y2, float const z1,
-    float const z2) {
+    float const z2, uint const interior) {
 
     uint global_addr        = get_global_id(0);
     float16 neutron         = neutrons[global_addr];
@@ -25,6 +25,7 @@ __kernel void intersect(__global float16* neutrons,
 
     float3 box_ll, box_ur, tA, tB;
     float t1, t2, t3, t4, t5, t6, tmin, tmax;
+    uint num_intersections = 0;
 
     box_ll = (float3){ x1, y1, z1 };
     box_ur = (float3){ x2, y2, z2 };
@@ -46,11 +47,11 @@ __kernel void intersect(__global float16* neutrons,
 
     // Raytrace against triangles
 
-    float3 v0, v1, v2, e1, e2, h, s, q;
+    float3 v0, v1, v2, e1, e2, h, s, q, norm;
     const float eps = 0.000000001f;
     float a, f, u, v, t;
 
-    float8 out = (float8){ 0.0f, 0.0f, 0.0f, 1e8f, 0.0f, 0.0f, 0.0f, 0.0f };
+    float8 out = (float8){ 0.0f, 0.0f, 0.0f, 1e8f, 0.0f, 0.0f, 0.0f, 1e8f };
 
     for(uint i=0;i<num_tri;i++) {
         // Loop over triangles
@@ -97,15 +98,27 @@ __kernel void intersect(__global float16* neutrons,
 
         t = f * dot(e2, q);
 
-        if ((t > eps) && (t < out.s3)) {
+        if (t > eps) {
+            num_intersections++;
+        }
+
+        norm = cross(e1, e2);
+
+        if ((t > eps) && (t < out.s3) && (dot(norm, NEUTRON_VEL) < 0)) {
             out.s012 = NEUTRON_POS + NEUTRON_VEL*t;
             out.s3 = t;
         } 
         
-        if ((t > eps) && (t > out.s7)) {
+        if ((t > eps) && (t < out.s7) && (dot(norm, NEUTRON_VEL) > 0)) {
             out.s456 = NEUTRON_POS + NEUTRON_VEL*t;
             out.s7 = t;
         }
+    }
+
+    if ((interior == 1) && (num_intersections%2 == 1)) {
+        out.s4567 = out.s0123;
+    } else if ((interior == 1) && (num_intersections%2 == 0)) {
+        return;
     }
 
     if(out.s3 < intersection.s3) {

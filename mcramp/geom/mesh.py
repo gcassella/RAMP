@@ -51,7 +51,7 @@ class GMesh(GPrim):
     None
     """
 
-    def __init__(self, filename='', idx=0, ctx=None):
+    def __init__(self, filename='', interior=False, idx=0, ctx=None):
         self.idx        = np.uint32(idx)
 
         self.mesh = mesh.Mesh.from_file(filename)
@@ -65,6 +65,11 @@ class GMesh(GPrim):
             hostbuf=self.mesh.points.flatten().astype(np.float32)
         )
         self.num_tri = num_tri = np.uint32(len(self.mesh.points.flatten())/9)
+
+        if interior:
+            self.interior = np.uint32(1)
+        else:
+            self.interior = np.uint32(0)
 
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mesh.cl'), mode='r') as f:
             self.prg = cl.Program(ctx, f.read()).build(options=r'-I "{}/include"'.format(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -84,4 +89,5 @@ class GMesh(GPrim):
                            self.y_min,
                            self.y_max,
                            self.z_min,
-                           self.z_max)
+                           self.z_max,
+                           self.interior)

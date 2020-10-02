@@ -31,7 +31,11 @@ __kernel void powderN(__global float16* neutrons,
 
     neutron.sa += intersection.s3;
 
-    path = intersection.s456 - intersection.s012;
+    if (all(intersection.s012 == intersection.s456)) {
+        path = intersection.s456 - neutron.s012;
+    } else {
+        path = intersection.s456 - intersection.s012;
+    }
 
     full_path_length = length(path);
     vel = length(neutron.s345);
@@ -64,10 +68,6 @@ __kernel void powderN(__global float16* neutrons,
         intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
                                              0.0f, 0.0f, 0.0f, 100000.0f );
         return;
-    } else {
-        // Scattered, multiply by weight factor
-        // to model absorption
-        neutron.s9 *= p_inter * sum_sigma_scat / (sum_sigma_scat + sigma_abs);
     }
 
     // Select scattering line
@@ -91,19 +91,11 @@ __kernel void powderN(__global float16* neutrons,
         if(arg < 1.0f) {
             break;
         } else if (arg > 1.0f && attempts > 2*num_lines) { // No bragg reflection possible, transmit
-            neutron.s9 /= p_inter * sum_sigma_scat / (sum_sigma_scat + sigma_abs);
-            neutron.s9 *= 1 - p_inter;
-            neutron.s012 = (intersection.s456+0.0001f*normalize(path));
-            neutron.sa += intersection.s7;
-
-            if (transmit == 0)
-              neutron.sf = 1.0f;
-
-            neutron.sc = comp_idx;
+            neutron.sf = 1;
             iidx[global_addr] = 0;
             neutrons[global_addr] = neutron;
             intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
-                                                 0.0f, 0.0f, 0.0f, 100000.0f );
+                                         0.0f, 0.0f, 0.0f, 100000.0f );
             return;
         }
 
@@ -144,6 +136,9 @@ __kernel void powderN(__global float16* neutrons,
     neutron.s345 = vel*normalize(beam_para);
 
     neutron.sa += intersection.s7 - intersection.s3;
+
+    neutron.s9 *= (1 - exp(-(sum_sigma_scat + sigma_abs)*pen_depth)) * sum_sigma_scat / (sum_sigma_scat + sigma_abs);
+
     /* ----------------------- */
 
     /* Update global memory and reset intersection */

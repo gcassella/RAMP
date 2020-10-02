@@ -117,7 +117,7 @@ __kernel void isotropic_scatter(
     // Transmitted, return without modifying
     // neutron state, but multiply by weight factor
     neutron.s9 *= p_trans;
-    neutron.s012 = (intersection.s456+0.01f*normalize(path));
+    neutron.s012 = (intersection.s456+0.0001f*normalize(path));
     neutron.sa += intersection.s7;
 
     if (transmit == 0)
