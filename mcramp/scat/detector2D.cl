@@ -101,6 +101,11 @@ __kernel void detector(__global float16 *neutrons,
     case 9 :
       axis1_val = VS2E*pow(length(neutron.s345), 2.0f);
       break;
+    case 10 :
+      axis1_val = sign(intersection.s4)*degrees(atan2(
+        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5),
+        intersection.s6
+      ));
     default:
       break;
   }
@@ -148,6 +153,11 @@ __kernel void detector(__global float16 *neutrons,
     case 9 :
       axis2_val = VS2E*pow(length(neutron.s345), 2.0f);
       break;
+    case 10 :
+      axis2_val = sign(intersection.s4)*degrees(atan2(
+        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5),
+        intersection.s6
+      ));
     default:
       break;
   }
