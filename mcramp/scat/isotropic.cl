@@ -5,8 +5,8 @@
 float2 sample_distn(float16* neutron, uint global_addr, __global float* q, __global float* w, __global float* pw_cdf, 
   __global float* pq_cdf, uint const qsamples, uint const wsamples) {
     
-  float mindiff, u, v, omega, Q;
-  uint w_index;
+  float mindiff, u, v, omega, Q, R;
+  uint w_index, q_index;
   
   u = rand(neutron, global_addr);
   v = rand(neutron, global_addr);
@@ -34,8 +34,40 @@ float2 sample_distn(float16* neutron, uint global_addr, __global float* q, __glo
     if (fabs(pq_cdf[w_index*qsamples + i] - u) < mindiff) {
       mindiff = fabs(pq_cdf[w_index*qsamples + i] - u);
       Q = (i > 0 ? q[i-1] : 0.0f) + (rand(neutron, global_addr))*(q[i] - (i > 0 ? q[i-1] : 0.0f));
+      q_index = i;
     } 
   }
+  
+   //float deviate = rand(neutron, global_addr);
+   //float q_range, q_spread, w_spread, interpol_start, interpol_end, accumulator, Pj;
+
+   //q_range = q[q_index + 1] - q[q_index];
+   //q_spread = pq_cdf[w_index * qsamples + q_index + 1] - pq_cdf[w_index * qsamples + q_index];
+   //R = deviate - pq_cdf[w_index * qsamples + q_index];
+   //R /= q_spread;
+   //Q += q_range * R;
+
+   //w_spread = w[w_index+1] - w[w_index];
+
+   //interpol_start = (w_index > 3) ? w_index - 3 : 0;
+   //interpol_end = ((wsamples - w_index - 1) > 3) ? w_index + 3 : (wsamples - 1);
+   //
+   //deviate = pw_cdf[w_index] + w_spread * rand(neutron, global_addr);
+   //accumulator = 0.0f;
+   //for (int i = interpol_start; i <= interpol_end; i++) {
+   //  Pj = 1.0f;
+   //  for (int j = interpol_start; j <= interpol_end; j++) {
+   //    if (j != i) {
+   //      Pj *= (deviate - pw_cdf[j]) / (pw_cdf[i] - pw_cdf[j]);
+   //    } else {
+   //      Pj *= 1;
+   //    }
+   //  }
+   //  Pj *= w[i];
+
+   //  accumulator += Pj;
+   //}
+   //omega = accumulator;
 
   return (float2){ omega, Q };
 }
@@ -260,8 +292,13 @@ __kernel void isotropic_scatter(
 
   neutron.sd = Q;
 
-  neutron.s012 = intersection.s012 + (path_length)*path;
-  neutron.sa   += intersection.s3 + TOF;
+  if (all(intersection.s012 == intersection.s456)) {
+    neutron.s012 = (path_length)*path;
+    neutron.sa   += TOF;
+  } else {
+    neutron.s012 = intersection.s012 + (path_length)*path;
+    neutron.sa   += intersection.s3 + TOF;
+  }
   
   neutron.s345 = normvel*kf*K2V;
 
