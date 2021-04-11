@@ -66,7 +66,8 @@ class SDetector2D(SPrim):
             "divX" : 6,
             "divY" : 7,
             "wavelength" : 8,
-            "energy" : 9
+            "energy" : 9,
+            "angle" : 10
         }
 
         self.var_label_dict = {
@@ -79,7 +80,8 @@ class SDetector2D(SPrim):
             6 : "Horizontal divergence [deg]",
             7 : "Vertical divergence [deg]",
             8 : "Wavelength [Ang]",
-            9 : "Energy [meV]"
+            9 : "Energy [meV]",
+            10 : "Bragg angle [deg]"
         }
         
         self.last_ran_datetime = datetime.datetime.now()

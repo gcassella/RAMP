@@ -183,12 +183,13 @@ class ExecutionBlock:
                                            comp["pos"],
                                            comp["rot"])
 
-                if (trace and comp["vis"]):
-                    cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
-                if debug:
-                    print("Intersection output for {}".format(comp["name"]))
-                    cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl).wait()
-                    print(self.parent.intersections[np.where(self.parent.neutrons['s15'] == 0.)])
+                    if (trace and comp["vis"]):
+                        cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl)
+
+                    if debug:
+                        print("Intersection output for {}".format(comp["name"]))
+                        cl.enqueue_copy(self.parent.queue, self.parent.intersections, self.parent.intersections_cl).wait()
+                        print(self.parent.intersections[np.where(self.parent.neutrons['s15'] == 0.)])
 
                 for (idx, comp) in self.components.items():
                     self.parent.trans_prg.transform(self.parent.queue, (N,), None,
@@ -205,13 +206,13 @@ class ExecutionBlock:
                                            comp["pos"],
                                            comp["rot"])
 
-                if (trace and comp["vis"]):
-                    cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
-                    self._get_trace_lines(offset=comp["pos"], rot=comp["rot"])
-                if debug:
-                    print("Neutron output for {}".format(comp["name"]))
-                    cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl).wait()
-                    print(self.parent.neutrons[np.where(self.parent.neutrons['s15'] == 0.)])
+                    if (trace and comp["vis"]):
+                        cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl)
+                        self._get_trace_lines(offset=comp["pos"], rot=comp["rot"])
+                    if debug:
+                        print("Neutron output for {}".format(comp["name"]))
+                        cl.enqueue_copy(self.parent.queue, self.parent.neutrons, self.parent.neutrons_cl).wait()
+                        print(self.parent.neutrons[np.where(self.parent.neutrons['s15'] == 0.)])
 
                 events += 1
 
@@ -396,7 +397,7 @@ class Instrument:
                                  mf.WRITE_ONLY,
                                  self.iidx.nbytes)
 
-    def execute(self, N, debug=False, trace=False):
+    def execute(self, N, buf_max_mod=None, debug=False, trace=False):
         """
         Executes the instrument simulation
 
@@ -404,10 +405,16 @@ class Instrument:
         ----------
         N : int
             Number of neutron trajectories to simulate
+        buf_max_mod : int
+            Factor to reduce the max buffer size, helps alleviate memory
+            restrictions on smaller cards
         """
         device = self.queue.get_info(cl.command_queue_info.DEVICE)
         max_mem_alloc_size = device.get_info(cl.device_info.MAX_MEM_ALLOC_SIZE)
-        buf_max = int(max_mem_alloc_size / 8 / 32)
+        if buf_max_mod is not None:
+            buf_max = int(max_mem_alloc_size / 8 / 32 / buf_max_mod)
+        else:
+            buf_max = int(max_mem_alloc_size / 8 / 32)
 
         i = 0
         for block in self.blocks:
