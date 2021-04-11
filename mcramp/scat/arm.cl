@@ -1,3 +1,5 @@
+#include "consts.h"
+
 __kernel void arm(__global float16* neutrons, 
   __global float8* intersections, __global uint* iidx,
   uint const comp_idx) {
@@ -16,7 +18,7 @@ __kernel void arm(__global float16* neutrons,
     }
     
     /* Already terminated? */
-    if (neutron.sf > 0.f) {
+    if (NEUTRON_DIE  > 0.f) {
         return;
     }
 

@@ -1,3 +1,5 @@
+#include "consts.h"
+
 __kernel void beamstop(__global float16 *neutrons, __global float8 *intersections, 
                         __global uint *iidx, uint const comp_idx)
 {
@@ -14,12 +16,12 @@ __kernel void beamstop(__global float16 *neutrons, __global float8 *intersection
       return;
   }
 
-  if (neutron.sf > 0.f)
+  if (NEUTRON_DIE  > 0.f)
   {
       return;
   }
 
-  neutron.sf = 1.0f;
+  NEUTRON_DIE  = 1.0f;
 
   iidx[global_addr] = 0;
   neutron.sc = comp_idx;

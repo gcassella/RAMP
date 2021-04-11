@@ -1,3 +1,5 @@
+#include "consts.h"
+
 __kernel void intersect_plane(__global float16* neutrons,
     __global float8* intersections, __global uint* iidx,
     uint const comp_idx, float const width, 
@@ -8,7 +10,7 @@ __kernel void intersect_plane(__global float16* neutrons,
     float8 intersection     = intersections[global_addr];
 
     /* Check termination flag */
-    if (neutron.sf > 0.f) 
+    if (NEUTRON_DIE  > 0.f) 
         return;
 
     if (neutron.sc == comp_idx) {
@@ -17,8 +19,8 @@ __kernel void intersect_plane(__global float16* neutrons,
 
     /* Perform raytracing here */
 
-    float3 vel = neutron.s345;
-    float3 pos = neutron.s012;
+    float3 vel = NEUTRON_VEL;
+    float3 pos = NEUTRON_POS;
 
     float t, x, y;
     
@@ -33,15 +35,15 @@ __kernel void intersect_plane(__global float16* neutrons,
     }
 
     if ((fabs(x) < width / 2.0f) && (fabs(y) < height / 2.0f)
-        && t < intersection.s3
-        && t < intersection.s7
+        && t < INTERSECTION_T1
+        && t < INTERSECTION_T2
         && t > 0.0f
         && dot(vel, (float3)( 0.0f, 0.0f, 1.0f )) > 0.f) {
 
-        intersection.s012 = pos + t*vel;
-        intersection.s456 = pos + t*vel;
-        intersection.s3   = t;
-        intersection.s7   = t;
+        INTERSECTION_POS1 = pos + t*vel;
+        INTERSECTION_POS2 = pos + t*vel;
+        INTERSECTION_T1   = t;
+        INTERSECTION_T2   = t;
 
         iidx[global_addr] = comp_idx;
     }

@@ -12,7 +12,7 @@ __kernel void intersect(__global float16* neutrons,
     float8 intersection     = intersections[global_addr];
 
     /* Check termination flag */
-    if (neutron.sf > 0.f) 
+    if (NEUTRON_DIE  > 0.f) 
         return;
 
     if (fabs(neutron.sc-comp_idx) < 1e-6) {
@@ -121,7 +121,7 @@ __kernel void intersect(__global float16* neutrons,
         return;
     }
 
-    if(out.s3 < intersection.s3) {
+    if(out.s3 < INTERSECTION_T1) {
         intersection = out;  
         iidx[global_addr] = comp_idx;
     }

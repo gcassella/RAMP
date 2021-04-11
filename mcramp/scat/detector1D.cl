@@ -37,7 +37,7 @@ __kernel void detector(__global float16 *neutrons,
       return;
   }
 
-  if (neutron.sf > 0.f)
+  if (NEUTRON_DIE  > 0.f)
   {
       return;
   }
@@ -47,25 +47,25 @@ __kernel void detector(__global float16 *neutrons,
   max_var = binning.s2;
 
   if (var == 0)
-    var_val = VS2E*pow(length(neutron.s345), 2.0f);
+    var_val = VS2E*pow(length(NEUTRON_VEL), 2.0f);
   else if (var == 1)
-    var_val = degrees(atan2(intersection.s4, intersection.s6));
+    var_val = degrees(atan2(INTERSECTION_X2, INTERSECTION_Z2));
   else if (var == 2)
-    var_val = (1.0e6f)*(neutron.sa + intersection.s7);
+    var_val = (1.0e6f)*(NEUTRON_TOF + INTERSECTION_T2);
   else if (var == 3)
-    var_val = 2*M_PI / (V2K*length(neutron.s345));
+    var_val = 2*M_PI / (V2K*length(NEUTRON_VEL));
 
   if(min_var<=var_val && var_val<=max_var) {    
     idx = floor((var_val -  min_var) / step_var);
-    atomicAdd_g_f(&histogram[idx], (float)neutron.s9);
-    atomicAdd_g_f(&histogram_err[idx], (float)neutron.s9*neutron.s9);
+    atomicAdd_g_f(&histogram[idx], (float)NEUTRON_P);
+    atomicAdd_g_f(&histogram_err[idx], (float)NEUTRON_P*NEUTRON_P);
   }
   
   
   if (restore_neutron == 0) {
-    neutron.s012 = intersection.s456;
-    neutron.sa += intersection.s7;
-    neutron.sf = 1.f;
+    NEUTRON_POS = INTERSECTION_POS2;
+    NEUTRON_TOF += INTERSECTION_T2;
+    NEUTRON_DIE  = 1.f;
   }
 
   iidx[global_addr] = 0;

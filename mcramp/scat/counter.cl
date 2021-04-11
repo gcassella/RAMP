@@ -1,3 +1,5 @@
+#include "consts.h"
+
 void atomicAdd_g_f(volatile __global float *addr, float val)
 {
     union {
@@ -30,7 +32,7 @@ __kernel void counter(__global float16 *neutrons,
       return;
   }
 
-  if (neutron.sf > 0.f)
+  if (NEUTRON_DIE  > 0.f)
   {
       return;
   }

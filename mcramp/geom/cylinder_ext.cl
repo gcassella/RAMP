@@ -1,3 +1,5 @@
+#include "consts.h"
+
 __kernel void intersect(__global float16* neutrons, 
   __global float8* intersections, __global uint* iidx,
   uint const comp_idx, float const radius, float const height) {
@@ -9,7 +11,7 @@ __kernel void intersect(__global float16* neutrons,
   float2 plane_pos, plane_vel;
   float theta2, a, b, c, t1, t2, quotient;
 
-  if (neutron.sf > 0.f) {
+  if (NEUTRON_DIE  > 0.f) {
     return;
   }
 
@@ -33,19 +35,19 @@ __kernel void intersect(__global float16* neutrons,
 
   theta2 = acos(dot(normalize(plane_pos+t2*plane_vel), (float2)( 0.0f, 1.0f )));
   if ((quotient > 0.0f) &&
-      ((-height/2.0f) < (neutron.s1 + t2*neutron.s4)) &&
-      ((neutron.s1 + t2*neutron.s4) < (height/2))) {
+      ((-height/2.0f) < (NEUTRON_Y+ t2*NEUTRON_VY)) &&
+      ((NEUTRON_Y+ t2*NEUTRON_VY) < (height/2))) {
   
-    if (t1 < intersection.s3 && t1 > 0.0f && t2 > 0.0f) {
+    if (t1 < INTERSECTION_T1 && t1 > 0.0f && t2 > 0.0f) {
         
-        intersection.s012 = neutron.s012 + t1*neutron.s345;
-        intersection.s3   = t1;
+        INTERSECTION_POS1 = NEUTRON_POS+ t1*NEUTRON_VEL;
+        INTERSECTION_T1   = t1;
       
         iidx[global_addr] = comp_idx;
         
 
-        intersection.s456 = neutron.s012 + t2*neutron.s345;
-        intersection.s7   = t2;
+        INTERSECTION_POS2 = NEUTRON_POS+ t2*NEUTRON_VEL;
+        INTERSECTION_T2   = t2;
     }
   }
 

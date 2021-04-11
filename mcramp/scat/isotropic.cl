@@ -117,7 +117,7 @@ __kernel void isotropic_scatter(
     return;
   }
 
-  if (neutron.sf > 0.) {
+  if (NEUTRON_DIE  > 0.) {
     return;
   }
 
@@ -128,14 +128,14 @@ __kernel void isotropic_scatter(
 
   uint flag = 0;
 
-  if (all(intersection.s012 == intersection.s456))
+  if (all(INTERSECTION_POS1 == intersection.s456))
     path = INTERSECTION_POS2 - NEUTRON_POS;
   else
     path = INTERSECTION_POS2 - INTERSECTION_POS1;
 
-  ki = V2K*length(neutron.s345);
+  ki = V2K*length(NEUTRON_VEL);
 
-  normvel = normalize(neutron.s345);
+  normvel = normalize(NEUTRON_VEL);
 
   sigma_s = (coh_sigma_scat + inc_sigma_scat + mag_sigma_scat) / (2.*ki*ki);
   sigma_a = (coh_sigma_abs + inc_sigma_abs + mag_sigma_abs) * 2200. / length(neutron.s345);
@@ -148,12 +148,12 @@ __kernel void isotropic_scatter(
   if (rand(&neutron, global_addr) < p_trans) {
     // Transmitted, return without modifying
     // neutron state, but multiply by weight factor
-    neutron.s9 *= p_trans;
-    neutron.s012 = (intersection.s456+0.0001f*normalize(path));
-    neutron.sa += intersection.s7;
+    NEUTRON_P *= p_trans;
+    NEUTRON_POS= (INTERSECTION_POS2+0.0001f*normalize(path));
+    NEUTRON_TOF += INTERSECTION_T2;
 
     if (transmit == 0)
-      neutron.sf = 1.0f;
+      NEUTRON_DIE  = 1.0f;
 
     neutron.sc = comp_idx;
     iidx[global_addr] = 0;
@@ -164,7 +164,7 @@ __kernel void isotropic_scatter(
   } else {
     // Scattered, multiply by weight factor
     // to model absorption
-    neutron.s9 *= (1 - p_trans) * sigma_s / sigma_tot;
+    NEUTRON_P *= (1 - p_trans) * sigma_s / sigma_tot;
   }
 
   // Monte carlo choice to find scattering point along
@@ -236,7 +236,7 @@ __kernel void isotropic_scatter(
   if (ki*ki < (E2KS*omega)) {
     // No real valued kf possible
     
-    neutron.sf = 1;
+    NEUTRON_DIE  = 1;
     iidx[global_addr] = 0;
     neutrons[global_addr] = neutron;
     intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
@@ -256,7 +256,7 @@ __kernel void isotropic_scatter(
 
   if (fabs(arg) > 1) {
     // Unphysical scattering direction
-    neutron.sf = 1;
+    NEUTRON_DIE  = 1;
     iidx[global_addr] = 0;
     neutrons[global_addr] = neutron;
     intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
@@ -276,7 +276,7 @@ __kernel void isotropic_scatter(
 
   x = 1.;
   y = 1.;
-  z = -(neutron.s3+neutron.s4)/(neutron.s5);
+  z = -(NEUTRON_VX+NEUTRON_VY)/(NEUTRON_VZ);
   perp = normalize((float3)( x, y, z ));
   // construct rotation matrix to randomly rotate the scattering
   // vector about the velocity
@@ -288,31 +288,31 @@ __kernel void isotropic_scatter(
 
   rotate_about_axis(alpha, perp, (&normvel));
 
-  TOF = path_length / length(neutron.s345);
+  TOF = path_length / length(NEUTRON_VEL);
 
   neutron.sd = Q;
 
-  if (all(intersection.s012 == intersection.s456)) {
-    neutron.s012 = (path_length)*path;
-    neutron.sa   += TOF;
+  if (all(INTERSECTION_POS1 == INTERSECTION_POS2)) {
+    NEUTRON_POS= (path_length)*path;
+    NEUTRON_TOF   += TOF;
   } else {
-    neutron.s012 = intersection.s012 + (path_length)*path;
-    neutron.sa   += intersection.s3 + TOF;
+    NEUTRON_POS= INTERSECTION_POS1 + (path_length)*path;
+    NEUTRON_TOF   += INTERSECTION_T1 + TOF;
   }
   
-  neutron.s345 = normvel*kf*K2V;
+  NEUTRON_VEL = normvel*kf*K2V;
 
   // Modify beam polarisation based on scattering
-  float3 q_norm = normalize((oldvel - neutron.s345)*V2K);
+  float3 q_norm = normalize((oldvel - NEUTRON_VEL)*V2K);
 
   if (flag == 2) {
     // Incoherent, model spin flip 2/3
-    neutron.s678 *= -1.0f/3.0f;
+    NEUTRON_POL *= -1.0f/3.0f;
   } else if (flag == 3) {
     // Magnetic, model directional polarisation
     // according to halpern-johnson eqn
     
-    neutron.s678 = -q_norm*dot(neutron.s678, q_norm);
+    NEUTRON_POL = -q_norm*dot(NEUTRON_POL, q_norm);
   }
 
   neutron.sc = comp_idx;

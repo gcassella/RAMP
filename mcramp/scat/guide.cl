@@ -26,7 +26,7 @@ __kernel void guide_scatter(__global float16* neutrons,
     }
 
     /* Check termination flag */
-    if (neutron.sf > 0.)  {
+    if (NEUTRON_DIE  > 0.)  {
         return;
     }
 

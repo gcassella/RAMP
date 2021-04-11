@@ -1,3 +1,5 @@
+#include "consts.h"
+
 __kernel void terminate(__global float16* neutrons,
     __global float8* intersections, uint const restore_neutron) {
 
@@ -7,13 +9,13 @@ __kernel void terminate(__global float16* neutrons,
     float8 intersection = intersections[global_addr];
 
     /* Already terminated? */
-    if (neutron.sf > 0.0f) {
+    if (NEUTRON_DIE  > 0.0f) {
         return;
     }
 
     /* Didn't intersect anything, terminate */
     if (length(intersection.s456) == 0.0f && restore_neutron == 0) {
-        neutron.sf = 1.f;
+        NEUTRON_DIE  = 1.f;
     }
 
     neutrons[global_addr] = neutron;

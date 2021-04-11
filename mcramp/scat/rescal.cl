@@ -17,15 +17,15 @@ __kernel void rescal(__global float16* neutrons,
         return;
 
     /* Check termination flag ---------------------------------------------- */
-    if (neutron.sf > 0.0f) 
+    if (NEUTRON_DIE  > 0.0f) 
         return;
 
     /* Perform scattering here --------------------------------------------- */
 
     // Choose random scattering point inside sample
 
-    float3 path = intersection.s456 - intersection.s012;
-    neutron.s012 = intersection.s012 + rand(&neutron, global_addr)*path;
+    float3 path = INTERSECTION_POS2 - intersection.s012;
+    NEUTRON_POS= INTERSECTION_POS1 + rand(&neutron, global_addr)*path;
 
     float8 ev;
     float3 target_perp, target_perp_perp, target_final, ki, kf;
@@ -56,7 +56,7 @@ __kernel void rescal(__global float16* neutrons,
     Ef = E0 + dE*(1.0f - 2.0f*rand(&neutron, global_addr));
     vf = SE2V*sqrt(Ef);
 
-    neutron.s345 = target_final*vf;
+    NEUTRON_VEL = target_final*vf;
     kf = V2K*neutron.s345;
 
     ev.s012 = ki - kf;

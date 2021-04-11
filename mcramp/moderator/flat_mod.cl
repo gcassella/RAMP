@@ -23,27 +23,27 @@ __kernel void generate_neutrons(__global float16* neutrons,
   E_range = (E_max - E_min);
   E_val = E_min + E_range*rand(&neutron, global_addr);
 
-  neutron.s9 = 1.0f / num_sim;
+  NEUTRON_P = 1.0f / num_sim;
 
-  neutron.s0 = mod_dim.x*(0.5f - rand(&neutron, global_addr));
-  neutron.s1 = mod_dim.y*(0.5f - rand(&neutron, global_addr));
-  neutron.s2 = 0.0f;
+  NEUTRON_X= mod_dim.x*(0.5f - rand(&neutron, global_addr));
+  NEUTRON_Y= mod_dim.y*(0.5f - rand(&neutron, global_addr));
+  NEUTRON_Z= 0.0f;
 
   vel = SE2V*sqrt(E_val);
   Dx = target_dim.x*(0.5f - rand(&neutron, global_addr)) - neutron.s0;
   Dy = target_dim.y*(0.5f - rand(&neutron, global_addr)) - neutron.s1;
   
-  neutron.s345 = vel*normalize((float3)( Dx, Dy, target_dist ));
+  NEUTRON_VEL = vel*normalize((float3)( Dx, Dy, target_dist ));
 
   // Randomly intiialize polarization on unit sphere
   theta = 2*M_PI*rand(&neutron, global_addr);
   phi = acos(1 - 2*rand(&neutron, global_addr));
-  neutron.s6 = sin(phi)*cos(theta);
-  neutron.s7 = sin(phi)*sin(theta);
-  neutron.s8 = cos(phi);
+  NEUTRON_PX = sin(phi)*cos(theta);
+  NEUTRON_PY = sin(phi)*sin(theta);
+  NEUTRON_PZ = cos(phi);
 
   // Revive terminated neutrons
-  neutron.sf = 0.f;
+  NEUTRON_DIE  = 0.f;
 
   neutrons[global_addr] = neutron;
   intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,

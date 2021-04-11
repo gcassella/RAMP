@@ -51,7 +51,7 @@ __kernel void detector(__global float16 *neutrons,
       return;
 
   /* Check termination flag ---------------------------------------------- */
-  if (neutron.sf > 0.f) 
+  if (NEUTRON_DIE  > 0.f) 
       return;
 
   /* Perform scattering here --------------------------------------------- */
@@ -63,48 +63,48 @@ __kernel void detector(__global float16 *neutrons,
   // Find axis 1 bin
   switch(axis1_var) {
     case 0 :
-      axis1_val = intersection.s4;
+      axis1_val = INTERSECTION_X2;
       break;
     case 1 :
-      axis1_val = intersection.s5;
+      axis1_val = INTERSECTION_Y2;
       break;
     case 2 :
       axis1_val = degrees(atan2(
-        intersection.s4,
-        intersection.s6
+        INTERSECTION_X2,
+        INTERSECTION_Z2
       ));
       break;
     case 3 :
       axis1_val = degrees(atan2(
-        intersection.s5, 
-        sqrt(intersection.s4*intersection.s4 + intersection.s6*intersection.s6)
+        INTERSECTION_Y2, 
+        sqrt(INTERSECTION_X2*INTERSECTION_X2 + INTERSECTION_Z2*INTERSECTION_Z2)
       ));
       break;
     case 4 :
-      axis1_val = sign(intersection.s5)*degrees(acos(
-        intersection.s4/
-        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5)
+      axis1_val = sign(INTERSECTION_Y2)*degrees(acos(
+        INTERSECTION_X2/
+        sqrt(INTERSECTION_X2*INTERSECTION_X2 + INTERSECTION_Y2*INTERSECTION_Y2)
       ));
       break;
     case 5 :
-      axis1_val = (1.0e6f)*(neutron.sa + intersection.s7);
+      axis1_val = (1.0e6f)*(NEUTRON_TOF + INTERSECTION_T2);
       break;
     case 6 :
-      axis1_val = degrees(atan2(neutron.s3, neutron.s5));
+      axis1_val = degrees(atan2(NEUTRON_VX, INTERSECTION_Y2));
       break;
     case 7 :
-      axis1_val = degrees(atan2(neutron.s4, neutron.s5));
+      axis1_val = degrees(atan2(NEUTRON_VY, INTERSECTION_Y2));
       break;
     case 8 :
-      axis1_val = 2*M_PI / (V2K*length(neutron.s345));
+      axis1_val = 2*M_PI / (V2K*length(NEUTRON_VEL));
       break;
     case 9 :
-      axis1_val = VS2E*pow(length(neutron.s345), 2.0f);
+      axis1_val = VS2E*pow(length(NEUTRON_VEL), 2.0f);
       break;
     case 10 :
-      axis1_val = sign(intersection.s4)*degrees(atan2(
-        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5),
-        intersection.s6
+      axis1_val = sign(INTERSECTION_X2)*degrees(atan2(
+        sqrt(INTERSECTION_X2*INTERSECTION_X2 + INTERSECTION_Y2*INTERSECTION_Y2),
+        INTERSECTION_Z2
       ));
     default:
       break;
@@ -115,48 +115,48 @@ __kernel void detector(__global float16 *neutrons,
   // Find axis 2 bin
   switch(axis2_var) {
     case 0 :
-      axis2_val = intersection.s4;
+      axis2_val = INTERSECTION_X2;
       break;
     case 1 :
-      axis2_val = intersection.s5;
+      axis2_val = INTERSECTION_Y2;
       break;
     case 2 :
       axis2_val = degrees(atan2(
-        intersection.s4,
-        intersection.s6
+        INTERSECTION_X2,
+        INTERSECTION_Z2
       ));
       break;
     case 3 :
       axis2_val = degrees(atan2(
-        intersection.s5, 
-        sqrt(intersection.s4*intersection.s4 + intersection.s6*intersection.s6)
+        INTERSECTION_Y2, 
+        sqrt(INTERSECTION_X2*INTERSECTION_X2 + INTERSECTION_Z2*INTERSECTION_Z2)
       ));
       break;
     case 4 :
-      axis2_val = sign(intersection.s5)*degrees(acos(
-        intersection.s4/
-        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5)
+      axis2_val = sign(INTERSECTION_Y2)*degrees(acos(
+        INTERSECTION_X2/
+        sqrt(INTERSECTION_X2*INTERSECTION_X2 + INTERSECTION_Y2*INTERSECTION_Y2)
       ));
       break;
     case 5 :
-      axis2_val = (1.0e6f)*(neutron.sa + intersection.s7);
+      axis2_val = (1.0e6f)*(NEUTRON_TOF + INTERSECTION_T2);
       break;
     case 6 :
-      axis2_val = degrees(atan2(neutron.s3, neutron.s5));
+      axis2_val = degrees(atan2(NEUTRON_VX, NEUTRON_VZ));
       break;
     case 7 :
-      axis2_val = degrees(atan2(neutron.s4, neutron.s5));
+      axis2_val = degrees(atan2(NEUTRON_VY, NEUTRON_VZ));
       break;
     case 8 :
-      axis2_val = 2*M_PI / (V2K*length(neutron.s345));
+      axis2_val = 2*M_PI / (V2K*length(NEUTRON_VEL));
       break;
     case 9 :
-      axis2_val = VS2E*pow(length(neutron.s345), 2.0f);
+      axis2_val = VS2E*pow(length(NEUTRON_VEL), 2.0f);
       break;
     case 10 :
-      axis2_val = sign(intersection.s4)*degrees(atan2(
-        sqrt(intersection.s4*intersection.s4 + intersection.s5*intersection.s5),
-        intersection.s6
+      axis2_val = sign(INTERSECTION_X2)*degrees(atan2(
+        sqrt(INTERSECTION_X2*INTERSECTION_X2 + INTERSECTION_Y2*INTERSECTION_Y2),
+        INTERSECTION_Z2
       ));
     default:
       break;
@@ -172,9 +172,9 @@ __kernel void detector(__global float16 *neutrons,
   }
 
   if (restore_neutron == 0) {
-    neutron.s012 = intersection.s456;
-    neutron.sa += intersection.s7;
-    neutron.sf = 1.f;
+    NEUTRON_POS= intersection.s456;
+    NEUTRON_TOF += intersection.s7;
+    NEUTRON_DIE  = 1.f;
   }
 
   iidx[global_addr] = 0;

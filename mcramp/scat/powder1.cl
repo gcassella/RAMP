@@ -17,7 +17,7 @@ __kernel void powder1(__global float16* neutrons,
         return;
 
     /* Check termination flag ---------------------------------------------- */
-    if (neutron.sf > 0.f) 
+    if (NEUTRON_DIE  > 0.f) 
         return;
 
     /* Perform scattering here --------------------------------------------- */
@@ -27,9 +27,9 @@ __kernel void powder1(__global float16* neutrons,
     float3 beam_para, beam_perp, path;
     // bool scattered = false; 
 
-    neutron.sa += intersection.s3;
+    NEUTRON_TOF += intersection.s3;
 
-    path = intersection.s456 - intersection.s012;
+    path = INTERSECTION_POS2 - intersection.s012;
 
     full_path_length = length(path);
     vel = length(neutron.s345);
@@ -52,11 +52,11 @@ __kernel void powder1(__global float16* neutrons,
 
     twotheta = 2.0f*asin(arg);
 
-    neutron.s9 *= p_scat; // Adjust weight to model absorption
+    NEUTRON_P *= p_scat; // Adjust weight to model absorption
 
     pen_depth = -log(1.0f - rand(&neutron, global_addr)*(1.0f - p_inter)) / (sigma_abs + sigma_scat);
 
-    beam_para = normalize(neutron.s345);
+    beam_para = normalize(NEUTRON_VEL);
     beam_perp = cross(beam_para, (float3)(0.0f, 1.0f, 0.0f));
 
     if(length(beam_perp) < 1e-3f) { // Beam just happens to be along 0 1 0
@@ -82,11 +82,11 @@ __kernel void powder1(__global float16* neutrons,
 
     rotate_about_axis(twotheta, beam_perp, &beam_para);
 
-    neutron.s012 = intersection.s012 + pen_depth * path;
-    neutron.s345 = vel*normalize(beam_para);
+    NEUTRON_POS= INTERSECTION_POS1 + pen_depth * path;
+    NEUTRON_VEL = vel*normalize(beam_para);
 
-    neutron.sa += intersection.s7 - intersection.s3;
-    neutron.s9 *= full_path_length*sigma_scat*exp(-(sigma_scat+sigma_abs)*full_path_length);
+    NEUTRON_TOF += INTERSECTION_T2 - intersection.s3;
+    NEUTRON_P *= full_path_length*sigma_scat*exp(-(sigma_scat+sigma_abs)*full_path_length);
 
     /* ----------------------- */
 

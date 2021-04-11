@@ -1,3 +1,5 @@
+#include "consts.h"
+
 __kernel void intersect_box(__global float16* neutrons, 
       __global float8* intersections, __global uint* iidx,
       uint const comp_idx, float const width, float const height,
@@ -8,7 +10,7 @@ __kernel void intersect_box(__global float16* neutrons,
   float8 intersection;
   float3 pos, vel;
  
-  if (neutron.sf > 0.f) {
+  if (NEUTRON_DIE  > 0.f) {
     return;
   }
 
@@ -42,10 +44,10 @@ __kernel void intersect_box(__global float16* neutrons,
   } else if (tmin > tmax) {
     // No intersection
   } else {    
-    intersection.s012 = pos + tmin*vel;
-    intersection.s3 = tmin;
-    intersection.s456 = pos + tmax*vel;
-    intersection.s7 = tmax;
+    INTERSECTION_POS1 = pos + tmin*vel;
+    INTERSECTION_T1 = tmin;
+    INTERSECTION_POS2 = pos + tmax*vel;
+    INTERSECTION_T2 = tmax;
 
     iidx[global_addr] = comp_idx;
   }

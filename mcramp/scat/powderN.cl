@@ -18,7 +18,7 @@ __kernel void powderN(__global float16* neutrons,
         return;
 
     /* Check termination flag ---------------------------------------------- */
-    if (neutron.sf > 0.f) 
+    if (NEUTRON_DIE  > 0.f) 
         return;
 
     /* Perform scattering here --------------------------------------------- */
@@ -29,12 +29,12 @@ __kernel void powderN(__global float16* neutrons,
     uint i, attempts;
     // bool scattered = false; 
 
-    // neutron.sa += intersection.s3;
+    // NEUTRON_TOF += intersection.s3;
 
-    if (all(intersection.s012 == intersection.s456)) {
-        path = intersection.s456 - neutron.s012;
+    if (all(INTERSECTION_POS1 == INTERSECTION_POS2)) {
+        path = INTERSECTION_POS2 - NEUTRON_POS;
     } else {
-        path = intersection.s456 - intersection.s012;
+        path = INTERSECTION_POS2 - INTERSECTION_POS1;
     }
 
     full_path_length = length(path);
@@ -55,12 +55,12 @@ __kernel void powderN(__global float16* neutrons,
     if (rand(&neutron, global_addr) > p_inter) {
         // Transmitted, return without modifying
         // neutron state, but multiply by weight factor
-        neutron.s9 *= 1 - p_inter;
-        neutron.s012 = (intersection.s456+0.0001f*normalize(path));
-        neutron.sa += intersection.s7;
+        NEUTRON_P *= 1 - p_inter;
+        NEUTRON_POS= (intersection.s456+0.0001f*normalize(path));
+        NEUTRON_TOF += intersection.s7;
 
         if (transmit == 0)
-          neutron.sf = 1.0f;
+          NEUTRON_DIE  = 1.0f;
 
         neutron.sc = comp_idx;
         iidx[global_addr] = 0;
@@ -91,7 +91,7 @@ __kernel void powderN(__global float16* neutrons,
         if(arg < 1.0f) {
             break;
         } else if (arg > 1.0f && attempts > 2*num_lines) { // No bragg reflection possible, transmit
-            neutron.sf = 1;
+            NEUTRON_DIE  = 1;
             iidx[global_addr] = 0;
             neutrons[global_addr] = neutron;
             intersections[global_addr] = (float8)( 0.0f, 0.0f, 0.0f, 100000.0f,
@@ -132,17 +132,17 @@ __kernel void powderN(__global float16* neutrons,
 
     rotate_about_axis(twotheta, beam_perp, &beam_para);
 
-    if (all(intersection.s012 == intersection.s456)) {
-        neutron.s012 += pen_depth * path;
-        neutron.sa += length(pen_depth * path) / length(neutron.s345);
+    if (all(INTERSECTION_POS1 == intersection.s456)) {
+        NEUTRON_POS+= pen_depth * path;
+        NEUTRON_TOF += length(pen_depth * path) / length(neutron.s345);
     } else {
-        neutron.s012 = intersection.s012 + pen_depth * path;   
-        neutron.sa += intersection.s7 - intersection.s3;
+        NEUTRON_POS= INTERSECTION_POS1 + pen_depth * path;   
+        NEUTRON_TOF += INTERSECTION_T2 - intersection.s3;
     }
     
-    neutron.s345 = vel*normalize(beam_para);
+    NEUTRON_VEL = vel*normalize(beam_para);
 
-    neutron.s9 *= (1 - exp(-(sum_sigma_scat + sigma_abs)*pen_depth)) * sum_sigma_scat / (sum_sigma_scat + sigma_abs);
+    NEUTRON_P *= (1 - exp(-(sum_sigma_scat + sigma_abs)*pen_depth)) * sum_sigma_scat / (sum_sigma_scat + sigma_abs);
 
     /* ----------------------- */
 

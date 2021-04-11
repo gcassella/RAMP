@@ -14,13 +14,13 @@ __kernel void analyser(__global float16 *neutrons, __global float8 *intersection
       return;
   }
 
-  if (neutron.sf > 0.f)
+  if (NEUTRON_DIE  > 0.f)
   {
       return;
   }
 
-  neutron.s9 *= (1.0f + dot(polarisation, neutron.s678))/2.0f;
-  neutron.s678 = polarisation;
+  NEUTRON_P *= (1.0f + dot(polarisation, NEUTRON_POL))/2.0f;
+  NEUTRON_POL = polarisation;
 
   iidx[global_addr] = 0;
   neutron.sc = comp_idx;

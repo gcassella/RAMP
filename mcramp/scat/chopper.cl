@@ -18,14 +18,14 @@ __kernel void chopper(__global float16* neutrons,
   }
 
   /* Check termination flag */
-  if (neutron.sf > 0.f)  {
+  if (NEUTRON_DIE  > 0.f)  {
       return;
   }
 
   /* Perform scattering here */
 
-  neutron.s012 = intersection.s456;
-  neutron.sa += intersection.s7;
+  NEUTRON_POS = INTERSECTION_POS2;
+  NEUTRON_TOF += INTERSECTION_T2;
 
   float Tg, thi_chop,thi_neut,thi_diff,ang_diff,width,pha_error;
 
@@ -33,18 +33,18 @@ __kernel void chopper(__global float16* neutrons,
   
 	/*pha_error is the error in the phasing of the chopper in radians*/
   pha_error=jitter*2.0f*(rand(&neutron, global_addr)-0.5f); 
-  thi_chop=freq*(neutron.sa - fabs(phase))+pha_error;
-  thi_neut=atan2(neutron.s0, neutron.s1+radius);
+  thi_chop=freq*(NEUTRON_TOF - fabs(phase))+pha_error;
+  thi_neut=atan2(NEUTRON_X, NEUTRON_Y+radius);
   thi_diff=fabs(thi_chop-thi_neut); 
   ang_diff=fmod(thi_diff,Tg);
   if (fabs(ang_diff-Tg) < ang_diff)
 	  ang_diff=fabs(ang_diff-Tg);
 
-  width=atan2(slit_width, neutron.s1+radius);
+  width=atan2(slit_width, NEUTRON_Y+radius);
 
   /* does neutron hit the slit? */
   if (ang_diff>width/2.0f) 
-    neutron.sf = 1.0f;
+    NEUTRON_DIE  = 1.0f;
   
 
   /* ----------------------- */

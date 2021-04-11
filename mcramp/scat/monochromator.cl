@@ -39,14 +39,14 @@ __kernel void monochromator(__global float16* neutrons,
     }
 
     /* Check termination flag */
-    if (neutron.sf > 0.f)  {
+    if (NEUTRON_DIE  > 0.f)  {
         return;
     }
 
     /* Perform scattering here */
 
-    neutron.s012 = intersection.s456;
-    neutron.sa += intersection.s7;
+    NEUTRON_POS = INTERSECTION_POS2;
+    NEUTRON_TOF += INTERSECTION_T2;
 
     float mos_rms_y, mos_rms_z, mos_rms_max, Q, tilt_horizontal, tilt_vertical,
           zmin, zmax, ymin, ymax, ratio, Q_order, row, col, q0, q0x, theta, delta,
@@ -64,9 +64,9 @@ __kernel void monochromator(__global float16* neutrons,
     ymax = ((n_vertical*(slab_height+gap))-gap)/2.0f;
     ymin = -ymax;
 
-    if (neutron.s2 > zmin && neutron.s2 < zmax && neutron.s1 > ymin && neutron.s1 < ymax) {
-      col = ceil((neutron.s2 - zmin)/(slab_width + gap));
-      row = ceil((neutron.s1 - ymin)/(slab_height + gap));
+    if (NEUTRON_Z > zmin && NEUTRON_Z < zmax && NEUTRON_Y > ymin && NEUTRON_Y < ymax) {
+      col = ceil((NEUTRON_Z - zmin)/(slab_width + gap));
+      row = ceil((NEUTRON_Y - ymin)/(slab_height + gap));
 
       tilt_horizontal = radius_horizontal > 0.0f ? asin(((float)col - (float)(n_horizontal+1)/2.0f) * (slab_width + gap) / radius_horizontal) : 0.0f;
       tilt_vertical = radius_vertical > 0.0f ? -asin(((float)row - (float)(n_vertical+1)/2.0f)*(slab_height + gap) / radius_vertical) : 0.0f;
@@ -77,14 +77,14 @@ __kernel void monochromator(__global float16* neutrons,
       float center_y = ymin + (row - 0.5f)*(slab_height + gap) - gap / 2.0f;
       float3 slab_pos = (float3){ 0.0f, center_y, center_z };
       float3 slab_rot = (float3){ 0.0f, tilt_horizontal, tilt_vertical };
-      neutron.s345 = frame_derotate(neutron.s345, slab_rot);
-      neutron.s012 -= slab_pos;
-      neutron.s012 = frame_derotate(neutron.s012, slab_rot);
+      NEUTRON_VEL = frame_derotate(NEUTRON_VEL, slab_rot);
+      NEUTRON_POS -= slab_pos;
+      NEUTRON_POS = frame_derotate(NEUTRON_POS, slab_rot);
 
-      if (fabs(neutron.s2) <= slab_width / 2.0f && fabs(neutron.s1) <= slab_height / 2.0f) {
+      if (fabs(NEUTRON_Z) <= slab_width / 2.0f && fabs(NEUTRON_Y) <= slab_height / 2.0f) {
         // Didn't hit the gap
 
-        ki = V2K*neutron.s345;
+        ki = V2K*NEUTRON_VEL;
 
         // Determine order of Bragg scattering
         ratio = -2.0f*ki.s0 / Q;
@@ -161,13 +161,13 @@ __kernel void monochromator(__global float16* neutrons,
 
           p_reflect = GAUSS((q.s2/q.s0),0.0f,mos_rms_y)*GAUSS((q.s1/q.s0),0.0f,mos_rms_z);
 
-          neutron.s345 = K2V*(ki + q);
+          NEUTRON_VEL = K2V*(ki + q);
 
           p_reflect /= total*GAUSS(phi, 0.0f, mos_sample);
           // if (p_reflect <= 0) // absorb
           if (p_reflect > 1.0f) p_reflect = 1.0f;
 
-          neutron.s9 *= p_reflect;
+          NEUTRON_P *= p_reflect;
         } else {
           // transmit neutron
         }
@@ -177,9 +177,9 @@ __kernel void monochromator(__global float16* neutrons,
 
       // Time to leave slab frame
 
-      neutron.s012 = frame_rotate(neutron.s012, slab_rot);
-      neutron.s012 += slab_pos;
-      neutron.s345 = frame_rotate(neutron.s345, slab_rot);
+      NEUTRON_POS = frame_rotate(NEUTRON_POS, slab_rot);
+      NEUTRON_POS += slab_pos;
+      NEUTRON_VEL = frame_rotate(NEUTRON_VEL, slab_rot);
     } else {
       // missed mono, should never happen in ramp
     }
