@@ -145,7 +145,7 @@ class SDetector2D(SPrim):
         plt.figure()
         Z = (np.log(self.Z + 1e-7) if self.logscale else self.Z)
 
-        plt.pcolormesh(self.X, self.Y, Z, cmap='jet', shading='gouraud')
+        plt.pcolormesh(self.X, self.Y, Z, cmap='jet', shading='auto')
         plt.xlabel(self.var_label_dict[self.axis1_var])
         plt.ylabel(self.var_label_dict[self.axis2_var])
         plt.colorbar()
