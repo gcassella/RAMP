@@ -33,18 +33,24 @@ def get_bounds(your_mesh):
 
 class GMesh(GPrim):
     """
-    Geometry kernel for 'plane' geometry.
+    Geometry kernel for 'mesh' geometry.
 
     Parameters
     ----------
-    None
+    filename: str
+        Name of STL file specifying mesh vertices
+    interior: bool
+        Does this kernel correspond to the 'interior' of a component? Used for
+        multiple scattering in multi mode. EXPERIMENTAL
 
     Notes
     -----
     Intersection 1 :
-        Point of intersection with the plane
+        First point of intersection with the mesh, 'entering' mesh.
     Intersection 2 :
-        Same as Intersection 1.
+        Second point of intersection with the mesh, 'exiting' mesh.
+
+    Works even for non-convex meshes!
 
     Methods
     -------

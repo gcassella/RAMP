@@ -8,8 +8,8 @@ import os
 
 class SPowderN(SPrim):
     """
-    Scattering kernel for single Bragg scattering powder sample. Recreates the
-    functionality of the Powder1 component in McStas. If a neutron satisfies
+    Scattering kernel for Bragg scattering powder sample. Recreates the
+    functionality of the PowderN component in McStas. If a neutron satisfies
     the Bragg condition, it is scattered at an angle twotheta into a random angle
     on the Debye-Scherrer cone. Phi focusing is implemented to improve simulation
     performance.
@@ -19,20 +19,20 @@ class SPowderN(SPrim):
 
     Parameters
     ----------
-    d_spacing : float
-        Lattice spacing corresponding to the Bragg powder line in AA
+    d_spacing : float array
+        Lattice spacings corresponding to the Bragg powder lines in AA
     pack : float in range [0, 1]
         Packing fraction of the sample
     vc : float
         Volume of the sample unit cell in AA^3
     sigma_abs : float
         Absorption cross section of the sample at 2200 m/s in barns
-    multiplicity : int
-        Multiplicity of the powder line
+    multiplicity : int array
+        Multiplicity of the powder lines
     DW : float in range [0, 1]
         Debye-Waller factor
-    F2 : float
-        Structure factor of the powder line
+    F2 : float array
+        Structure factors of the powder lines
     d_phi : float in range [0.0, 180.0]
         Max angle around Debye-Scherrer cone into which neutrons are scattered
 

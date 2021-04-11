@@ -1,30 +1,34 @@
 Geometry kernels
 ================
 
-Arm (`GArm`)
-~~~~~~~~~~~~
+Arm (``GArm``)
+~~~~~~~~~~~~~~
 .. autoclass:: mcramp.geom.GArm
 
-Banana (`GBanana`)
-~~~~~~~~~~~~~~~~~~
+Banana (``GBanana``)
+~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: mcramp.geom.GBanana
 
-Box (`GBox`)
-~~~~~~~~~~~~
+Box (``GBox``)
+~~~~~~~~~~~~~~
 .. autoclass:: mcramp.geom.GBox
 
-Cylinder Exterior (`GCylinderExt`)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Cylinder Exterior (``GCylinderExt``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: mcramp.geom.GCylinderExt
 
-Plane (`GPlane`)
+Mesh (``GMesh``)
 ~~~~~~~~~~~~~~~~
+.. autoclass:: mcramp.geom.GMesh
+
+Plane (``GPlane``)
+~~~~~~~~~~~~~~~~~~
 .. autoclass:: mcramp.geom.GPlane
 
-Sphere (`GSphere`)
-~~~~~~~~~~~~~~~~~~
+Sphere (``GSphere``)
+~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: mcramp.geom.GSphere
 
-Sphere Interior (`GSphereInt`)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sphere Interior (``GSphereInt``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: mcramp.geom.GSphereInt
