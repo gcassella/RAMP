@@ -216,6 +216,9 @@ class ExecutionBlock:
 
                 events += 1
 
+        for (idx, comp) in self.components.items():
+            comp["scat_kernel"].data_reduce(self.parent.queue)
+
     def _get_trace_lines(self, offset, rot):
         self.parent.queue.finish()
         non_terminated = np.transpose(np.where(self.parent.neutrons["s15"] == 0)).flatten()
