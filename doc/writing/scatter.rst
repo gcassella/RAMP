@@ -1,12 +1,7 @@
 Conventions: Scattering kernels
 ===============================
 
-The building blocks of instruments in RAMP are OpenCL kernels. \
-These mini programs are executed by the RAMP architecture to \
-manipulate the neutron buffer in the order specified by the instrument \
-definition file. Most useful applications of RAMP will require \
-some custom components, and the process of creating user defined kernels that \
-can be used in RAMP is outlined here.
+The building blocks of instruments in RAMP are OpenCL kernels. These mini programs are executed by the RAMP architecture to manipulate the neutron buffer in the order specified by the instrument definition file. Most useful applications of RAMP will require some custom components, and the process of creating user defined kernels that can be used in RAMP is outlined here.
 
 Template
 --------
@@ -51,7 +46,9 @@ The basic template for a scattering kernel ``mykernel.cl`` is
 
     }
 
-The basic template for a scattering kernel Python class ``MyKernel.py`` is::
+The basic template for a scattering kernel Python class ``MyKernel.py`` is
+
+.. code-block:: Python
 
     from mcramp.scat.sprim import SPrim
     import mcramp
@@ -72,3 +69,8 @@ The basic template for a scattering kernel Python class ``MyKernel.py`` is::
                             self.idx)
 
 With these files in the same location as the instrument definition file, this kernel can be included in the instrument using the Python class name ``MyKernel`` in the ``name`` field of a component's scattering kernel entry.
+
+Example: Chopper kernel
+-----------------------
+
+The file ``<RAMP dir>/mcramp/scat/chopper.cl`` defines a simple disk chopper kernel.

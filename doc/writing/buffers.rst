@@ -6,15 +6,15 @@ The neutron buffer
 
 The neutron buffer holds a ``float16`` entry for each simulated trajectory. The elements of these entries correspond to
 
- - ``(x, y, z)``, the neutron position. In kernels, this is given in the component frame.
- - ``(vx, vy, vz)``, the neutron velocity. Again, in the component frame.
- - ``(px, py, pz)``, the neutron spin. As of the current update, unused.
- - ``p``, the neutron weighting i.e. how many counts this trajectory will contribute to a detector.
- - ``t``, time of flight.
- - ``mc``, a counter that is incremented upon each Monte Carlo decision, used in random number generation.
- - ``prevcomp``, the index of the previous component hit. Prevents spurious multiple collisions due to rounding errors.
- - ``(_, _)``, two unused entries. May be used as custom flags / storage by kernels but this should be made extremely explicit in documentation to avoid conflicts.
- - ``T``, termination flag. Trajectory is no longer simulated by kernels once this flag is set not equal to zero.
+- ``(x, y, z)``, the neutron position. In kernels, this is given in the component frame.
+- ``(vx, vy, vz)``, the neutron velocity. Again, in the component frame.
+- ``(px, py, pz)``, the neutron spin. As of the current update, unused.
+- ``p``, the neutron weighting i.e. how many counts this trajectory will contribute to a detector.
+- ``t``, time of flight.
+- ``mc``, a counter that is incremented upon each Monte Carlo decision, used in random number generation.
+- ``prevcomp``, the index of the previous component hit. Prevents spurious multiple collisions due to rounding errors.
+- ``(_, _)``, two unused entries. May be used as custom flags / storage by kernels but this should be made extremely explicit in documentation to avoid conflicts.
+- ``T``, termination flag. Trajectory is no longer simulated by kernels once this flag is set not equal to zero.
 
 Altering the data in the neutron buffer is the role of scattering kernels. These entires have assosciated convenient
 macros defined in the header file ``consts.h`` as follows
@@ -50,10 +50,10 @@ The intersection buffer
 
 The intersection buffer holds a ``float8`` entry for each simulated trajectory. The elements of these entries correspond to
 
- - ``(x1, y1, z1)``, the coordinates (in component frame) of the earliest intersection with the instrument geometry.
- - ``t1``, the time of flight from the neutron position at the previous scattering step to ``(x1, y1, z1)``.
- - ``(x2, y2, z2)``, the coordinates (in component frame) of the second intersection point with the component intersected at ``(x1, y1, z1)``, e.g. where the neutron leaves a component.
- - ``t2``, the time of flight from the neutron position at the previous scattering step to ``(x2, y2, z2)``.
+- ``(x1, y1, z1)``, the coordinates (in component frame) of the earliest intersection with the instrument geometry.
+- ``t1``, the time of flight from the neutron position at the previous scattering step to ``(x1, y1, z1)``.
+- ``(x2, y2, z2)``, the coordinates (in component frame) of the second intersection point with the component intersected at ``(x1, y1, z1)``, e.g. where the neutron leaves a component.
+- ``t2``, the time of flight from the neutron position at the previous scattering step to ``(x2, y2, z2)``.
 
 The units of distance are meters and the units of time are seconds. As for the neutron buffer, the following macros are defined in ``consts.h``
 

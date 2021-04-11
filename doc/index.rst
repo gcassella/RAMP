@@ -1,8 +1,7 @@
 RAMP: Raytracing Achieved via Massive Parallelisation
 =====================================================
 
-**RAMP** is a Monte Carlo raytracing package for the simulation of neutron \
-instrumentation, written in Python and parallelized via the OpenCL API.
+**RAMP** is a Monte Carlo raytracing package for the simulation of neutron instrumentation, written in Python and parallelized via the OpenCL API.
 
 -------------------
 
@@ -11,9 +10,7 @@ instrumentation, written in Python and parallelized via the OpenCL API.
 Quick start
 -----------
 
-The quickest way to get hands on with RAMP is running Jupyter notebooks \
-via Google Colab, a service that allows Python code to be executed in the \
-cloud with access to enterprise grade GPUs. To access RAMP via Colab:
+The quickest way to get hands on with RAMP is running Jupyter notebooks via Google Colab, a service that allows Python code to be executed in the cloud with access to enterprise grade GPUs. To access RAMP via Colab:
 
 1. Go to https://colab.research.google.com/
 2. Log into a Google Account 
