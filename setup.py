@@ -19,7 +19,7 @@ for dir_, _, files in os.walk(root_dir):
 # Run setup, OpenCL kernels are specified as additional data files
 
 setup(name="MCRAMP",
-      version="0.0.3",
+      version="0.0.3post1",
       packages=find_packages(),
       package_data={'': ['*.cl']},
       data_files=[('headers', list(file_set))],
@@ -29,6 +29,7 @@ setup(name="MCRAMP",
             'pyopencl==2019.1.2',
             'numpy',
             'matplotlib',
-            'mcpl'
+            'mcpl',
+            'numpy-stl'
       ]
 )
