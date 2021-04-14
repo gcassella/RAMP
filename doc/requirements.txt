@@ -3,7 +3,7 @@ scipy
 numpy
 matplotlib
 sphinx>=1.7.5
-pygments==2.4.1
+pygments==2.7.4
 nbsphinx>=0.6.0
 numpy-stl
 numpydoc
