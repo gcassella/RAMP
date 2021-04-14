@@ -184,4 +184,4 @@ epub_exclude_files = ['search.html']
 
 # -- Additional configuration ------------------------------------------------
 
-autodoc_mock_imports = ["pyopencl"]
+autodoc_mock_imports = ["pyopencl", "numpy-stl"]
