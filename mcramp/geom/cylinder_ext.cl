@@ -15,9 +15,6 @@ __kernel void intersect(__global float16* neutrons,
     return;
   }
 
-  if (neutron.sc == comp_idx) {
-    return;
-  }
 
   plane_pos = neutron.s02;
   plane_vel = neutron.s35;

@@ -14,9 +14,6 @@ __kernel void intersect_sphere(__global float16* neutrons,
     return;
   }
 
-  if (neutron.sc == comp_idx) {
-    return;
-  }
 
   pos = NEUTRON_POS;
   vel = NEUTRON_VEL;

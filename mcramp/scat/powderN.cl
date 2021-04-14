@@ -133,7 +133,7 @@ __kernel void powderN(__global float16* neutrons,
     rotate_about_axis(twotheta, beam_perp, &beam_para);
 
     if (all(INTERSECTION_POS1 == intersection.s456)) {
-        NEUTRON_POS+= pen_depth * path;
+        NEUTRON_POS += pen_depth * path;
         NEUTRON_TOF += length(pen_depth * path) / length(neutron.s345);
     } else {
         NEUTRON_POS= INTERSECTION_POS1 + pen_depth * path;   

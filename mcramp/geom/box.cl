@@ -14,9 +14,6 @@ __kernel void intersect_box(__global float16* neutrons,
     return;
   }
 
-  if (neutron.sc == comp_idx) {
-    return;
-  }
 
   pos = neutron.s012;
   vel = neutron.s345;

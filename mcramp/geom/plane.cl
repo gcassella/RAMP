@@ -13,9 +13,6 @@ __kernel void intersect_plane(__global float16* neutrons,
     if (NEUTRON_DIE  > 0.f) 
         return;
 
-    if (neutron.sc == comp_idx) {
-        return;
-    }
 
     /* Perform raytracing here */
 

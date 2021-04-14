@@ -15,10 +15,6 @@ __kernel void intersect(__global float16* neutrons,
     if (NEUTRON_DIE  > 0.f) 
         return;
 
-    if (fabs(neutron.sc-comp_idx) < 1e-6) {
-        return;
-    }
-
     /* Perform raytracing here */
 
     // Raytrace against bounding box
