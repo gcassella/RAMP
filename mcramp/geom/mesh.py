@@ -50,10 +50,7 @@ class GMesh(GPrim):
     Intersection 2 :
         Second point of intersection with the mesh, 'exiting' mesh.
 
-    Works even for non-convex meshes! numpy-stl MUST BE INSTALLED from pip to use
-    this geometry kernel, via
-
-      $ pip install numpy-stl
+    Works even for non-convex meshes!
 
     Methods
     -------
