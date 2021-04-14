@@ -1,0 +1,134 @@
+{
+    "all" : {
+        "linear" : true,
+        "Source" : {
+            "source": true,
+            "position" : [0.0, 0.0, 0.0],
+            "moderator_kernel": {
+                "name": "MFlat",
+                "mod_dim": [0.1, 0.1],
+                "target_dim": [0.08, 0.08],
+                "target_dist": 4.0,
+                "E_min": $0.95*Ei$,
+                "E_max": $1.05*Ei$
+            }
+        },
+
+        "Pinhole" : {
+            "position" : [0.0, 0.0, 4.0],
+            "geom_kernel": {
+                "name": "GPlane",
+                "height": 0.08,
+                "width": 0.08
+            },
+            "scat_kernel": {
+                "name": "SArm"
+            }
+        }
+    },
+
+    "sample_block" : {
+        "linear": false,
+        "multi": 8,
+
+        "Sample" : {
+            "position" : [0.0, 0.0, 14.0],
+            "restore_neutron": true,
+            "disable": $sample_disable$,
+            "geom_kernel": {
+                "name": "GMesh",
+                "filename": "$sample_name$"
+            },
+            "scat_kernel": {
+                "name": "SPowderN",
+                "d_spacing" : [3.0],
+                "pack" : 1.0,
+                "vc" : 75.0,
+                "sigma_abs" : 4.0,
+                "multiplicity" : [1],
+                "DW" : 1.0,
+                "F2" : [1.5]
+            }
+        },
+
+        "SampleInt" : {
+            "position" : [0.0, 0.0, 14.0],
+            "restore_neutron": true,
+            "disable": $sample_disable$,
+            "geom_kernel": {
+                "name": "GMesh",
+                "filename": "can.stl",
+                "interior": true
+            },
+            "scat_kernel": {
+                "name": "SPowderN",
+                "d_spacing" : [3.0],
+                "pack" : 1.0,
+                "vc" : 75.0,
+                "sigma_abs" : 4.0,
+                "multiplicity" : [1],
+                "DW" : 1.0,
+                "F2" : [1.5]
+            }
+        },
+
+        "Can" : {
+            "position" : [0.0, 0.0, 14.0],
+            "restore_neutron": true,
+            "geom_kernel": {
+                "name": "GMesh",
+                "filename": "can.stl"
+            },
+            "scat_kernel": {
+                "name": "SPowderN",
+                "d_spacing" : [3.0],
+                "pack" : 1.0,
+                "vc" : 75.0,
+                "sigma_abs" : 0.5,
+                "multiplicity" : [1],
+                "DW" : 1.0,
+                "F2" : [0.001]
+            }
+        },
+
+        "CanInt" : {
+            "position" : [0.0, 0.0, 14.0],
+            "restore_neutron": true,
+            "geom_kernel": {
+                "name": "GMesh",
+                "filename": "can.stl",
+                "interior": true
+            },
+            "scat_kernel": {
+                "name": "SPowderN",
+                "d_spacing" : [3.0],
+                "pack" : 1.0,
+                "vc" : 75.0,
+                "sigma_abs" : 0.5,
+                "multiplicity" : [1],
+                "DW" : 1.0,
+                "F2" : [0.001]
+            }
+        }
+    },
+
+    "detector_bank": {
+        "linear" : true,
+        "Detector" : {
+            "position" : [0.0, 0.0, 15.0],
+            "geom_kernel" : {
+                "name" : "GPlane",
+                "width" : 0.2,
+                "height" : 0.2
+            },
+            "scat_kernel" : {
+                "name" : "SDetector2D",
+                "axis1_var" : "x",
+                "axis2_var" : "y",
+                "axis1_binning" : [-0.1, 0.001, 0.1],
+                "axis2_binning" : [-0.1, 0.001, 0.1],
+                "filename" : "detector"
+            }
+        }
+    }
+}
